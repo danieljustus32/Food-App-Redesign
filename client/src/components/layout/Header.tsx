@@ -1,0 +1,16 @@
+import { Flame } from "lucide-react";
+
+export function Header() {
+  return (
+    <div className="flex items-center justify-center h-14 px-4 pt-2 bg-transparent z-50 absolute top-0 w-full pointer-events-none">
+      <div className="flex items-center gap-2">
+        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-md">
+          <Flame size={18} className="text-white fill-white" />
+        </div>
+        <h1 className="text-xl font-bold tracking-tight text-primary" style={{ fontFamily: "Playfair Display" }}>
+          Tindish
+        </h1>
+      </div>
+    </div>
+  );
+}
