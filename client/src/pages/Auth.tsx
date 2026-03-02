@@ -86,9 +86,9 @@ export default function Auth() {
   const signupDisabled = !isLogin && (!isEmailValid || !allRulesPassed || !passwordsMatch || !confirmPassword);
 
   return (
-    <div className="min-h-[100dvh] bg-background flex flex-col items-center justify-center px-6">
-      <div className="w-full max-w-sm">
-        <div className="flex flex-col items-center mb-10">
+    <div className="min-h-[100dvh] bg-background flex flex-col items-center px-6 py-8">
+      <div className="w-full max-w-sm flex flex-col flex-1">
+        <div className="flex flex-col items-center justify-center flex-1">
           <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
             <ChefHat size={40} className="text-primary" />
           </div>
