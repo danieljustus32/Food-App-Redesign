@@ -1,8 +1,8 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { RecipeCard } from "@/components/RecipeCard";
 import { X, Heart, UtensilsCrossed, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
 interface RecipeData {
@@ -18,13 +18,53 @@ interface RecipeData {
   tags: string[];
 }
 
-export default function Discover() {
-  const [currentIndex, setCurrentIndex] = useState(0);
+const BATCH_SIZE = 10;
+const PREFETCH_THRESHOLD = 3;
 
-  const { data: recipes = [], isLoading, refetch, isFetching } = useQuery<RecipeData[]>({
-    queryKey: ["/api/recipes/random?count=10"],
-    staleTime: Infinity,
-  });
+export default function Discover() {
+  const [recipes, setRecipes] = useState<RecipeData[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const isFetchingRef = useRef(false);
+  const seenIds = useRef(new Set<string>());
+
+  const fetchMore = useCallback(async () => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+
+    try {
+      const res = await fetch(`/api/recipes/random?count=${BATCH_SIZE}`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch");
+      const data: RecipeData[] = await res.json();
+
+      const newRecipes = data.filter(r => {
+        const key = `${r.source}-${r.externalId}`;
+        if (seenIds.current.has(key)) return false;
+        seenIds.current.add(key);
+        return true;
+      });
+
+      if (newRecipes.length > 0) {
+        setRecipes(prev => [...prev, ...newRecipes]);
+      }
+    } catch (err) {
+      console.error("Failed to fetch recipes:", err);
+    } finally {
+      isFetchingRef.current = false;
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchMore();
+  }, [fetchMore]);
+
+  useEffect(() => {
+    const remaining = recipes.length - currentIndex;
+    if (remaining <= PREFETCH_THRESHOLD && remaining > 0) {
+      fetchMore();
+    }
+  }, [currentIndex, recipes.length, fetchMore]);
 
   const saveMutation = useMutation({
     mutationFn: async (recipe: RecipeData) => {
@@ -48,14 +88,13 @@ export default function Discover() {
   }, [recipes, currentIndex, saveMutation]);
 
   const handleRefresh = () => {
-    setCurrentIndex(0);
-    queryClient.removeQueries({ queryKey: ["/api/recipes/random?count=10"] });
-    refetch();
+    fetchMore();
   };
 
   const currentRecipes = recipes.slice(currentIndex, currentIndex + 2).reverse();
+  const allSwiped = currentIndex >= recipes.length && !isLoading;
 
-  if (isLoading) {
+  if (isLoading && recipes.length === 0) {
     return (
       <div className="h-[100dvh] bg-background flex flex-col items-center justify-center pt-16 pb-24">
         <Loader2 size={32} className="animate-spin text-primary mb-4" />
@@ -68,7 +107,7 @@ export default function Discover() {
     <div className="h-[100dvh] bg-background flex flex-col pt-16 pb-24 overflow-hidden">
       <div className="flex-1 relative w-full max-w-md mx-auto px-4 perspective-1000 flex items-center justify-center">
         <AnimatePresence>
-          {currentIndex >= recipes.length ? (
+          {allSwiped ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -81,11 +120,11 @@ export default function Discover() {
               <p className="text-muted-foreground mb-8">We're finding more delicious recipes for you.</p>
               <button
                 onClick={handleRefresh}
-                disabled={isFetching}
+                disabled={isFetchingRef.current}
                 className="bg-primary text-primary-foreground font-semibold px-8 py-3 rounded-full shadow-lg hover:shadow-primary/25 transition-shadow active:scale-95 disabled:opacity-60"
                 data-testid="button-refresh"
               >
-                {isFetching ? "Loading..." : "Discover More"}
+                Discover More
               </button>
             </motion.div>
           ) : (
