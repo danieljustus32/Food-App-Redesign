@@ -111,17 +111,17 @@ export default function Auth() {
   const signupDisabled = !isLogin && (!isEmailValid || !allRulesPassed || !passwordsMatch || !confirmPassword);
 
   return (
-    <div className="min-h-[100dvh] bg-background flex flex-col items-center px-6 py-8">
-      <div className="w-full max-w-sm flex flex-col flex-1">
-        <div className="flex flex-col items-center justify-center flex-1">
-          <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-            <ChefHat size={40} className="text-primary" />
+    <div className="min-h-[100dvh] bg-background flex flex-col items-center px-6 py-8 overflow-y-auto">
+      <div className="w-full max-w-sm flex flex-col">
+        <div className="flex flex-col items-center justify-center py-4">
+          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+            <ChefHat size={32} className="text-primary" />
           </div>
-          <h1 className="text-4xl font-serif font-bold text-foreground">Tindish</h1>
-          <p className="text-muted-foreground mt-1">Swipe. Save. Cook.</p>
+          <h1 className="text-3xl font-serif font-bold text-foreground">Tindish</h1>
+          <p className="text-muted-foreground text-sm mt-1">Swipe. Save. Cook.</p>
         </div>
 
-        <Card className="rounded-3xl border-0 shadow-lg p-6 bg-card transition-all duration-300" data-testid="auth-card">
+        <Card className="rounded-3xl border-0 shadow-lg p-5 bg-card transition-all duration-300 mb-8" data-testid="auth-card">
           <div className="flex bg-muted rounded-full p-1 mb-6">
             <button
               type="button"
