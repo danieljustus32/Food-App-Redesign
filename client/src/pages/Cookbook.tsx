@@ -83,7 +83,7 @@ export default function Cookbook() {
 
   return (
     <div className="bg-background pt-20 pb-24 px-4">
-      <div className="max-w-md mx-auto">
+      <div className="max-w-md md:max-w-3xl xl:max-w-6xl mx-auto">
         <h1 className="text-3xl font-serif font-bold text-foreground mb-1">My Cookbook</h1>
         <p className="text-muted-foreground mb-8">Your curated collection of deliciousness.</p>
 
@@ -96,7 +96,7 @@ export default function Cookbook() {
             <p className="text-muted-foreground">Swipe right on recipes in Discover to save them here.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
             <AnimatePresence>
               {savedRecipes.map((recipe) => (
                 <motion.div
