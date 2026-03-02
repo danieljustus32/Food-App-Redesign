@@ -168,6 +168,34 @@ function normalizeDetailResult(raw: FatSecretDetailRecipe): NormalizedRecipe {
   };
 }
 
+async function hydrateWithDetails(searchResult: NormalizedRecipe): Promise<NormalizedRecipe> {
+  try {
+    const detailData = await apiCall({
+      method: "recipe.get.v2",
+      recipe_id: String(searchResult.externalId),
+    });
+
+    const rawRecipe = detailData?.recipe || detailData;
+    if (!rawRecipe || !rawRecipe.recipe_id) {
+      console.warn(`[fatsecret] No recipe in detail response for ${searchResult.externalId}:`, JSON.stringify(detailData).slice(0, 300));
+      return searchResult;
+    }
+
+    console.log(`[fatsecret] Detail for ${searchResult.externalId}: has directions=${!!rawRecipe.directions}, keys=${Object.keys(rawRecipe).join(",")}`);
+
+    const detailed = normalizeDetailResult(rawRecipe);
+
+    if (detailed.instructions.length === 0 && rawRecipe.directions) {
+      console.warn(`[fatsecret] Recipe ${searchResult.externalId} directions present but parsed 0 steps. Raw:`, JSON.stringify(rawRecipe.directions).slice(0, 500));
+    }
+
+    return detailed;
+  } catch (err: any) {
+    console.error(`[fatsecret] Detail fetch failed for ${searchResult.externalId}:`, err.message);
+    return searchResult;
+  }
+}
+
 export class FatSecretProvider implements RecipeProvider {
   name = "fatsecret";
 
@@ -194,20 +222,7 @@ export class FatSecretProvider implements RecipeProvider {
     const searchResults = recipeList.map(normalizeSearchResult);
 
     const detailed = await Promise.allSettled(
-      searchResults.slice(0, count).map(async (r) => {
-        try {
-          const detailData = await apiCall({
-            method: "recipe.get.v2",
-            recipe_id: String(r.externalId),
-          });
-          if (detailData?.recipe) {
-            return normalizeDetailResult(detailData.recipe);
-          }
-          return r;
-        } catch {
-          return r;
-        }
-      })
+      searchResults.slice(0, count).map(r => hydrateWithDetails(r))
     );
 
     return detailed
@@ -230,20 +245,7 @@ export class FatSecretProvider implements RecipeProvider {
     const searchResults = recipeList.map(normalizeSearchResult);
 
     const detailed = await Promise.allSettled(
-      searchResults.slice(0, count).map(async (r) => {
-        try {
-          const detailData = await apiCall({
-            method: "recipe.get.v2",
-            recipe_id: String(r.externalId),
-          });
-          if (detailData?.recipe) {
-            return normalizeDetailResult(detailData.recipe);
-          }
-          return r;
-        } catch {
-          return r;
-        }
-      })
+      searchResults.slice(0, count).map(r => hydrateWithDetails(r))
     );
 
     return detailed
