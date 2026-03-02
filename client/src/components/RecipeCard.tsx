@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { motion, useMotionValue, useTransform, AnimatePresence } from "framer-motion";
-import { Info, X, Heart, Clock, Users, ChefHat } from "lucide-react";
+import { Info, X, Heart, Clock, Users, ChefHat, Mic } from "lucide-react";
 import { Recipe } from "@/data/recipes";
 import { useDrag } from "@use-gesture/react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "wouter";
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -128,7 +129,7 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
                 </button>
               </div>
 
-              <div className="p-6 pb-20">
+              <div className="p-6 pb-32">
                 <h2 className="text-2xl font-serif font-bold mb-4 text-foreground">{recipe.title}</h2>
                 <p className="text-muted-foreground mb-6 leading-relaxed">{recipe.summary}</p>
                 
@@ -172,6 +173,16 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
                     ))}
                   </ol>
                 </div>
+              </div>
+
+              {/* Floating Action Button for Hands-free Cooking */}
+              <div className="fixed bottom-6 left-0 right-0 flex justify-center z-40 px-6">
+                <Link href={`/cook/${recipe.id}`}>
+                  <button className="bg-foreground text-background shadow-xl hover:bg-foreground/90 transition-all rounded-full py-4 px-8 font-bold flex items-center gap-3 w-full max-w-sm">
+                    <Mic size={20} className="text-primary" />
+                    Start Hands-free Cooking
+                  </button>
+                </Link>
               </div>
             </motion.div>
           )}

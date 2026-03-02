@@ -9,6 +9,7 @@ import Discover from "@/pages/Discover";
 import Cookbook from "@/pages/Cookbook";
 import ShoppingList from "@/pages/ShoppingList";
 import Profile from "@/pages/Profile";
+import CookingMode from "@/pages/CookingMode";
 
 import { Header } from "@/components/layout/Header";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/cookbook" component={Cookbook} />
       <Route path="/list" component={ShoppingList} />
       <Route path="/profile" component={Profile} />
+      <Route path="/cook/:id" component={CookingMode} />
       <Route component={NotFound} />
     </Switch>
   );
