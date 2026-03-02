@@ -1,4 +1,5 @@
-import { Switch, Route } from "wouter";
+import { useRef, useEffect } from "react";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -19,6 +20,12 @@ import { BottomNav } from "@/components/layout/BottomNav";
 
 function AppRouter() {
   const { user, isLoading } = useAuth();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [location] = useLocation();
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo(0, 0);
+  }, [location]);
 
   if (isLoading) {
     return (
@@ -38,7 +45,7 @@ function AppRouter() {
   return (
     <div className="relative w-full h-[100dvh] flex flex-col bg-background">
       <Header />
-      <div className="flex-1 overflow-y-auto">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto">
         <Switch>
           <Route path="/" component={Discover} />
           <Route path="/cookbook" component={Cookbook} />
