@@ -57,7 +57,13 @@ async function apiCall(params: Record<string, string>): Promise<any> {
     throw new Error(`FatSecret API error ${res.status}: ${text}`);
   }
 
-  return res.json();
+  const data = await res.json();
+
+  if (data?.error) {
+    throw new Error(`FatSecret API error ${data.error.code}: ${data.error.message}`);
+  }
+
+  return data;
 }
 
 interface FatSecretSearchRecipe {
