@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Clock, Trash2, Heart, ShoppingCart, Mic, Info } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -5,6 +6,16 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface SavedRecipe {
   id: string;
@@ -22,6 +33,7 @@ interface SavedRecipe {
 export default function Cookbook() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const [recipeToDelete, setRecipeToDelete] = useState<SavedRecipe | null>(null);
 
   const { data: savedRecipes = [] } = useQuery<SavedRecipe[]>({
     queryKey: ["/api/cookbook"],
@@ -51,9 +63,16 @@ export default function Cookbook() {
     },
   });
 
-  const handleRemove = (id: string, e: React.MouseEvent) => {
+  const handleRemoveClick = (recipe: SavedRecipe, e: React.MouseEvent) => {
     e.stopPropagation();
-    removeMutation.mutate(id);
+    setRecipeToDelete(recipe);
+  };
+
+  const handleConfirmDelete = () => {
+    if (recipeToDelete) {
+      removeMutation.mutate(recipeToDelete.id);
+      setRecipeToDelete(null);
+    }
   };
 
   const handleAddToList = (recipe: SavedRecipe, e: React.MouseEvent) => {
@@ -130,7 +149,7 @@ export default function Cookbook() {
                         <ShoppingCart size={14} />
                       </button>
                       <button
-                        onClick={(e) => handleRemove(recipe.id, e)}
+                        onClick={(e) => handleRemoveClick(recipe, e)}
                         className="w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white active:scale-95 shadow-sm hover:bg-black/60 transition-colors"
                         data-testid={`button-remove-${recipe.id}`}
                       >
@@ -144,6 +163,27 @@ export default function Cookbook() {
           </div>
         )}
       </div>
+
+      <AlertDialog open={!!recipeToDelete} onOpenChange={(open) => !open && setRecipeToDelete(null)}>
+        <AlertDialogContent className="rounded-2xl max-w-[340px]" data-testid="dialog-confirm-delete">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-serif">Remove Recipe?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove <span className="font-semibold text-foreground">{recipeToDelete?.title}</span> from your cookbook? This can't be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-full" data-testid="button-cancel-delete">Keep</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              className="rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              data-testid="button-confirm-delete"
+            >
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
