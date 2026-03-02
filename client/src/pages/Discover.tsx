@@ -6,7 +6,8 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
 interface RecipeData {
-  spoonacularId: number;
+  externalId: number;
+  source: string;
   title: string;
   image: string;
   readyInMinutes: number;
@@ -93,7 +94,7 @@ export default function Discover() {
                 const isActive = index === currentRecipes.length - 1;
                 return (
                   <RecipeCard
-                    key={recipe.spoonacularId}
+                    key={`${recipe.source}-${recipe.externalId}`}
                     recipe={recipe}
                     active={isActive}
                     onSwipeLeft={handleSwipeLeft}

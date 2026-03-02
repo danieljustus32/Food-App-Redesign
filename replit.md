@@ -7,20 +7,30 @@ A Tinder-style recipe discovery app where users swipe through food photos to sav
 - **Frontend**: React + Vite + Tailwind CSS v4 + shadcn/ui + Framer Motion
 - **Backend**: Express.js with Passport.js authentication
 - **Database**: PostgreSQL with Drizzle ORM
-- **API**: Spoonacular for recipe data
+- **Recipe Providers**: API-agnostic provider pattern with fallback (Spoonacular, FatSecret, Mock)
 - **Routing**: wouter (frontend), Express (backend)
 - **PWA**: Service worker, manifest.json, installable on iOS/Android/desktop
 
 ## Key Features
-1. **Discover** - Swipeable recipe cards fetched from Spoonacular API. Swipe right to save, left to pass.
+1. **Discover** - Swipeable recipe cards fetched from multiple recipe APIs with fallback. Swipe right to save, left to pass.
 2. **Cookbook** - Persistent collection of saved recipes with cook mode and shopping list integration.
 3. **Shopping List** - Organized by grocery store aisle with check-off functionality.
 4. **Hands-free Cooking** - Voice-guided step-by-step cooking using browser Speech APIs.
 5. **User Auth** - Registration/login with session-based authentication. Social login with Google and Apple OAuth.
 
+## Recipe Provider System
+The app uses an API-agnostic provider pattern (`server/recipe-providers/`):
+- **RecipeProvider interface** (`types.ts`): Defines `getRandomRecipes()` and `searchRecipes()` methods
+- **Spoonacular** (`spoonacular.ts`): Primary provider, requires `SPOONACULAR_API_KEY`
+- **FatSecret** (`fatsecret.ts`): Secondary provider, requires `FATSECRET_CLIENT_ID` and `FATSECRET_CLIENT_SECRET`. Uses OAuth2 client_credentials flow.
+- **Mock** (`mock.ts`): Fallback provider with hardcoded recipes, always available
+- **Provider Manager** (`index.ts`): Tries each available provider in sequence; falls back to next on failure
+- In dev mode (`APP_ENV=dev`), only mock provider is used
+- All providers normalize data to `NormalizedRecipe` shape: `{ externalId, source, title, image, readyInMinutes, servings, summary, ingredients, instructions, tags }`
+
 ## Data Model
 - `users` - id, username, password (hashed, empty for social auth users), authProvider (google/apple/null), authProviderId
-- `saved_recipes` - id, userId, spoonacularId, title, image, readyInMinutes, servings, summary, ingredients (jsonb), instructions (jsonb), tags (jsonb)
+- `saved_recipes` - id, userId, externalId, source, title, image, readyInMinutes, servings, summary, ingredients (jsonb), instructions (jsonb), tags (jsonb)
 - `shopping_items` - id, userId, name, section, checked
 
 ## API Routes
@@ -32,8 +42,8 @@ A Tinder-style recipe discovery app where users swipe through food photos to sav
 - `GET /api/auth/google/callback` - Google OAuth callback
 - `GET /api/auth/apple` - Initiate Apple OAuth
 - `POST /api/auth/apple/callback` - Apple OAuth callback
-- `GET /api/recipes/random` - Random recipes from Spoonacular
-- `GET /api/recipes/search?q=` - Search recipes
+- `GET /api/recipes/random` - Random recipes from available providers
+- `GET /api/recipes/search?q=` - Search recipes across providers
 - `GET /api/cookbook` - User's saved recipes
 - `POST /api/cookbook` - Save a recipe
 - `DELETE /api/cookbook/:id` - Remove saved recipe
@@ -44,7 +54,10 @@ A Tinder-style recipe discovery app where users swipe through food photos to sav
 
 ## Environment Variables
 - `DATABASE_URL` - PostgreSQL connection string (auto-set)
-- `SPOONACULAR_API_KEY` - Spoonacular API key (secret)
+- `APP_ENV` - Set to "dev" for mock data mode
+- `SPOONACULAR_API_KEY` - Spoonacular API key (optional, for Spoonacular provider)
+- `FATSECRET_CLIENT_ID` - FatSecret OAuth2 client ID (optional, for FatSecret provider)
+- `FATSECRET_CLIENT_SECRET` - FatSecret OAuth2 client secret (optional, for FatSecret provider)
 - `GOOGLE_CLIENT_ID` - Google OAuth client ID (optional, for Google login)
 - `GOOGLE_CLIENT_SECRET` - Google OAuth client secret (optional, for Google login)
 - `APPLE_CLIENT_ID` - Apple Sign-In service ID (optional, for Apple login)
@@ -57,7 +70,13 @@ A Tinder-style recipe discovery app where users swipe through food photos to sav
 - `server/db.ts` - Database connection
 - `server/auth.ts` - Passport authentication setup
 - `server/storage.ts` - Database CRUD operations
-- `server/spoonacular.ts` - Spoonacular API client
+- `server/recipe-providers/` - API-agnostic recipe provider system
+  - `types.ts` - RecipeProvider interface and NormalizedRecipe type
+  - `index.ts` - Provider manager with fallback logic
+  - `spoonacular.ts` - Spoonacular API provider
+  - `fatsecret.ts` - FatSecret API provider
+  - `mock.ts` - Mock data fallback provider
+- `server/mockRecipes.ts` - Hardcoded mock recipe data
 - `server/routes.ts` - Express API routes
 - `client/src/hooks/use-auth.tsx` - Auth context/provider
 - `client/src/pages/` - Page components (Auth, Discover, Cookbook, ShoppingList, CookingMode, Profile)

@@ -6,7 +6,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 export interface RecipeData {
-  spoonacularId: number;
+  externalId: number;
+  source: string;
   title: string;
   image: string;
   readyInMinutes: number;

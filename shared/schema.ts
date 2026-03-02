@@ -14,7 +14,8 @@ export const users = pgTable("users", {
 export const savedRecipes = pgTable("saved_recipes", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull(),
-  spoonacularId: integer("spoonacular_id").notNull(),
+  externalId: integer("external_id").notNull(),
+  source: text("source").notNull().default("spoonacular"),
   title: text("title").notNull(),
   image: text("image").notNull(),
   readyInMinutes: integer("ready_in_minutes").notNull(),

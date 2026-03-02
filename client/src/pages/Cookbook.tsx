@@ -19,7 +19,8 @@ import {
 
 interface SavedRecipe {
   id: string;
-  spoonacularId: number;
+  externalId: number;
+  source: string;
   title: string;
   image: string;
   readyInMinutes: number;
@@ -120,7 +121,7 @@ export default function Cookbook() {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            setLocation(`/cook/${recipe.spoonacularId}`);
+                            setLocation(`/cook/${recipe.id}`);
                           }}
                           className="flex items-center gap-1 text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-full active:scale-95 transition-transform"
                           data-testid={`button-cook-${recipe.id}`}

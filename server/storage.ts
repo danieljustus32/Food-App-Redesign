@@ -14,7 +14,7 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
 
   getSavedRecipes(userId: string): Promise<SavedRecipe[]>;
-  getSavedRecipe(userId: string, spoonacularId: number): Promise<SavedRecipe | undefined>;
+  getSavedRecipe(userId: string, externalId: number, source: string): Promise<SavedRecipe | undefined>;
   saveRecipe(recipe: InsertSavedRecipe): Promise<SavedRecipe>;
   removeSavedRecipe(userId: string, recipeId: string): Promise<void>;
 
@@ -51,9 +51,9 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(savedRecipes).where(eq(savedRecipes.userId, userId));
   }
 
-  async getSavedRecipe(userId: string, spoonacularId: number): Promise<SavedRecipe | undefined> {
+  async getSavedRecipe(userId: string, externalId: number, source: string): Promise<SavedRecipe | undefined> {
     const [recipe] = await db.select().from(savedRecipes)
-      .where(and(eq(savedRecipes.userId, userId), eq(savedRecipes.spoonacularId, spoonacularId)));
+      .where(and(eq(savedRecipes.userId, userId), eq(savedRecipes.externalId, externalId), eq(savedRecipes.source, source)));
     return recipe;
   }
 

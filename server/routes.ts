@@ -2,7 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, requireAuth } from "./auth";
-import { getRandomRecipes, searchRecipes } from "./spoonacular";
+import { getRandomRecipes, searchRecipes } from "./recipe-providers";
 import type { User } from "@shared/schema";
 
 function getSection(ingredient: string): string {
@@ -25,7 +25,6 @@ export async function registerRoutes(
 ): Promise<Server> {
   setupAuth(app);
 
-  // Recipes from Spoonacular
   app.get("/api/recipes/random", requireAuth, async (req: Request, res: Response) => {
     try {
       const count = parseInt(req.query.count as string) || 10;
@@ -48,7 +47,6 @@ export async function registerRoutes(
     }
   });
 
-  // Cookbook (saved recipes)
   app.get("/api/cookbook", requireAuth, async (req: Request, res: Response) => {
     const user = req.user as User;
     const recipes = await storage.getSavedRecipes(user.id);
@@ -58,16 +56,17 @@ export async function registerRoutes(
   app.post("/api/cookbook", requireAuth, async (req: Request, res: Response) => {
     try {
       const user = req.user as User;
-      const { spoonacularId, title, image, readyInMinutes, servings, summary, ingredients, instructions, tags } = req.body;
+      const { externalId, source, title, image, readyInMinutes, servings, summary, ingredients, instructions, tags } = req.body;
 
-      const existing = await storage.getSavedRecipe(user.id, spoonacularId);
+      const existing = await storage.getSavedRecipe(user.id, externalId, source || "spoonacular");
       if (existing) {
         return res.json(existing);
       }
 
       const saved = await storage.saveRecipe({
         userId: user.id,
-        spoonacularId,
+        externalId,
+        source: source || "spoonacular",
         title,
         image,
         readyInMinutes,
@@ -89,7 +88,6 @@ export async function registerRoutes(
     res.json({ message: "Removed" });
   });
 
-  // Shopping list
   app.get("/api/shopping-list", requireAuth, async (req: Request, res: Response) => {
     const user = req.user as User;
     const items = await storage.getShoppingItems(user.id);

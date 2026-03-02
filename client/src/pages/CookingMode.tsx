@@ -6,7 +6,8 @@ import { useQuery } from "@tanstack/react-query";
 
 interface SavedRecipe {
   id: string;
-  spoonacularId: number;
+  externalId: number;
+  source: string;
   title: string;
   image: string;
   readyInMinutes: number;
@@ -26,7 +27,7 @@ export default function CookingMode() {
     queryKey: ["/api/cookbook"],
   });
 
-  const recipe = savedRecipes.find(r => r.spoonacularId === Number(recipeId));
+  const recipe = savedRecipes.find(r => r.id === recipeId);
 
   const [steps, setSteps] = useState<{ type: 'ingredient' | 'instruction', text: string }[]>([]);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);

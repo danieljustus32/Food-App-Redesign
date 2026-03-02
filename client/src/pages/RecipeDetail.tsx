@@ -7,7 +7,8 @@ import { useToast } from "@/hooks/use-toast";
 
 interface SavedRecipe {
   id: string;
-  spoonacularId: number;
+  externalId: number;
+  source: string;
   title: string;
   image: string;
   readyInMinutes: number;
@@ -102,7 +103,7 @@ export default function RecipeDetail() {
               <ShoppingCart size={16} /> Add to List
             </button>
             <button
-              onClick={() => setLocation(`/cook/${recipe.spoonacularId}`)}
+              onClick={() => setLocation(`/cook/${recipe.id}`)}
               className="flex-1 flex items-center justify-center gap-2 bg-primary text-primary-foreground font-semibold py-3 rounded-full active:scale-[0.98] transition-transform"
               data-testid="button-start-cooking"
             >
