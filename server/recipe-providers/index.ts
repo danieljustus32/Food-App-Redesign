@@ -1,6 +1,7 @@
 import type { RecipeProvider, NormalizedRecipe } from "./types";
 import { SpoonacularProvider } from "./spoonacular";
 import { FatSecretProvider } from "./fatsecret";
+import { EdamamProvider } from "./edamam";
 import { MockProvider } from "./mock";
 
 export type { NormalizedRecipe, RecipeProvider };
@@ -21,6 +22,9 @@ function buildProviders(): { real: RecipeProvider[]; mock: RecipeProvider } {
 
   const fatsecret = new FatSecretProvider();
   if (fatsecret.isAvailable()) real.push(fatsecret);
+
+  const edamam = new EdamamProvider();
+  if (edamam.isAvailable()) real.push(edamam);
 
   return { real, mock };
 }

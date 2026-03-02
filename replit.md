@@ -21,10 +21,11 @@ A Tinder-style recipe discovery app where users swipe through food photos to sav
 ## Recipe Provider System
 The app uses an API-agnostic provider pattern (`server/recipe-providers/`):
 - **RecipeProvider interface** (`types.ts`): Defines `getRandomRecipes()` and `searchRecipes()` methods
-- **Spoonacular** (`spoonacular.ts`): Primary provider, requires `SPOONACULAR_API_KEY`
-- **FatSecret** (`fatsecret.ts`): Secondary provider, requires `FATSECRET_CLIENT_ID` and `FATSECRET_CLIENT_SECRET`. Uses OAuth2 client_credentials flow.
+- **Spoonacular** (`spoonacular.ts`): Requires `SPOONACULAR_API_KEY`
+- **FatSecret** (`fatsecret.ts`): Requires `FATSECRET_CLIENT_ID` and `FATSECRET_CLIENT_SECRET`. Uses OAuth2 client_credentials flow.
+- **Edamam** (`edamam.ts`): Requires `EDAMAM_APP_ID` and `EDAMAM_APP_KEY`. Uses Recipe Search API v2.
 - **Mock** (`mock.ts`): Fallback provider with hardcoded recipes, always available
-- **Provider Manager** (`index.ts`): Tries each available provider in sequence; falls back to next on failure
+- **Provider Manager** (`index.ts`): Calls all available providers in parallel, shuffles combined results; falls back to mock if all fail
 - In dev mode (`APP_ENV=dev`), only mock provider is used
 - All providers normalize data to `NormalizedRecipe` shape: `{ externalId, source, title, image, readyInMinutes, servings, summary, ingredients, instructions, tags }`
 
@@ -58,6 +59,8 @@ The app uses an API-agnostic provider pattern (`server/recipe-providers/`):
 - `SPOONACULAR_API_KEY` - Spoonacular API key (optional, for Spoonacular provider)
 - `FATSECRET_CLIENT_ID` - FatSecret OAuth2 client ID (optional, for FatSecret provider)
 - `FATSECRET_CLIENT_SECRET` - FatSecret OAuth2 client secret (optional, for FatSecret provider)
+- `EDAMAM_APP_ID` - Edamam application ID (optional, for Edamam provider)
+- `EDAMAM_APP_KEY` - Edamam application key (optional, for Edamam provider)
 - `GOOGLE_CLIENT_ID` - Google OAuth client ID (optional, for Google login)
 - `GOOGLE_CLIENT_SECRET` - Google OAuth client secret (optional, for Google login)
 - `APPLE_CLIENT_ID` - Apple Sign-In service ID (optional, for Apple login)
@@ -75,6 +78,7 @@ The app uses an API-agnostic provider pattern (`server/recipe-providers/`):
   - `index.ts` - Provider manager with fallback logic
   - `spoonacular.ts` - Spoonacular API provider
   - `fatsecret.ts` - FatSecret API provider
+  - `edamam.ts` - Edamam Recipe Search API provider
   - `mock.ts` - Mock data fallback provider
 - `server/mockRecipes.ts` - Hardcoded mock recipe data
 - `server/routes.ts` - Express API routes
