@@ -9,6 +9,7 @@ A Tinder-style recipe discovery app where users swipe through food photos to sav
 - **Database**: PostgreSQL with Drizzle ORM
 - **API**: Spoonacular for recipe data
 - **Routing**: wouter (frontend), Express (backend)
+- **PWA**: Service worker, manifest.json, installable on iOS/Android/desktop
 
 ## Key Features
 1. **Discover** - Swipeable recipe cards fetched from Spoonacular API. Swipe right to save, left to pass.
