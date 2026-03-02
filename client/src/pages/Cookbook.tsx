@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card } from "@/components/ui/card";
-import { Clock, Trash2, Heart, ShoppingCart, Mic, Info } from "lucide-react";
+import { Clock, Trash2, Heart, ShoppingCart, Mic, Info, SlidersHorizontal, ArrowUpDown, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -16,6 +16,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface SavedRecipe {
   id: string;
@@ -31,14 +36,77 @@ interface SavedRecipe {
   tags: string[];
 }
 
+const MEAL_TYPES = ["breakfast", "lunch", "dinner", "dessert", "snack", "appetizer", "salad", "soup", "side dish"];
+const DIET_TYPES = ["vegetarian", "vegan", "gluten free", "dairy free", "healthy", "paleo", "keto", "whole30"];
+
+type SortOption = "default" | "time-asc" | "time-desc" | "meal" | "ingredients-asc" | "ingredients-desc";
+
+const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+  { value: "default", label: "Default" },
+  { value: "time-asc", label: "Time: Quick first" },
+  { value: "time-desc", label: "Time: Longest first" },
+  { value: "ingredients-asc", label: "Ingredients: Fewest" },
+  { value: "ingredients-desc", label: "Ingredients: Most" },
+  { value: "meal", label: "Meal type" },
+];
+
+function matchesTag(tags: string[], value: string) {
+  return tags.some(t => t.toLowerCase() === value.toLowerCase());
+}
+
+function getMealOrder(tags: string[]) {
+  const order = ["breakfast", "lunch", "snack", "appetizer", "salad", "soup", "side dish", "dinner", "dessert"];
+  for (const tag of tags) {
+    const idx = order.indexOf(tag.toLowerCase());
+    if (idx !== -1) return idx;
+  }
+  return order.length;
+}
+
 export default function Cookbook() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [recipeToDelete, setRecipeToDelete] = useState<SavedRecipe | null>(null);
+  const [sortBy, setSortBy] = useState<SortOption>("default");
+  const [mealFilter, setMealFilter] = useState<string | null>(null);
+  const [dietFilter, setDietFilter] = useState<string | null>(null);
 
   const { data: savedRecipes = [] } = useQuery<SavedRecipe[]>({
     queryKey: ["/api/cookbook"],
   });
+
+  const filteredAndSorted = useMemo(() => {
+    let recipes = [...savedRecipes];
+
+    if (mealFilter) {
+      recipes = recipes.filter(r => matchesTag(r.tags, mealFilter));
+    }
+    if (dietFilter) {
+      recipes = recipes.filter(r => matchesTag(r.tags, dietFilter));
+    }
+
+    switch (sortBy) {
+      case "time-asc":
+        recipes.sort((a, b) => a.readyInMinutes - b.readyInMinutes);
+        break;
+      case "time-desc":
+        recipes.sort((a, b) => b.readyInMinutes - a.readyInMinutes);
+        break;
+      case "ingredients-asc":
+        recipes.sort((a, b) => a.ingredients.length - b.ingredients.length);
+        break;
+      case "ingredients-desc":
+        recipes.sort((a, b) => b.ingredients.length - a.ingredients.length);
+        break;
+      case "meal":
+        recipes.sort((a, b) => getMealOrder(a.tags) - getMealOrder(b.tags));
+        break;
+    }
+
+    return recipes;
+  }, [savedRecipes, sortBy, mealFilter, dietFilter]);
+
+  const activeFilterCount = (mealFilter ? 1 : 0) + (dietFilter ? 1 : 0) + (sortBy !== "default" ? 1 : 0);
 
   const removeMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -81,11 +149,146 @@ export default function Cookbook() {
     addToListMutation.mutate(recipe.ingredients);
   };
 
+  const clearAll = () => {
+    setSortBy("default");
+    setMealFilter(null);
+    setDietFilter(null);
+  };
+
   return (
     <div className="bg-background pt-20 pb-24 px-4">
       <div className="max-w-md md:max-w-3xl xl:max-w-6xl mx-auto">
-        <h1 className="text-3xl font-serif font-bold text-foreground mb-1">My Cookbook</h1>
-        <p className="text-muted-foreground mb-8">Your curated collection of deliciousness.</p>
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-serif font-bold text-foreground mb-1">My Cookbook</h1>
+            <p className="text-muted-foreground">Your curated collection of deliciousness.</p>
+          </div>
+
+          {savedRecipes.length > 0 && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  className="relative flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-full border border-border bg-card hover:bg-accent transition-colors mt-1"
+                  data-testid="button-sort-filter"
+                >
+                  <SlidersHorizontal size={16} />
+                  <span className="hidden sm:inline">Sort & Filter</span>
+                  {activeFilterCount > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center font-bold" data-testid="badge-filter-count">
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-72 p-0 rounded-2xl" data-testid="popover-sort-filter">
+                <div className="p-4 space-y-5">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-sm">Sort & Filter</h3>
+                    {activeFilterCount > 0 && (
+                      <button
+                        onClick={clearAll}
+                        className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+                        data-testid="button-clear-filters"
+                      >
+                        <X size={12} /> Clear all
+                      </button>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-1 mb-2">
+                      <ArrowUpDown size={12} /> Sort by
+                    </label>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {SORT_OPTIONS.map(opt => (
+                        <button
+                          key={opt.value}
+                          onClick={() => setSortBy(opt.value)}
+                          className={`text-xs px-2.5 py-1.5 rounded-lg transition-colors text-left ${
+                            sortBy === opt.value
+                              ? "bg-primary text-primary-foreground font-medium"
+                              : "bg-muted/50 hover:bg-muted text-foreground"
+                          }`}
+                          data-testid={`sort-${opt.value}`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 block">
+                      Meal type
+                    </label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {MEAL_TYPES.map(meal => (
+                        <button
+                          key={meal}
+                          onClick={() => setMealFilter(mealFilter === meal ? null : meal)}
+                          className={`text-xs px-2.5 py-1.5 rounded-full transition-colors capitalize ${
+                            mealFilter === meal
+                              ? "bg-primary text-primary-foreground font-medium"
+                              : "bg-muted/50 hover:bg-muted text-foreground"
+                          }`}
+                          data-testid={`filter-meal-${meal.replace(/\s+/g, "-")}`}
+                        >
+                          {meal}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 block">
+                      Diet type
+                    </label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {DIET_TYPES.map(diet => (
+                        <button
+                          key={diet}
+                          onClick={() => setDietFilter(dietFilter === diet ? null : diet)}
+                          className={`text-xs px-2.5 py-1.5 rounded-full transition-colors capitalize ${
+                            dietFilter === diet
+                              ? "bg-primary text-primary-foreground font-medium"
+                              : "bg-muted/50 hover:bg-muted text-foreground"
+                          }`}
+                          data-testid={`filter-diet-${diet.replace(/\s+/g, "-")}`}
+                        >
+                          {diet}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
+        </div>
+
+        {mealFilter || dietFilter ? (
+          <div className="flex items-center gap-2 mb-4 flex-wrap">
+            <span className="text-xs text-muted-foreground">Filtering:</span>
+            {mealFilter && (
+              <button
+                onClick={() => setMealFilter(null)}
+                className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium capitalize"
+                data-testid="chip-meal-filter"
+              >
+                {mealFilter} <X size={12} />
+              </button>
+            )}
+            {dietFilter && (
+              <button
+                onClick={() => setDietFilter(null)}
+                className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium capitalize"
+                data-testid="chip-diet-filter"
+              >
+                {dietFilter} <X size={12} />
+              </button>
+            )}
+          </div>
+        ) : null}
 
         {savedRecipes.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center p-8 mt-12 border-2 border-dashed border-border rounded-3xl">
@@ -95,10 +298,25 @@ export default function Cookbook() {
             <h2 className="text-xl font-semibold text-foreground mb-2" data-testid="text-empty-cookbook">No recipes yet</h2>
             <p className="text-muted-foreground">Swipe right on recipes in Discover to save them here.</p>
           </div>
+        ) : filteredAndSorted.length === 0 ? (
+          <div className="flex flex-col items-center justify-center text-center p-8 mt-8 border-2 border-dashed border-border rounded-3xl">
+            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+              <SlidersHorizontal size={24} className="text-muted-foreground opacity-50" />
+            </div>
+            <h2 className="text-lg font-semibold text-foreground mb-2" data-testid="text-no-filter-results">No matching recipes</h2>
+            <p className="text-muted-foreground text-sm mb-3">Try adjusting your filters.</p>
+            <button
+              onClick={clearAll}
+              className="text-sm font-medium text-primary hover:underline"
+              data-testid="button-clear-filters-empty"
+            >
+              Clear all filters
+            </button>
+          </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
             <AnimatePresence>
-              {savedRecipes.map((recipe) => (
+              {filteredAndSorted.map((recipe) => (
                 <motion.div
                   key={recipe.id}
                   layout
