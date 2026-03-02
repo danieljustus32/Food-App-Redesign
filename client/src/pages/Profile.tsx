@@ -14,7 +14,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-background pt-20 pb-24 px-4 overflow-y-auto">
+    <div className="bg-background pt-20 pb-24 px-4">
       <div className="max-w-md mx-auto">
         <h1 className="text-3xl font-serif font-bold text-foreground mb-8">Profile</h1>
 

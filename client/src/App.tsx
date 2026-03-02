@@ -12,6 +12,7 @@ import Cookbook from "@/pages/Cookbook";
 import ShoppingList from "@/pages/ShoppingList";
 import Profile from "@/pages/Profile";
 import CookingMode from "@/pages/CookingMode";
+import RecipeDetail from "@/pages/RecipeDetail";
 
 import { Header } from "@/components/layout/Header";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -35,16 +36,19 @@ function AppRouter() {
   }
 
   return (
-    <div className="relative w-full h-[100dvh] overflow-hidden bg-background">
+    <div className="relative w-full h-[100dvh] flex flex-col bg-background">
       <Header />
-      <Switch>
-        <Route path="/" component={Discover} />
-        <Route path="/cookbook" component={Cookbook} />
-        <Route path="/list" component={ShoppingList} />
-        <Route path="/profile" component={Profile} />
-        <Route path="/cook/:id" component={CookingMode} />
-        <Route component={NotFound} />
-      </Switch>
+      <div className="flex-1 overflow-y-auto">
+        <Switch>
+          <Route path="/" component={Discover} />
+          <Route path="/cookbook" component={Cookbook} />
+          <Route path="/list" component={ShoppingList} />
+          <Route path="/profile" component={Profile} />
+          <Route path="/cook/:id" component={CookingMode} />
+          <Route path="/recipe/:id" component={RecipeDetail} />
+          <Route component={NotFound} />
+        </Switch>
+      </div>
       <BottomNav />
     </div>
   );

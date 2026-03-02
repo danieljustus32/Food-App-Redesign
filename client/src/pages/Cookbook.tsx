@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { Clock, Trash2, Heart, ShoppingCart, Mic } from "lucide-react";
+import { Clock, Trash2, Heart, ShoppingCart, Mic, Info } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -62,7 +62,7 @@ export default function Cookbook() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-background pt-20 pb-24 px-4 overflow-y-auto">
+    <div className="bg-background pt-20 pb-24 px-4">
       <div className="max-w-md mx-auto">
         <h1 className="text-3xl font-serif font-bold text-foreground mb-1">My Cookbook</h1>
         <p className="text-muted-foreground mb-8">Your curated collection of deliciousness.</p>
@@ -111,21 +111,32 @@ export default function Cookbook() {
                       </div>
                     </div>
 
-                    <button
-                      onClick={(e) => handleAddToList(recipe, e)}
-                      className="absolute top-2 right-12 w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white active:scale-95 shadow-sm hover:bg-black/60 transition-colors"
-                      data-testid={`button-add-to-list-${recipe.id}`}
-                    >
-                      <ShoppingCart size={14} />
-                    </button>
-
-                    <button
-                      onClick={(e) => handleRemove(recipe.id, e)}
-                      className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white active:scale-95 shadow-sm hover:bg-black/60 transition-colors"
-                      data-testid={`button-remove-${recipe.id}`}
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                    <div className="absolute top-2 right-2 flex gap-1.5">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setLocation(`/recipe/${recipe.id}`);
+                        }}
+                        className="w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white active:scale-95 shadow-sm hover:bg-black/60 transition-colors"
+                        data-testid={`button-info-${recipe.id}`}
+                      >
+                        <Info size={14} />
+                      </button>
+                      <button
+                        onClick={(e) => handleAddToList(recipe, e)}
+                        className="w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white active:scale-95 shadow-sm hover:bg-black/60 transition-colors"
+                        data-testid={`button-add-to-list-${recipe.id}`}
+                      >
+                        <ShoppingCart size={14} />
+                      </button>
+                      <button
+                        onClick={(e) => handleRemove(recipe.id, e)}
+                        className="w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white active:scale-95 shadow-sm hover:bg-black/60 transition-colors"
+                        data-testid={`button-remove-${recipe.id}`}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
                   </Card>
                 </motion.div>
               ))}

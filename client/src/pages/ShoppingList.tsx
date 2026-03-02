@@ -42,7 +42,7 @@ export default function ShoppingList() {
   const hasCheckedItems = items.some(i => i.checked);
 
   return (
-    <div className="h-[100dvh] bg-background pt-16 pb-24 px-4 overflow-y-auto">
+    <div className="bg-background pt-16 pb-24 px-4">
       <div className="max-w-md mx-auto pt-4">
         <div className="flex items-center justify-between mb-8">
           <div>
