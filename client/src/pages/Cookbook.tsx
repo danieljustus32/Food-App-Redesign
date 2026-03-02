@@ -2,13 +2,15 @@ import { useState, useEffect } from "react";
 import { getSavedRecipes, removeRecipe, Recipe } from "@/data/recipes";
 import { addIngredientsToList } from "@/data/shoppingList";
 import { Card } from "@/components/ui/card";
-import { Clock, Trash2, Heart, ShoppingCart } from "lucide-react";
+import { Clock, Trash2, Heart, ShoppingCart, Mic } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 
 export default function Cookbook() {
   const [savedRecipes, setSavedRecipes] = useState<Recipe[]>([]);
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
   // Load saved recipes on mount
   useEffect(() => {
@@ -70,22 +72,33 @@ export default function Cookbook() {
                     />
                     <div className="p-4">
                       <h3 className="font-serif font-bold text-lg mb-1 leading-tight line-clamp-1">{recipe.title}</h3>
-                      <div className="flex items-center text-xs text-muted-foreground gap-3">
-                        <span className="flex items-center gap-1"><Clock size={12} /> {recipe.readyInMinutes}m</span>
-                        <span className="text-primary font-medium">{recipe.tags[0]}</span>
+                      <div className="flex items-center justify-between mt-2">
+                        <div className="flex items-center text-xs text-muted-foreground gap-3">
+                          <span className="flex items-center gap-1"><Clock size={12} /> {recipe.readyInMinutes}m</span>
+                          <span className="text-primary font-medium">{recipe.tags[0]}</span>
+                        </div>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setLocation(`/cook/${recipe.id}`);
+                          }}
+                          className="flex items-center gap-1 text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-full active:scale-95 transition-transform"
+                        >
+                          <Mic size={12} /> Cook
+                        </button>
                       </div>
                     </div>
                     
                     <button 
                       onClick={(e) => handleAddToList(recipe, e)}
-                      className="absolute top-2 right-12 w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white active:scale-95 shadow-sm"
+                      className="absolute top-2 right-12 w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white active:scale-95 shadow-sm hover:bg-black/60 transition-colors"
                     >
                       <ShoppingCart size={14} />
                     </button>
 
                     <button 
                       onClick={(e) => handleRemove(recipe.id, e)}
-                      className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white active:scale-95 shadow-sm"
+                      className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white active:scale-95 shadow-sm hover:bg-black/60 transition-colors"
                     >
                       <Trash2 size={14} />
                     </button>
