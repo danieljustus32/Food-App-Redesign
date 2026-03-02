@@ -65,7 +65,7 @@ export default function RecipeDetail() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         <button
           onClick={() => window.history.back()}
-          className="absolute top-4 left-4 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white active:scale-95 transition-transform"
+          className="absolute top-16 left-4 z-10 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white active:scale-95 transition-transform"
           data-testid="button-back"
         >
           <ArrowLeft size={20} />
