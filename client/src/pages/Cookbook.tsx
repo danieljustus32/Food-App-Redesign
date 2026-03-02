@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import { getSavedRecipes, removeRecipe, Recipe } from "@/data/recipes";
+import { addIngredientsToList } from "@/data/shoppingList";
 import { Card } from "@/components/ui/card";
-import { Clock, Trash2, Heart } from "lucide-react";
+import { Clock, Trash2, Heart, ShoppingCart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Cookbook() {
   const [savedRecipes, setSavedRecipes] = useState<Recipe[]>([]);
+  const { toast } = useToast();
 
   // Load saved recipes on mount
   useEffect(() => {
@@ -16,6 +19,23 @@ export default function Cookbook() {
     e.stopPropagation();
     removeRecipe(id);
     setSavedRecipes(getSavedRecipes());
+  };
+
+  const handleAddToList = (recipe: Recipe, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const addedCount = addIngredientsToList(recipe.ingredients);
+    
+    if (addedCount > 0) {
+      toast({
+        title: "Added to Shopping List",
+        description: `${addedCount} ingredients added from ${recipe.title}.`,
+      });
+    } else {
+      toast({
+        title: "Already in list",
+        description: `All ingredients from ${recipe.title} are already in your list.`,
+      });
+    }
   };
 
   return (
@@ -57,8 +77,15 @@ export default function Cookbook() {
                     </div>
                     
                     <button 
+                      onClick={(e) => handleAddToList(recipe, e)}
+                      className="absolute top-2 right-12 w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white active:scale-95 shadow-sm"
+                    >
+                      <ShoppingCart size={14} />
+                    </button>
+
+                    <button 
                       onClick={(e) => handleRemove(recipe.id, e)}
-                      className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity active:scale-95"
+                      className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white active:scale-95 shadow-sm"
                     >
                       <Trash2 size={14} />
                     </button>
