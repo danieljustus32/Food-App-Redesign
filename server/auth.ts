@@ -37,10 +37,11 @@ export function setupAuth(app: Express) {
     session({
       store: new PgStore({ pool, createTableIfMissing: true }),
       secret: process.env.SESSION_SECRET || "tindish-secret-key-change-me",
-      resave: false,
+      resave: true,
       saveUninitialized: false,
+      rolling: true,
       cookie: {
-        maxAge: 30 * 24 * 60 * 60 * 1000,
+        maxAge: 45 * 24 * 60 * 60 * 1000,
         httpOnly: true,
         secure: false,
         sameSite: "lax",
