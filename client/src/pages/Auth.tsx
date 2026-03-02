@@ -96,7 +96,7 @@ export default function Auth() {
           <p className="text-muted-foreground mt-1">Swipe. Save. Cook.</p>
         </div>
 
-        <Card className="rounded-3xl border-0 shadow-lg p-6 bg-card" data-testid="auth-card">
+        <Card className="rounded-3xl border-0 shadow-lg p-6 bg-card min-h-[520px] transition-all duration-300" data-testid="auth-card">
           <div className="flex bg-muted rounded-full p-1 mb-6">
             <button
               type="button"
