@@ -1,5 +1,7 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import AppleStrategy from "passport-apple";
 import { storage } from "./storage";
 import type { Express, Request, Response, NextFunction } from "express";
 import session from "express-session";
@@ -18,7 +20,9 @@ async function hashPassword(password: string): Promise<string> {
 }
 
 async function comparePasswords(supplied: string, stored: string): Promise<boolean> {
+  if (!stored || stored === "") return false;
   const [hashed, salt] = stored.split(".");
+  if (!hashed || !salt) return false;
   const hashedBuf = Buffer.from(hashed, "hex");
   const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
   return timingSafeEqual(hashedBuf, suppliedBuf);
@@ -28,6 +32,24 @@ declare global {
   namespace Express {
     interface User extends import("@shared/schema").User {}
   }
+}
+
+async function findOrCreateSocialUser(provider: string, providerId: string, email: string): Promise<User> {
+  let user = await storage.getUserByProvider(provider, providerId);
+  if (user) return user;
+
+  const existingByEmail = await storage.getUserByUsername(email);
+  if (existingByEmail) {
+    return existingByEmail;
+  }
+
+  user = await storage.createUser({
+    username: email,
+    password: "",
+    authProvider: provider,
+    authProviderId: providerId,
+  });
+  return user;
 }
 
 export function setupAuth(app: Express) {
@@ -65,6 +87,62 @@ export function setupAuth(app: Express) {
       }
     })
   );
+
+  const replitDomain = process.env.REPLIT_DOMAINS?.split(",")[0] || `localhost:${process.env.PORT || 5000}`;
+  const protocol = process.env.REPLIT_DOMAINS ? "https" : "http";
+  const baseUrl = `${protocol}://${replitDomain}`;
+
+  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    passport.use(
+      new GoogleStrategy(
+        {
+          clientID: process.env.GOOGLE_CLIENT_ID,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+          callbackURL: `${baseUrl}/api/auth/google/callback`,
+        },
+        async (_accessToken, _refreshToken, profile, done) => {
+          try {
+            const email = profile.emails?.[0]?.value;
+            if (!email) {
+              return done(new Error("No email found in Google profile"));
+            }
+            const user = await findOrCreateSocialUser("google", profile.id, email);
+            return done(null, user);
+          } catch (err) {
+            return done(err as Error);
+          }
+        }
+      )
+    );
+  }
+
+  if (process.env.APPLE_CLIENT_ID && process.env.APPLE_TEAM_ID && process.env.APPLE_KEY_ID && process.env.APPLE_PRIVATE_KEY) {
+    passport.use(
+      new AppleStrategy(
+        {
+          clientID: process.env.APPLE_CLIENT_ID,
+          teamID: process.env.APPLE_TEAM_ID,
+          keyID: process.env.APPLE_KEY_ID,
+          privateKeyString: process.env.APPLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+          callbackURL: `${baseUrl}/api/auth/apple/callback`,
+          scope: ["name", "email"],
+        },
+        async (_accessToken: string, _refreshToken: string, idToken: any, profile: any, done: any) => {
+          try {
+            const email = idToken?.email || profile?.email;
+            const appleId = idToken?.sub || profile?.id;
+            if (!email || !appleId) {
+              return done(new Error("No email or ID found in Apple profile"));
+            }
+            const user = await findOrCreateSocialUser("apple", appleId, email);
+            return done(null, user);
+          } catch (err) {
+            return done(err as Error);
+          }
+        }
+      )
+    );
+  }
 
   passport.serializeUser((user: User, done) => {
     done(null, user.id);
@@ -118,6 +196,32 @@ export function setupAuth(app: Express) {
         return res.json({ id: user.id, username: user.username });
       });
     })(req, res, next);
+  });
+
+  app.get("/api/auth/google", (req: Request, res: Response, next: NextFunction) => {
+    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+      return res.status(501).json({ message: "Google authentication is not configured. Please add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET." });
+    }
+    passport.authenticate("google", { scope: ["profile", "email"] })(req, res, next);
+  });
+
+  app.get("/api/auth/google/callback", (req: Request, res: Response, next: NextFunction) => {
+    passport.authenticate("google", { failureRedirect: "/auth?error=google_failed" })(req, res, () => {
+      res.redirect("/");
+    });
+  });
+
+  app.get("/api/auth/apple", (req: Request, res: Response, next: NextFunction) => {
+    if (!process.env.APPLE_CLIENT_ID || !process.env.APPLE_TEAM_ID || !process.env.APPLE_KEY_ID || !process.env.APPLE_PRIVATE_KEY) {
+      return res.status(501).json({ message: "Apple authentication is not configured. Please add APPLE_CLIENT_ID, APPLE_TEAM_ID, APPLE_KEY_ID, and APPLE_PRIVATE_KEY." });
+    }
+    passport.authenticate("apple")(req, res, next);
+  });
+
+  app.post("/api/auth/apple/callback", (req: Request, res: Response, next: NextFunction) => {
+    passport.authenticate("apple", { failureRedirect: "/auth?error=apple_failed" })(req, res, () => {
+      res.redirect("/");
+    });
   });
 
   app.post("/api/auth/logout", (req: Request, res: Response) => {

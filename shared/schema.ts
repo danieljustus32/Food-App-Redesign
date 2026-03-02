@@ -6,7 +6,9 @@ import { z } from "zod";
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+  password: text("password").notNull().default(""),
+  authProvider: text("auth_provider"),
+  authProviderId: text("auth_provider_id"),
 });
 
 export const savedRecipes = pgTable("saved_recipes", {
@@ -34,6 +36,8 @@ export const shoppingItems = pgTable("shopping_items", {
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
+  authProvider: true,
+  authProviderId: true,
 });
 
 export const insertSavedRecipeSchema = createInsertSchema(savedRecipes).omit({

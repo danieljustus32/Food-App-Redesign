@@ -16,10 +16,10 @@ A Tinder-style recipe discovery app where users swipe through food photos to sav
 2. **Cookbook** - Persistent collection of saved recipes with cook mode and shopping list integration.
 3. **Shopping List** - Organized by grocery store aisle with check-off functionality.
 4. **Hands-free Cooking** - Voice-guided step-by-step cooking using browser Speech APIs.
-5. **User Auth** - Registration/login with session-based authentication.
+5. **User Auth** - Registration/login with session-based authentication. Social login with Google and Apple OAuth.
 
 ## Data Model
-- `users` - id, username, password (hashed)
+- `users` - id, username, password (hashed, empty for social auth users), authProvider (google/apple/null), authProviderId
 - `saved_recipes` - id, userId, spoonacularId, title, image, readyInMinutes, servings, summary, ingredients (jsonb), instructions (jsonb), tags (jsonb)
 - `shopping_items` - id, userId, name, section, checked
 
@@ -28,6 +28,10 @@ A Tinder-style recipe discovery app where users swipe through food photos to sav
 - `POST /api/auth/login` - Login
 - `POST /api/auth/logout` - Logout
 - `GET /api/auth/me` - Current user
+- `GET /api/auth/google` - Initiate Google OAuth
+- `GET /api/auth/google/callback` - Google OAuth callback
+- `GET /api/auth/apple` - Initiate Apple OAuth
+- `POST /api/auth/apple/callback` - Apple OAuth callback
 - `GET /api/recipes/random` - Random recipes from Spoonacular
 - `GET /api/recipes/search?q=` - Search recipes
 - `GET /api/cookbook` - User's saved recipes
@@ -41,6 +45,12 @@ A Tinder-style recipe discovery app where users swipe through food photos to sav
 ## Environment Variables
 - `DATABASE_URL` - PostgreSQL connection string (auto-set)
 - `SPOONACULAR_API_KEY` - Spoonacular API key (secret)
+- `GOOGLE_CLIENT_ID` - Google OAuth client ID (optional, for Google login)
+- `GOOGLE_CLIENT_SECRET` - Google OAuth client secret (optional, for Google login)
+- `APPLE_CLIENT_ID` - Apple Sign-In service ID (optional, for Apple login)
+- `APPLE_TEAM_ID` - Apple Developer team ID (optional, for Apple login)
+- `APPLE_KEY_ID` - Apple Sign-In key ID (optional, for Apple login)
+- `APPLE_PRIVATE_KEY` - Apple Sign-In private key (optional, for Apple login)
 
 ## File Structure
 - `shared/schema.ts` - Drizzle schema + Zod types
