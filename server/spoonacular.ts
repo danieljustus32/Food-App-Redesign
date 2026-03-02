@@ -1,5 +1,8 @@
+import { mockRecipes } from "./mockRecipes";
+
 const API_KEY = process.env.SPOONACULAR_API_KEY;
 const BASE_URL = "https://api.spoonacular.com";
+const isDev = process.env.APP_ENV === "dev";
 
 export interface SpoonacularRecipe {
   id: number;
@@ -45,7 +48,20 @@ export function normalizeRecipe(raw: SpoonacularRecipe) {
   };
 }
 
+function shuffleArray<T>(arr: T[]): T[] {
+  const shuffled = [...arr];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 export async function getRandomRecipes(count = 10): Promise<ReturnType<typeof normalizeRecipe>[]> {
+  if (isDev) {
+    return shuffleArray(mockRecipes).slice(0, count);
+  }
+
   if (!API_KEY) throw new Error("SPOONACULAR_API_KEY is not set");
 
   const url = `${BASE_URL}/recipes/random?number=${count}&apiKey=${API_KEY}`;
@@ -61,6 +77,15 @@ export async function getRandomRecipes(count = 10): Promise<ReturnType<typeof no
 }
 
 export async function searchRecipes(query: string, count = 10): Promise<ReturnType<typeof normalizeRecipe>[]> {
+  if (isDev) {
+    const q = query.toLowerCase();
+    const filtered = mockRecipes.filter(r =>
+      r.title.toLowerCase().includes(q) ||
+      r.tags.some(t => t.toLowerCase().includes(q))
+    );
+    return filtered.length > 0 ? filtered.slice(0, count) : mockRecipes.slice(0, count);
+  }
+
   if (!API_KEY) throw new Error("SPOONACULAR_API_KEY is not set");
 
   const url = `${BASE_URL}/recipes/complexSearch?query=${encodeURIComponent(query)}&number=${count}&addRecipeInformation=true&fillIngredients=true&apiKey=${API_KEY}`;

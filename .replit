@@ -42,3 +42,11 @@ waitForPort = 5000
 [agent]
 stack = "MOCKUP_JS"
 mockupState = "FULLSTACK"
+
+[userenv]
+
+[userenv.development]
+APP_ENV = "dev"
+
+[userenv.production]
+APP_ENV = "production"
