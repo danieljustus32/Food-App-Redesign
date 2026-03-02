@@ -7,55 +7,75 @@ export type { NormalizedRecipe, RecipeProvider };
 
 const isDev = process.env.APP_ENV === "dev";
 
-function buildProviders(): RecipeProvider[] {
+function buildProviders(): { real: RecipeProvider[]; mock: RecipeProvider } {
+  const mock = new MockProvider();
+
   if (isDev) {
-    return [new MockProvider()];
+    return { real: [], mock };
   }
 
-  const providers: RecipeProvider[] = [];
+  const real: RecipeProvider[] = [];
 
   const spoonacular = new SpoonacularProvider();
-  if (spoonacular.isAvailable()) providers.push(spoonacular);
+  if (spoonacular.isAvailable()) real.push(spoonacular);
 
   const fatsecret = new FatSecretProvider();
-  if (fatsecret.isAvailable()) providers.push(fatsecret);
+  if (fatsecret.isAvailable()) real.push(fatsecret);
 
-  providers.push(new MockProvider());
-
-  return providers;
+  return { real, mock };
 }
 
-const providers = buildProviders();
+const { real: realProviders, mock: mockProvider } = buildProviders();
 
-async function tryProviders(
-  action: (provider: RecipeProvider) => Promise<NormalizedRecipe[]>
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+async function gatherFromAll(
+  action: (provider: RecipeProvider, count: number) => Promise<NormalizedRecipe[]>,
+  totalCount: number
 ): Promise<NormalizedRecipe[]> {
-  const errors: string[] = [];
+  if (isDev || realProviders.length === 0) {
+    return action(mockProvider, totalCount);
+  }
 
-  for (const provider of providers) {
-    try {
-      const results = await action(provider);
-      if (results.length > 0) {
-        return results;
-      }
-      errors.push(`${provider.name}: returned 0 results`);
-    } catch (err: any) {
-      errors.push(`${provider.name}: ${err.message}`);
-      console.error(`[recipe-providers] ${provider.name} failed:`, err.message);
+  const perProvider = Math.max(1, Math.ceil(totalCount / realProviders.length));
+
+  const results = await Promise.allSettled(
+    realProviders.map(provider =>
+      action(provider, perProvider)
+        .then(recipes => ({ provider: provider.name, recipes }))
+    )
+  );
+
+  const allRecipes: NormalizedRecipe[] = [];
+
+  for (const result of results) {
+    if (result.status === "fulfilled") {
+      allRecipes.push(...result.value.recipes);
+    } else {
+      const reason = result.reason?.message || String(result.reason);
+      console.error(`[recipe-providers] Provider failed:`, reason);
     }
   }
 
-  if (errors.length > 0) {
-    console.error(`[recipe-providers] All providers failed:`, errors.join("; "));
+  if (allRecipes.length === 0) {
+    console.warn(`[recipe-providers] All real providers failed, falling back to mock`);
+    return action(mockProvider, totalCount);
   }
 
-  return [];
+  return shuffle(allRecipes).slice(0, totalCount);
 }
 
 export async function getRandomRecipes(count = 10): Promise<NormalizedRecipe[]> {
-  return tryProviders(p => p.getRandomRecipes(count));
+  return gatherFromAll((p, c) => p.getRandomRecipes(c), count);
 }
 
 export async function searchRecipes(query: string, count = 10): Promise<NormalizedRecipe[]> {
-  return tryProviders(p => p.searchRecipes(query, count));
+  return gatherFromAll((p, c) => p.searchRecipes(query, c), count);
 }
