@@ -4,14 +4,14 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 
 interface AuthUser {
   id: string;
-  username: string;
+  email: string;
 }
 
 interface AuthContextType {
   user: AuthUser | null;
   isLoading: boolean;
-  login: (username: string, password: string) => Promise<void>;
-  register: (username: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -25,7 +25,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const res = await fetch("/api/auth/me", { credentials: "include" });
         if (res.status === 401) return null;
         if (!res.ok) throw new Error("Failed to fetch user");
-        return res.json();
+        const data = await res.json();
+        return { id: data.id, email: data.username || data.email };
       } catch {
         return null;
       }
@@ -35,8 +36,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const loginMutation = useMutation({
-    mutationFn: async ({ username, password }: { username: string; password: string }) => {
-      const res = await apiRequest("POST", "/api/auth/login", { username, password });
+    mutationFn: async ({ email, password }: { email: string; password: string }) => {
+      const res = await apiRequest("POST", "/api/auth/login", { username: email, password });
       return res.json();
     },
     onSuccess: () => {
@@ -45,8 +46,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const registerMutation = useMutation({
-    mutationFn: async ({ username, password }: { username: string; password: string }) => {
-      const res = await apiRequest("POST", "/api/auth/register", { username, password });
+    mutationFn: async ({ email, password }: { email: string; password: string }) => {
+      const res = await apiRequest("POST", "/api/auth/register", { username: email, password });
       return res.json();
     },
     onSuccess: () => {
@@ -64,12 +65,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  const login = async (username: string, password: string) => {
-    await loginMutation.mutateAsync({ username, password });
+  const login = async (email: string, password: string) => {
+    await loginMutation.mutateAsync({ email, password });
   };
 
-  const register = async (username: string, password: string) => {
-    await registerMutation.mutateAsync({ username, password });
+  const register = async (email: string, password: string) => {
+    await registerMutation.mutateAsync({ email, password });
   };
 
   const logout = async () => {

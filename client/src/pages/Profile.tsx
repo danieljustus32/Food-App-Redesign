@@ -23,7 +23,7 @@ export default function Profile() {
             <User size={32} className="text-primary" />
           </div>
           <div>
-            <h2 className="text-xl font-bold" data-testid="text-username">{user?.username || "User"}</h2>
+            <h2 className="text-xl font-bold" data-testid="text-email">{user?.email || "User"}</h2>
             <p className="text-muted-foreground text-sm">Tindish Member</p>
           </div>
         </div>

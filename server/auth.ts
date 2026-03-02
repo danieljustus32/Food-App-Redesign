@@ -82,12 +82,17 @@ export function setupAuth(app: Express) {
     try {
       const { username, password } = req.body;
       if (!username || !password) {
-        return res.status(400).json({ message: "Username and password are required" });
+        return res.status(400).json({ message: "Email and password are required" });
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(username)) {
+        return res.status(400).json({ message: "Please enter a valid email address" });
       }
 
       const existing = await storage.getUserByUsername(username);
       if (existing) {
-        return res.status(409).json({ message: "Username already exists" });
+        return res.status(409).json({ message: "An account with this email already exists" });
       }
 
       const hashedPassword = await hashPassword(password);

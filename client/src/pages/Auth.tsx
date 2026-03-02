@@ -16,28 +16,37 @@ const passwordRules: PasswordRule[] = [
   { label: "One special character (!@#$...)", test: (pw) => /[^A-Za-z0-9]/.test(pw) },
 ];
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default function Auth() {
   const { login, register } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [emailTouched, setEmailTouched] = useState(false);
 
   const ruleResults = useMemo(() => passwordRules.map(r => r.test(password)), [password]);
   const allRulesPassed = ruleResults.every(Boolean);
   const passwordsMatch = password === confirmPassword;
   const showRules = !isLogin && password.length > 0;
   const showConfirmError = !isLogin && confirmPassword.length > 0 && !passwordsMatch;
+  const isEmailValid = emailRegex.test(email);
+  const showEmailError = !isLogin && emailTouched && email.length > 0 && !isEmailValid;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
     if (!isLogin) {
+      if (!isEmailValid) {
+        setError("Please enter a valid email address");
+        return;
+      }
       if (!allRulesPassed) {
         setError("Please meet all password requirements");
         return;
@@ -51,14 +60,14 @@ export default function Auth() {
     setLoading(true);
     try {
       if (isLogin) {
-        await login(username, password);
+        await login(email, password);
       } else {
-        await register(username, password);
+        await register(email, password);
       }
     } catch (err: any) {
       setError(
-        err.message?.includes("409") ? "Username already taken" :
-        err.message?.includes("401") ? "Invalid username or password" :
+        err.message?.includes("409") ? "An account with this email already exists" :
+        err.message?.includes("401") ? "Invalid email or password" :
         "Something went wrong. Please try again."
       );
     } finally {
@@ -71,9 +80,10 @@ export default function Auth() {
     setError("");
     setPassword("");
     setConfirmPassword("");
+    setEmailTouched(false);
   };
 
-  const signupDisabled = !isLogin && (!allRulesPassed || !passwordsMatch || !confirmPassword);
+  const signupDisabled = !isLogin && (!isEmailValid || !allRulesPassed || !passwordsMatch || !confirmPassword);
 
   return (
     <div className="min-h-[100dvh] bg-background flex flex-col items-center justify-center px-6">
@@ -108,17 +118,24 @@ export default function Auth() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="text-sm font-medium text-foreground mb-1.5 block">Username</label>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">Email</label>
               <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full bg-muted/50 border border-border rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-                placeholder="Choose a username"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onBlur={() => setEmailTouched(true)}
+                className={`w-full bg-muted/50 border rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all ${
+                  showEmailError ? "border-destructive focus:border-destructive focus:ring-destructive/30" : "border-border focus:border-primary"
+                }`}
+                placeholder={isLogin ? "Enter your email" : "you@example.com"}
                 required
-                minLength={3}
-                data-testid="input-username"
+                data-testid="input-email"
               />
+              {showEmailError && (
+                <p className="text-xs text-destructive mt-1.5 ml-1" data-testid="text-email-error">
+                  Please enter a valid email address
+                </p>
+              )}
             </div>
 
             <div>
