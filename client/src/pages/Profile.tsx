@@ -2,13 +2,19 @@ import { useState } from "react";
 import { User, Settings, LogOut, Bell, Shield, CircleHelp } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function Profile() {
+  const { user, logout } = useAuth();
   const [notifications, setNotifications] = useState(true);
   const [dietary, setDietary] = useState(false);
 
+  const handleLogout = async () => {
+    await logout();
+  };
+
   return (
-    <div className="min-h-[100dvh] bg-background pt-20 pb-24 px-4">
+    <div className="min-h-[100dvh] bg-background pt-20 pb-24 px-4 overflow-y-auto">
       <div className="max-w-md mx-auto">
         <h1 className="text-3xl font-serif font-bold text-foreground mb-8">Profile</h1>
 
@@ -17,11 +23,8 @@ export default function Profile() {
             <User size={32} className="text-primary" />
           </div>
           <div>
-            <h2 className="text-xl font-bold">Foodie User</h2>
-            <p className="text-muted-foreground text-sm">foodie@example.com</p>
-            <div className="mt-2 bg-secondary/10 text-secondary text-xs font-semibold px-2 py-1 rounded-full inline-block">
-              Pro Member
-            </div>
+            <h2 className="text-xl font-bold" data-testid="text-username">{user?.username || "User"}</h2>
+            <p className="text-muted-foreground text-sm">Tindish Member</p>
           </div>
         </div>
 
@@ -83,7 +86,11 @@ export default function Profile() {
             </Card>
           </section>
 
-          <button className="w-full py-4 mt-4 flex items-center justify-center gap-2 text-destructive font-semibold hover:bg-destructive/5 rounded-2xl transition-colors">
+          <button
+            onClick={handleLogout}
+            className="w-full py-4 mt-4 flex items-center justify-center gap-2 text-destructive font-semibold hover:bg-destructive/5 rounded-2xl transition-colors"
+            data-testid="button-logout"
+          >
             <LogOut size={20} />
             Log Out
           </button>

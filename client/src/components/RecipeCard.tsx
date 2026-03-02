@@ -1,13 +1,24 @@
 import { useState } from "react";
 import { motion, useMotionValue, useTransform, AnimatePresence } from "framer-motion";
 import { Info, X, Heart, Clock, Users, ChefHat } from "lucide-react";
-import { Recipe } from "@/data/recipes";
 import { useDrag } from "@use-gesture/react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
+export interface RecipeData {
+  spoonacularId: number;
+  title: string;
+  image: string;
+  readyInMinutes: number;
+  servings: number;
+  summary: string;
+  ingredients: string[];
+  instructions: string[];
+  tags: string[];
+}
+
 interface RecipeCardProps {
-  recipe: Recipe;
+  recipe: RecipeData;
   onSwipeLeft: () => void;
   onSwipeRight: () => void;
   active: boolean;
@@ -15,29 +26,28 @@ interface RecipeCardProps {
 
 export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: RecipeCardProps) {
   const [showDetails, setShowDetails] = useState(false);
-  
+
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-10, 10]);
   const opacity = useTransform(x, [-200, -150, 0, 150, 200], [0, 1, 1, 1, 0]);
-  
+
   const likeOpacity = useTransform(x, [0, 100], [0, 1]);
   const nopeOpacity = useTransform(x, [-100, 0], [1, 0]);
 
   const bind = useDrag(({ active: isDragging, movement: [mx], direction: [dx], velocity: [vx] }) => {
     if (!active) return;
-    
+
     if (isDragging) {
       x.set(mx);
     } else {
       const swipeThreshold = 100;
       const swipeVelocityThreshold = 0.5;
-      
+
       if (mx > swipeThreshold || (dx > 0 && vx > swipeVelocityThreshold)) {
         onSwipeRight();
       } else if (mx < -swipeThreshold || (dx < 0 && vx > swipeVelocityThreshold)) {
         onSwipeLeft();
       } else {
-        // Spring back to center
         x.set(0);
       }
     }
@@ -57,39 +67,35 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
     >
       <Card className="w-full h-full overflow-hidden rounded-3xl shadow-xl relative border-0 touch-none">
-        {/* Background Image */}
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${recipe.image})` }}
         />
-        
-        {/* Dark overlay gradient for text legibility */}
+
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-        {/* Swipe Indicators (Like/Nope) */}
-        <motion.div 
-          style={{ opacity: likeOpacity }} 
+        <motion.div
+          style={{ opacity: likeOpacity }}
           className="absolute top-8 right-8 border-4 border-green-500 text-green-500 rounded-xl px-4 py-2 text-4xl font-bold uppercase tracking-wider rotate-12 z-10"
         >
           SAVE
         </motion.div>
-        
-        <motion.div 
-          style={{ opacity: nopeOpacity }} 
+
+        <motion.div
+          style={{ opacity: nopeOpacity }}
           className="absolute top-8 left-8 border-4 border-red-500 text-red-500 rounded-xl px-4 py-2 text-4xl font-bold uppercase tracking-wider -rotate-12 z-10"
         >
           PASS
         </motion.div>
 
-        {/* Info Icon Button */}
-        <button 
+        <button
           onClick={handleInfoClick}
           className="absolute right-4 bottom-32 w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white z-20 hover:bg-white/40 transition-colors"
+          data-testid="button-info"
         >
           {showDetails ? <X size={20} /> : <Info size={20} />}
         </button>
 
-        {/* Main Info (Always visible at bottom) */}
         <div className="absolute bottom-0 left-0 right-0 p-6 text-white pb-10 z-10 pointer-events-none">
           <div className="flex gap-2 mb-3 flex-wrap">
             {recipe.tags.slice(0, 3).map(tag => (
@@ -105,7 +111,6 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
           </div>
         </div>
 
-        {/* Expanding Details View */}
         <AnimatePresence>
           {showDetails && (
             <motion.div
@@ -115,12 +120,12 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
               className="absolute inset-0 bg-white dark:bg-zinc-900 z-30 overflow-y-auto"
             >
-              <div 
+              <div
                 className="h-64 w-full bg-cover bg-center relative"
                 style={{ backgroundImage: `url(${recipe.image})` }}
               >
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                <button 
+                <button
                   onClick={(e) => { e.stopPropagation(); setShowDetails(false); }}
                   className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white"
                 >
@@ -128,10 +133,10 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
                 </button>
               </div>
 
-              <div className="p-6 pb-32">
+              <div className="p-6 pb-20">
                 <h2 className="text-2xl font-serif font-bold mb-4 text-foreground">{recipe.title}</h2>
                 <p className="text-muted-foreground mb-6 leading-relaxed">{recipe.summary}</p>
-                
+
                 <div className="grid grid-cols-2 gap-4 mb-8">
                   <div className="bg-primary/5 rounded-2xl p-4 flex flex-col items-center justify-center text-primary">
                     <Clock size={24} className="mb-2" />
@@ -166,7 +171,7 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
                   <ol className="space-y-4">
                     {recipe.instructions.map((step, i) => (
                       <li key={i} className="flex gap-4">
-                        <span className="font-serif font-bold text-xl text-muted-foreground/40">{i+1}</span>
+                        <span className="font-serif font-bold text-xl text-muted-foreground/40">{i + 1}</span>
                         <span className="text-foreground/80 mt-1">{step}</span>
                       </li>
                     ))}

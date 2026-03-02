@@ -1,19 +1,38 @@
-import { useState, useEffect } from "react";
-import { getShoppingList, toggleShoppingItem, clearCheckedItems, subscribeShoppingList, ShoppingItem } from "@/data/shoppingList";
 import { Card } from "@/components/ui/card";
 import { CheckCircle2, Circle, Trash2, ShoppingBag } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+
+interface ShoppingItem {
+  id: string;
+  name: string;
+  section: string;
+  checked: boolean;
+}
 
 export default function ShoppingList() {
-  const [items, setItems] = useState<ShoppingItem[]>(getShoppingList());
+  const { data: items = [] } = useQuery<ShoppingItem[]>({
+    queryKey: ["/api/shopping-list"],
+  });
 
-  useEffect(() => {
-    return subscribeShoppingList(() => {
-      setItems(getShoppingList());
-    });
-  }, []);
+  const toggleMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("PATCH", `/api/shopping-list/${id}/toggle`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shopping-list"] });
+    },
+  });
 
-  // Group items by section
+  const clearCheckedMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("DELETE", "/api/shopping-list/checked");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shopping-list"] });
+    },
+  });
+
   const sections = items.reduce((acc, item) => {
     if (!acc[item.section]) acc[item.section] = [];
     acc[item.section].push(item);
@@ -31,9 +50,10 @@ export default function ShoppingList() {
             <p className="text-muted-foreground">{items.length} items to buy</p>
           </div>
           {hasCheckedItems && (
-            <button 
-              onClick={clearCheckedItems}
+            <button
+              onClick={() => clearCheckedMutation.mutate()}
               className="text-sm font-medium text-destructive flex items-center gap-1 bg-destructive/10 px-3 py-1.5 rounded-full hover:bg-destructive/20 transition-colors"
+              data-testid="button-clear-checked"
             >
               <Trash2 size={14} /> Clear checked
             </button>
@@ -45,7 +65,7 @@ export default function ShoppingList() {
             <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
               <ShoppingBag size={24} className="text-muted-foreground opacity-50" />
             </div>
-            <h2 className="text-xl font-semibold text-foreground mb-2">Your list is empty</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-2" data-testid="text-empty-list">Your list is empty</h2>
             <p className="text-muted-foreground">Add ingredients from your Cookbook to start shopping.</p>
           </div>
         ) : (
@@ -60,10 +80,11 @@ export default function ShoppingList() {
                 </h2>
                 <Card className="rounded-2xl border-0 shadow-sm overflow-hidden bg-card divide-y divide-border">
                   {sectionItems.map((item) => (
-                    <div 
+                    <div
                       key={item.id}
-                      onClick={() => toggleShoppingItem(item.id)}
+                      onClick={() => toggleMutation.mutate(item.id)}
                       className="p-4 flex items-start gap-3 hover:bg-muted/50 transition-colors cursor-pointer group"
+                      data-testid={`item-${item.id}`}
                     >
                       <div className="mt-0.5 shrink-0">
                         {item.checked ? (

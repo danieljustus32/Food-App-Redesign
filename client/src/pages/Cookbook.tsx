@@ -1,47 +1,68 @@
-import { useState, useEffect } from "react";
-import { getSavedRecipes, removeRecipe, Recipe } from "@/data/recipes";
-import { addIngredientsToList } from "@/data/shoppingList";
 import { Card } from "@/components/ui/card";
 import { Clock, Trash2, Heart, ShoppingCart, Mic } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+
+interface SavedRecipe {
+  id: string;
+  spoonacularId: number;
+  title: string;
+  image: string;
+  readyInMinutes: number;
+  servings: number;
+  summary: string;
+  ingredients: string[];
+  instructions: string[];
+  tags: string[];
+}
 
 export default function Cookbook() {
-  const [savedRecipes, setSavedRecipes] = useState<Recipe[]>([]);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
 
-  // Load saved recipes on mount
-  useEffect(() => {
-    setSavedRecipes(getSavedRecipes());
-  }, []);
+  const { data: savedRecipes = [] } = useQuery<SavedRecipe[]>({
+    queryKey: ["/api/cookbook"],
+  });
+
+  const removeMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("DELETE", `/api/cookbook/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/cookbook"] });
+    },
+  });
+
+  const addToListMutation = useMutation({
+    mutationFn: async (ingredients: string[]) => {
+      const res = await apiRequest("POST", "/api/shopping-list", { ingredients });
+      return res.json();
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shopping-list"] });
+      if (data.added > 0) {
+        toast({ title: "Added to Shopping List", description: `${data.added} ingredients added.` });
+      } else {
+        toast({ title: "Already in list", description: "All ingredients are already in your list." });
+      }
+    },
+  });
 
   const handleRemove = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    removeRecipe(id);
-    setSavedRecipes(getSavedRecipes());
+    removeMutation.mutate(id);
   };
 
-  const handleAddToList = (recipe: Recipe, e: React.MouseEvent) => {
+  const handleAddToList = (recipe: SavedRecipe, e: React.MouseEvent) => {
     e.stopPropagation();
-    const addedCount = addIngredientsToList(recipe.ingredients);
-    
-    if (addedCount > 0) {
-      toast({
-        title: "Added to Shopping List",
-        description: `${addedCount} ingredients added from ${recipe.title}.`,
-      });
-    } else {
-      toast({
-        title: "Already in list",
-        description: `All ingredients from ${recipe.title} are already in your list.`,
-      });
-    }
+    addToListMutation.mutate(recipe.ingredients);
   };
 
   return (
-    <div className="min-h-[100dvh] bg-background pt-20 pb-24 px-4">
+    <div className="min-h-[100dvh] bg-background pt-20 pb-24 px-4 overflow-y-auto">
       <div className="max-w-md mx-auto">
         <h1 className="text-3xl font-serif font-bold text-foreground mb-1">My Cookbook</h1>
         <p className="text-muted-foreground mb-8">Your curated collection of deliciousness.</p>
@@ -51,7 +72,7 @@ export default function Cookbook() {
             <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
               <Heart size={24} className="text-muted-foreground opacity-50" />
             </div>
-            <h2 className="text-xl font-semibold text-foreground mb-2">No recipes yet</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-2" data-testid="text-empty-cookbook">No recipes yet</h2>
             <p className="text-muted-foreground">Swipe right on recipes in Discover to save them here.</p>
           </div>
         ) : (
@@ -65,8 +86,8 @@ export default function Cookbook() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
                 >
-                  <Card className="overflow-hidden rounded-2xl border-0 shadow-sm bg-card hover:shadow-md transition-shadow relative group">
-                    <div 
+                  <Card className="overflow-hidden rounded-2xl border-0 shadow-sm bg-card hover:shadow-md transition-shadow relative group" data-testid={`card-recipe-${recipe.id}`}>
+                    <div
                       className="h-32 w-full bg-cover bg-center"
                       style={{ backgroundImage: `url(${recipe.image})` }}
                     />
@@ -75,30 +96,33 @@ export default function Cookbook() {
                       <div className="flex items-center justify-between mt-2">
                         <div className="flex items-center text-xs text-muted-foreground gap-3">
                           <span className="flex items-center gap-1"><Clock size={12} /> {recipe.readyInMinutes}m</span>
-                          <span className="text-primary font-medium">{recipe.tags[0]}</span>
+                          {recipe.tags[0] && <span className="text-primary font-medium">{recipe.tags[0]}</span>}
                         </div>
-                        <button 
+                        <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            setLocation(`/cook/${recipe.id}`);
+                            setLocation(`/cook/${recipe.spoonacularId}`);
                           }}
                           className="flex items-center gap-1 text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-full active:scale-95 transition-transform"
+                          data-testid={`button-cook-${recipe.id}`}
                         >
                           <Mic size={12} /> Cook
                         </button>
                       </div>
                     </div>
-                    
-                    <button 
+
+                    <button
                       onClick={(e) => handleAddToList(recipe, e)}
                       className="absolute top-2 right-12 w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white active:scale-95 shadow-sm hover:bg-black/60 transition-colors"
+                      data-testid={`button-add-to-list-${recipe.id}`}
                     >
                       <ShoppingCart size={14} />
                     </button>
 
-                    <button 
+                    <button
                       onClick={(e) => handleRemove(recipe.id, e)}
                       className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white active:scale-95 shadow-sm hover:bg-black/60 transition-colors"
+                      data-testid={`button-remove-${recipe.id}`}
                     >
                       <Trash2 size={14} />
                     </button>
