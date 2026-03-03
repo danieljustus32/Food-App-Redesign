@@ -137,18 +137,18 @@ export default function ShoppingList() {
       </div>
 
       <AlertDialog open={showClearDialog} onOpenChange={setShowClearDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-2xl max-w-[340px]" data-testid="dialog-confirm-clear-all">
           <AlertDialogHeader>
-            <AlertDialogTitle>Clear shopping list?</AlertDialogTitle>
+            <AlertDialogTitle className="font-serif">Clear Shopping List?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will delete all items from your shopping list. This action can't be undone.
+              This will delete all items from your shopping list. This can't be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-full">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => clearAllMutation.mutate()}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90"
               data-testid="button-confirm-clear-all"
             >
               Clear All
