@@ -136,7 +136,7 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
 
               <div className="p-6 pb-20">
                 <h2 className="text-2xl font-serif font-bold mb-4 text-foreground">{recipe.title}</h2>
-                <p className="text-muted-foreground mb-6 leading-relaxed">{recipe.summary}</p>
+                <p className="text-muted-foreground mb-6 leading-relaxed">{recipe.summary.replace(/\s*If you like this recipe,?\s*take a look at these similar recipes:.*$/i, "").trim()}</p>
 
                 <div className="grid grid-cols-2 gap-4 mb-8">
                   <div className="bg-primary/5 rounded-2xl p-4 flex flex-col items-center justify-center text-primary">

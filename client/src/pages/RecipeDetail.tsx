@@ -54,7 +54,7 @@ export default function RecipeDetail() {
     );
   }
 
-  const cleanSummary = recipe.summary.replace(/<[^>]*>/g, "");
+  const cleanSummary = recipe.summary.replace(/<[^>]*>/g, "").replace(/\s*If you like this recipe,?\s*take a look at these similar recipes:.*$/i, "").trim();
 
   return (
     <div className="pb-24" data-testid="recipe-detail">

@@ -37,7 +37,7 @@ function normalize(raw: SpoonacularRecipe): NormalizedRecipe {
     image: raw.image || `https://spoonacular.com/recipeImages/${raw.id}-556x370.jpg`,
     readyInMinutes: raw.readyInMinutes || 30,
     servings: raw.servings || 4,
-    summary: stripHtml(raw.summary || ""),
+    summary: stripHtml(raw.summary || "").replace(/\s*If you like this recipe,?\s*take a look at these similar recipes:.*$/i, "").trim(),
     ingredients: raw.extendedIngredients?.map(i => i.original) || [],
     instructions: raw.analyzedInstructions?.[0]?.steps?.map(s => s.step) || [],
     tags: buildTags(raw),
