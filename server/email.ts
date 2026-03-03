@@ -32,13 +32,8 @@ export async function sendVerificationEmail(
   const domain = getDomain();
   const client = getClient();
 
-  const replitDomain =
-    process.env.REPLIT_DOMAINS?.split(",")[0] ||
-    `localhost:${process.env.PORT || 5000}`;
-  const protocol = process.env.REPLIT_DOMAINS ? "https" : "http";
-  const baseUrl = process.env.PRODUCTION_DOMAIN
-    ? `https://${process.env.PRODUCTION_DOMAIN}`
-    : `${protocol}://${replitDomain}`;
+  const productionDomain = "recipe-swipe.replit.app";
+  const baseUrl = `https://${productionDomain}`;
   const verifyUrl = `${baseUrl}/api/auth/verify-email?token=${token}`;
 
   const messageData = {

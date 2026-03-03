@@ -50,4 +50,3 @@ APP_ENV = "dev"
 
 [userenv.production]
 APP_ENV = "production"
-PRODUCTION_DOMAIN = "recipe-swipe.replit.app"
