@@ -187,6 +187,7 @@ export async function registerRoutes(
         let cleaned = name.split(",")[0].trim();
         cleaned = cleaned.replace(/^(pinch of|dash of)\s+/i, "").trim();
         cleaned = cleaned.replace(/\s+to taste$/i, "").trim();
+        cleaned = cleaned.replace(/\s+for\s+.*$/i, "").trim();
         return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
       };
 
