@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { User, Settings, LogOut, Bell, Shield, CircleHelp, ChevronLeft, Leaf, Wheat, MilkOff, EggOff, Fish, AlertTriangle, Ban, FileText, ScrollText } from "lucide-react";
+import { User, Settings, LogOut, Bell, Shield, CircleHelp, ChevronLeft, Leaf, Wheat, MilkOff, EggOff, Fish, AlertTriangle, Ban, FileText, ScrollText, Mail, CheckCircle2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
@@ -34,10 +35,24 @@ interface PreferencesData {
 }
 
 export default function Profile() {
-  const { user, logout } = useAuth();
+  const { user, logout, resendVerification } = useAuth();
+  const { toast } = useToast();
   const [, navigate] = useLocation();
   const [notifications, setNotifications] = useState(true);
   const [view, setView] = useState<"main" | "preferences" | "privacy">("main");
+  const [resending, setResending] = useState(false);
+
+  const handleResendVerification = async () => {
+    setResending(true);
+    try {
+      await resendVerification();
+      toast({ title: "Verification email sent", description: "Check your inbox for a new verification link." });
+    } catch {
+      toast({ title: "Failed to send", description: "Please try again in a moment.", variant: "destructive" });
+    } finally {
+      setResending(false);
+    }
+  };
 
   const { data: preferences } = useQuery<PreferencesData>({
     queryKey: ["/api/preferences"],
@@ -231,6 +246,37 @@ export default function Profile() {
         </div>
 
         <div className="space-y-6">
+          {user && !user.emailVerified && (
+            <Card className="rounded-2xl border-0 shadow-sm overflow-hidden bg-amber-50 p-4" data-testid="card-email-verification">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-600 shrink-0">
+                  <Mail size={18} />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-medium text-amber-900 text-sm" data-testid="text-verify-prompt">Email not verified</h3>
+                  <p className="text-xs text-amber-700 mt-0.5 mb-3">
+                    Please verify your email address to secure your account. Check your inbox or request a new link.
+                  </p>
+                  <button
+                    onClick={handleResendVerification}
+                    disabled={resending}
+                    className="text-sm font-semibold text-amber-700 bg-amber-100 hover:bg-amber-200 px-4 py-2 rounded-full transition-colors disabled:opacity-50"
+                    data-testid="button-profile-resend-verification"
+                  >
+                    {resending ? "Sending..." : "Resend Verification Email"}
+                  </button>
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {user && user.emailVerified && (
+            <div className="flex items-center gap-2 px-1 text-sm text-green-600" data-testid="text-email-verified">
+              <CheckCircle2 size={16} />
+              <span>Email verified</span>
+            </div>
+          )}
+
           <section>
             <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-1">Account</h3>
             <Card className="rounded-2xl border-0 shadow-sm overflow-hidden bg-card divide-y divide-border">
