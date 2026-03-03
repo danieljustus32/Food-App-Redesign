@@ -132,13 +132,33 @@ export function setupAuth(app: Express) {
 
   if (process.env.APPLE_CLIENT_ID && process.env.APPLE_TEAM_ID && process.env.APPLE_KEY_ID && process.env.APPLE_PRIVATE_KEY) {
     console.log("[APPLE_AUTH] Registering Apple strategy");
+
+    let applePrivateKey = process.env.APPLE_PRIVATE_KEY;
+    applePrivateKey = applePrivateKey.replace(/\\n/g, "\n");
+    if (!applePrivateKey.includes("\n") && applePrivateKey.includes("-----")) {
+      applePrivateKey = applePrivateKey
+        .replace(/-----BEGIN PRIVATE KEY-----\s*/, "-----BEGIN PRIVATE KEY-----\n")
+        .replace(/\s*-----END PRIVATE KEY-----/, "\n-----END PRIVATE KEY-----");
+      const parts = applePrivateKey.split("\n");
+      if (parts.length === 3) {
+        const body = parts[1];
+        const bodyLines = body.match(/.{1,64}/g) || [];
+        applePrivateKey = parts[0] + "\n" + bodyLines.join("\n") + "\n" + parts[2];
+      }
+    }
+
+    console.log("[APPLE_AUTH] Private key starts with:", applePrivateKey.substring(0, 40));
+    console.log("[APPLE_AUTH] Private key ends with:", applePrivateKey.substring(applePrivateKey.length - 40));
+    console.log("[APPLE_AUTH] Private key contains newlines:", applePrivateKey.includes("\n"));
+    console.log("[APPLE_AUTH] Private key line count:", applePrivateKey.split("\n").length);
+
     passport.use(
       new AppleStrategy(
         {
           clientID: process.env.APPLE_CLIENT_ID,
           teamID: process.env.APPLE_TEAM_ID,
           keyID: process.env.APPLE_KEY_ID,
-          privateKeyString: process.env.APPLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+          privateKeyString: applePrivateKey,
           callbackURL: `${baseUrl}/api/auth/apple/callback`,
           scope: ["name", "email"],
         },
