@@ -1,7 +1,18 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { CheckCircle2, Circle, Trash2, ShoppingBag } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface ShoppingItem {
   id: string;
@@ -11,6 +22,8 @@ interface ShoppingItem {
 }
 
 export default function ShoppingList() {
+  const [showClearDialog, setShowClearDialog] = useState(false);
+
   const { data: items = [] } = useQuery<ShoppingItem[]>({
     queryKey: ["/api/shopping-list"],
   });
@@ -30,6 +43,16 @@ export default function ShoppingList() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/shopping-list"] });
+    },
+  });
+
+  const clearAllMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("DELETE", "/api/shopping-list");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shopping-list"] });
+      setShowClearDialog(false);
     },
   });
 
@@ -101,9 +124,38 @@ export default function ShoppingList() {
                 </Card>
               </div>
             ))}
+
+            <button
+              onClick={() => setShowClearDialog(true)}
+              className="w-full py-3 rounded-2xl bg-red-600 text-white font-semibold text-base hover:bg-red-700 transition-colors mt-4"
+              data-testid="button-clear-all"
+            >
+              Clear Shopping List
+            </button>
           </div>
         )}
       </div>
+
+      <AlertDialog open={showClearDialog} onOpenChange={setShowClearDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clear shopping list?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will delete all items from your shopping list. This action can't be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => clearAllMutation.mutate()}
+              className="bg-red-600 hover:bg-red-700 text-white"
+              data-testid="button-confirm-clear-all"
+            >
+              Clear All
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
