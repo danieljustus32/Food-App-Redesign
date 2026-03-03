@@ -120,7 +120,18 @@ export function setupAuth(app: Express) {
     );
   }
 
+  console.log("[APPLE_AUTH] Config check:", {
+    hasClientID: !!process.env.APPLE_CLIENT_ID,
+    hasTeamID: !!process.env.APPLE_TEAM_ID,
+    hasKeyID: !!process.env.APPLE_KEY_ID,
+    hasPrivateKey: !!process.env.APPLE_PRIVATE_KEY,
+    callbackURL: `${baseUrl}/api/auth/apple/callback`,
+    baseUrl,
+    replitDomains: process.env.REPLIT_DOMAINS,
+  });
+
   if (process.env.APPLE_CLIENT_ID && process.env.APPLE_TEAM_ID && process.env.APPLE_KEY_ID && process.env.APPLE_PRIVATE_KEY) {
+    console.log("[APPLE_AUTH] Registering Apple strategy");
     passport.use(
       new AppleStrategy(
         {
@@ -133,30 +144,45 @@ export function setupAuth(app: Express) {
         },
         async (_accessToken: string, _refreshToken: string, idToken: any, profile: any, done: any) => {
           try {
+            console.log("[APPLE_AUTH] Verify callback invoked");
+            console.log("[APPLE_AUTH] idToken keys:", idToken ? Object.keys(idToken) : "null");
+            console.log("[APPLE_AUTH] idToken.sub:", idToken?.sub);
+            console.log("[APPLE_AUTH] idToken.email:", idToken?.email);
+            console.log("[APPLE_AUTH] profile:", JSON.stringify(profile));
             const email = idToken?.email || profile?.email;
             const appleId = idToken?.sub || profile?.id;
+            console.log("[APPLE_AUTH] Resolved email:", email, "appleId:", appleId);
             if (!email || !appleId) {
+              console.error("[APPLE_AUTH] Missing email or appleId, failing");
               return done(new Error("No email or ID found in Apple profile"));
             }
             const user = await findOrCreateSocialUser("apple", appleId, email);
+            console.log("[APPLE_AUTH] User found/created:", { id: user.id, username: user.username });
             return done(null, user);
           } catch (err) {
+            console.error("[APPLE_AUTH] Verify callback error:", err);
             return done(err as Error);
           }
         }
       )
     );
+  } else {
+    console.log("[APPLE_AUTH] Apple strategy NOT registered - missing env vars");
   }
 
   passport.serializeUser((user: User, done) => {
+    console.log("[AUTH] serializeUser called, user.id:", user.id);
     done(null, user.id);
   });
 
   passport.deserializeUser(async (id: string, done) => {
     try {
+      console.log("[AUTH] deserializeUser called, id:", id);
       const user = await storage.getUser(id);
+      console.log("[AUTH] deserializeUser result:", user ? { id: user.id, username: user.username } : "null");
       done(null, user || undefined);
     } catch (err) {
+      console.error("[AUTH] deserializeUser error:", err);
       done(err);
     }
   });
@@ -216,22 +242,64 @@ export function setupAuth(app: Express) {
   });
 
   app.get("/api/auth/apple", (req: Request, res: Response, next: NextFunction) => {
+    console.log("[APPLE_AUTH] /api/auth/apple hit - initiating Apple auth");
     if (!process.env.APPLE_CLIENT_ID || !process.env.APPLE_TEAM_ID || !process.env.APPLE_KEY_ID || !process.env.APPLE_PRIVATE_KEY) {
+      console.error("[APPLE_AUTH] Missing env vars, returning 501");
       return res.status(501).json({ message: "Apple authentication is not configured. Please add APPLE_CLIENT_ID, APPLE_TEAM_ID, APPLE_KEY_ID, and APPLE_PRIVATE_KEY." });
     }
     passport.authenticate("apple")(req, res, next);
   });
 
   app.post("/api/auth/apple/callback", (req: Request, res: Response, next: NextFunction) => {
-    passport.authenticate("apple", { failureRedirect: "/auth?error=apple_failed" })(req, res, () => {
-      res.send(`
-        <!DOCTYPE html>
-        <html>
-          <head><meta http-equiv="refresh" content="0;url=/"></head>
-          <body></body>
-        </html>
-      `);
-    });
+    console.log("[APPLE_AUTH] /api/auth/apple/callback POST received");
+    console.log("[APPLE_AUTH] Request body keys:", req.body ? Object.keys(req.body) : "no body");
+    console.log("[APPLE_AUTH] Has session cookie:", !!req.headers.cookie);
+    console.log("[APPLE_AUTH] Session ID before auth:", req.sessionID);
+    console.log("[APPLE_AUTH] req.isAuthenticated() before auth:", req.isAuthenticated());
+
+    passport.authenticate("apple", (err: any, user: any, info: any) => {
+      if (err) {
+        console.error("[APPLE_AUTH] passport.authenticate error:", err);
+        return res.redirect("/auth?error=apple_failed");
+      }
+      if (!user) {
+        console.error("[APPLE_AUTH] passport.authenticate returned no user, info:", info);
+        return res.redirect("/auth?error=apple_failed");
+      }
+
+      console.log("[APPLE_AUTH] passport.authenticate success, user:", { id: user.id, username: user.username });
+
+      req.login(user, (loginErr) => {
+        if (loginErr) {
+          console.error("[APPLE_AUTH] req.login error:", loginErr);
+          return res.redirect("/auth?error=apple_failed");
+        }
+
+        console.log("[APPLE_AUTH] req.login success");
+        console.log("[APPLE_AUTH] Session ID after login:", req.sessionID);
+        console.log("[APPLE_AUTH] req.isAuthenticated() after login:", req.isAuthenticated());
+        console.log("[APPLE_AUTH] req.session.passport:", JSON.stringify((req.session as any)?.passport));
+
+        req.session.save((saveErr) => {
+          if (saveErr) {
+            console.error("[APPLE_AUTH] session.save error:", saveErr);
+          } else {
+            console.log("[APPLE_AUTH] session.save success");
+          }
+
+          const setCookieHeader = res.getHeaders()["set-cookie"];
+          console.log("[APPLE_AUTH] Set-Cookie header present:", !!setCookieHeader);
+
+          res.send(`
+            <!DOCTYPE html>
+            <html>
+              <head><meta http-equiv="refresh" content="0;url=/"></head>
+              <body></body>
+            </html>
+          `);
+        });
+      });
+    })(req, res, next);
   });
 
   app.post("/api/auth/logout", (req: Request, res: Response) => {
@@ -242,6 +310,11 @@ export function setupAuth(app: Express) {
   });
 
   app.get("/api/auth/me", (req: Request, res: Response) => {
+    console.log("[AUTH] /api/auth/me hit");
+    console.log("[AUTH] Session ID:", req.sessionID);
+    console.log("[AUTH] Has cookie:", !!req.headers.cookie);
+    console.log("[AUTH] isAuthenticated:", req.isAuthenticated());
+    console.log("[AUTH] session.passport:", JSON.stringify((req.session as any)?.passport));
     if (!req.isAuthenticated()) return res.status(401).json({ message: "Not authenticated" });
     const user = req.user as User;
     return res.json({ id: user.id, username: user.username });
