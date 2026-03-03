@@ -30,7 +30,7 @@ The app uses an API-agnostic provider pattern (`server/recipe-providers/`):
 - All providers normalize data to `NormalizedRecipe` shape: `{ externalId, source, title, image, readyInMinutes, servings, summary, ingredients, instructions, tags }`
 
 ## Data Model
-- `users` - id, username, password (hashed, empty for social auth users), authProvider (google/apple/null), authProviderId
+- `users` - id, username, password (hashed, empty for social auth users), authProvider (google/apple/null), authProviderId, dietaryPreferences (jsonb array of strings)
 - `saved_recipes` - id, userId, externalId, source, title, image, readyInMinutes, servings, summary, ingredients (jsonb), instructions (jsonb), tags (jsonb)
 - `shopping_items` - id, userId, name, section, checked
 
@@ -43,7 +43,9 @@ The app uses an API-agnostic provider pattern (`server/recipe-providers/`):
 - `GET /api/auth/google/callback` - Google OAuth callback
 - `GET /api/auth/apple` - Initiate Apple OAuth
 - `POST /api/auth/apple/callback` - Apple OAuth callback
-- `GET /api/recipes/random` - Random recipes from available providers
+- `GET /api/preferences` - Get user dietary preferences
+- `PUT /api/preferences` - Update user dietary preferences
+- `GET /api/recipes/random` - Random recipes from available providers (filtered by user dietary preferences)
 - `GET /api/recipes/search?q=` - Search recipes across providers
 - `GET /api/cookbook` - User's saved recipes
 - `POST /api/cookbook` - Save a recipe

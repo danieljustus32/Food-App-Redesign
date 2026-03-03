@@ -23,6 +23,9 @@ export interface IStorage {
   toggleShoppingItem(userId: string, itemId: string): Promise<ShoppingItem | undefined>;
   clearCheckedItems(userId: string): Promise<void>;
   clearAllItems(userId: string): Promise<void>;
+
+  getDietaryPreferences(userId: string): Promise<string[]>;
+  updateDietaryPreferences(userId: string, preferences: string[]): Promise<string[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -95,6 +98,19 @@ export class DatabaseStorage implements IStorage {
 
   async clearAllItems(userId: string): Promise<void> {
     await db.delete(shoppingItems).where(eq(shoppingItems.userId, userId));
+  }
+
+  async getDietaryPreferences(userId: string): Promise<string[]> {
+    const [user] = await db.select({ dietaryPreferences: users.dietaryPreferences }).from(users).where(eq(users.id, userId));
+    return user?.dietaryPreferences ?? [];
+  }
+
+  async updateDietaryPreferences(userId: string, preferences: string[]): Promise<string[]> {
+    const [updated] = await db.update(users)
+      .set({ dietaryPreferences: preferences })
+      .where(eq(users.id, userId))
+      .returning({ dietaryPreferences: users.dietaryPreferences });
+    return updated?.dietaryPreferences ?? [];
   }
 }
 

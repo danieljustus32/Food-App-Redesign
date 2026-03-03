@@ -25,10 +25,47 @@ export async function registerRoutes(
 ): Promise<Server> {
   setupAuth(app);
 
+  app.get("/api/preferences", requireAuth, async (req: Request, res: Response) => {
+    const user = req.user as User;
+    const preferences = await storage.getDietaryPreferences(user.id);
+    res.json({ dietaryPreferences: preferences });
+  });
+
+  const VALID_DIETARY_PREFERENCES = ["vegetarian", "vegan", "gluten free", "dairy free", "ketogenic", "pescetarian"];
+
+  app.put("/api/preferences", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const user = req.user as User;
+      const { dietaryPreferences } = req.body;
+      if (!Array.isArray(dietaryPreferences)) {
+        return res.status(400).json({ message: "dietaryPreferences must be an array" });
+      }
+      const valid = dietaryPreferences.filter(p => VALID_DIETARY_PREFERENCES.includes(p));
+      const updated = await storage.updateDietaryPreferences(user.id, valid);
+      res.json({ dietaryPreferences: updated });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
   app.get("/api/recipes/random", requireAuth, async (req: Request, res: Response) => {
     try {
+      const user = req.user as User;
       const count = parseInt(req.query.count as string) || 10;
-      const recipes = await getRandomRecipes(Math.min(count, 20));
+      const dietaryPreferences = await storage.getDietaryPreferences(user.id);
+      const fetchCount = dietaryPreferences.length > 0 ? Math.min(count * 3, 60) : count;
+      let recipes = await getRandomRecipes(Math.min(fetchCount, 60));
+
+      if (dietaryPreferences.length > 0) {
+        const normalize = (s: string) => s.toLowerCase().replace(/[-_]/g, " ").trim();
+        const normalizedPrefs = dietaryPreferences.map(normalize);
+        recipes = recipes.filter(recipe => {
+          const recipeTags = recipe.tags.map(normalize);
+          return normalizedPrefs.some(pref => recipeTags.includes(pref));
+        });
+        recipes = recipes.slice(0, count);
+      }
+
       res.json(recipes);
     } catch (err: any) {
       res.status(500).json({ message: err.message });

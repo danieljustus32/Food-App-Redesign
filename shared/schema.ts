@@ -9,6 +9,7 @@ export const users = pgTable("users", {
   password: text("password").notNull().default(""),
   authProvider: text("auth_provider"),
   authProviderId: text("auth_provider_id"),
+  dietaryPreferences: jsonb("dietary_preferences").notNull().default([]).$type<string[]>(),
 });
 
 export const savedRecipes = pgTable("saved_recipes", {
