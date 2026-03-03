@@ -55,6 +55,10 @@ async function findOrCreateSocialUser(provider: string, providerId: string, emai
 export function setupAuth(app: Express) {
   const PgStore = connectPgSimple(session);
 
+  if (process.env.REPLIT_DOMAINS) {
+    app.set("trust proxy", 1);
+  }
+
   app.use(
     session({
       store: new PgStore({ pool, createTableIfMissing: true }),
@@ -65,7 +69,7 @@ export function setupAuth(app: Express) {
       cookie: {
         maxAge: 45 * 24 * 60 * 60 * 1000,
         httpOnly: true,
-        secure: false,
+        secure: !!process.env.REPLIT_DOMAINS,
         sameSite: "lax",
       },
     })
@@ -220,7 +224,13 @@ export function setupAuth(app: Express) {
 
   app.post("/api/auth/apple/callback", (req: Request, res: Response, next: NextFunction) => {
     passport.authenticate("apple", { failureRedirect: "/auth?error=apple_failed" })(req, res, () => {
-      res.redirect("/");
+      res.send(`
+        <!DOCTYPE html>
+        <html>
+          <head><meta http-equiv="refresh" content="0;url=/"></head>
+          <body></body>
+        </html>
+      `);
     });
   });
 
