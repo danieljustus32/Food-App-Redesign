@@ -30,7 +30,7 @@ The app uses an API-agnostic provider pattern (`server/recipe-providers/`):
 - All providers normalize data to `NormalizedRecipe` shape: `{ externalId, source, title, image, readyInMinutes, servings, summary, ingredients, instructions, tags }`
 
 ## Data Model
-- `users` - id, username, password (hashed, empty for social auth users), authProvider (google/apple/null), authProviderId, dietaryPreferences (jsonb array of strings)
+- `users` - id, username, password (hashed, empty for social auth users), authProvider (google/apple/null), authProviderId, dietaryPreferences (jsonb array of strings), allergens (jsonb array of strings)
 - `saved_recipes` - id, userId, externalId, source, title, image, readyInMinutes, servings, summary, ingredients (jsonb), instructions (jsonb), tags (jsonb)
 - `shopping_items` - id, userId, name, section, checked
 

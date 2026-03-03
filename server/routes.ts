@@ -27,33 +27,66 @@ export async function registerRoutes(
 
   app.get("/api/preferences", requireAuth, async (req: Request, res: Response) => {
     const user = req.user as User;
-    const preferences = await storage.getDietaryPreferences(user.id);
-    res.json({ dietaryPreferences: preferences });
+    const [dietaryPreferences, allergens] = await Promise.all([
+      storage.getDietaryPreferences(user.id),
+      storage.getAllergens(user.id),
+    ]);
+    res.json({ dietaryPreferences, allergens });
   });
 
   const VALID_DIETARY_PREFERENCES = ["vegetarian", "vegan", "gluten free", "dairy free", "ketogenic", "pescetarian"];
+  const VALID_ALLERGENS = ["milk", "eggs", "fish", "shellfish", "tree nuts", "peanuts", "wheat", "soybeans", "sesame"];
 
   app.put("/api/preferences", requireAuth, async (req: Request, res: Response) => {
     try {
       const user = req.user as User;
-      const { dietaryPreferences } = req.body;
-      if (!Array.isArray(dietaryPreferences)) {
-        return res.status(400).json({ message: "dietaryPreferences must be an array" });
+      const { dietaryPreferences, allergens } = req.body;
+
+      const results: { dietaryPreferences?: string[]; allergens?: string[] } = {};
+
+      if (Array.isArray(dietaryPreferences)) {
+        const valid = dietaryPreferences.filter(p => VALID_DIETARY_PREFERENCES.includes(p));
+        results.dietaryPreferences = await storage.updateDietaryPreferences(user.id, valid);
       }
-      const valid = dietaryPreferences.filter(p => VALID_DIETARY_PREFERENCES.includes(p));
-      const updated = await storage.updateDietaryPreferences(user.id, valid);
-      res.json({ dietaryPreferences: updated });
+
+      if (Array.isArray(allergens)) {
+        const valid = allergens.filter(a => VALID_ALLERGENS.includes(a));
+        results.allergens = await storage.updateAllergens(user.id, valid);
+      }
+
+      const [currentDietary, currentAllergens] = await Promise.all([
+        storage.getDietaryPreferences(user.id),
+        storage.getAllergens(user.id),
+      ]);
+
+      res.json({ dietaryPreferences: currentDietary, allergens: currentAllergens });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
     }
   });
 
+  const ALLERGEN_KEYWORDS: Record<string, RegExp> = {
+    "milk": /milk|cream|cheese|butter|yogurt|whey|casein|lactose|ghee/i,
+    "eggs": /\begg\b|eggs|meringue|mayonnaise|aioli/i,
+    "fish": /\bfish\b|salmon|tuna|cod\b|tilapia|trout|anchov|sardine|mahi|halibut|bass\b|mackerel/i,
+    "shellfish": /shrimp|crab|lobster|clam|mussel|oyster|scallop|crawfish|crayfish|prawn|shellfish/i,
+    "tree nuts": /almond|walnut|cashew|pecan|pistachio|macadamia|hazelnut|brazil nut|chestnut|pine nut/i,
+    "peanuts": /peanut/i,
+    "wheat": /\bwheat\b|flour(?!.*rice)(?!.*almond)(?!.*coconut)|bread\b|pasta\b|noodle|couscous|cracker|breadcrumb|tortilla|pita\b/i,
+    "soybeans": /\bsoy\b|soybean|tofu|tempeh|edamame|miso(?!.*paste)|soy sauce/i,
+    "sesame": /sesame|tahini/i,
+  };
+
   app.get("/api/recipes/random", requireAuth, async (req: Request, res: Response) => {
     try {
       const user = req.user as User;
       const count = parseInt(req.query.count as string) || 10;
-      const dietaryPreferences = await storage.getDietaryPreferences(user.id);
-      const fetchCount = dietaryPreferences.length > 0 ? Math.min(count * 3, 60) : count;
+      const [dietaryPreferences, allergens] = await Promise.all([
+        storage.getDietaryPreferences(user.id),
+        storage.getAllergens(user.id),
+      ]);
+      const hasFilters = dietaryPreferences.length > 0 || allergens.length > 0;
+      const fetchCount = hasFilters ? Math.min(count * 3, 60) : count;
       let recipes = await getRandomRecipes(Math.min(fetchCount, 60));
 
       if (dietaryPreferences.length > 0) {
@@ -63,9 +96,19 @@ export async function registerRoutes(
           const recipeTags = recipe.tags.map(normalize);
           return normalizedPrefs.every(pref => recipeTags.includes(pref));
         });
-        recipes = recipes.slice(0, count);
       }
 
+      if (allergens.length > 0) {
+        const allergenPatterns = allergens
+          .map(a => ALLERGEN_KEYWORDS[a])
+          .filter(Boolean);
+        recipes = recipes.filter(recipe => {
+          const ingredientText = recipe.ingredients.join(" ");
+          return !allergenPatterns.some(pattern => pattern.test(ingredientText));
+        });
+      }
+
+      recipes = recipes.slice(0, count);
       res.json(recipes);
     } catch (err: any) {
       res.status(500).json({ message: err.message });

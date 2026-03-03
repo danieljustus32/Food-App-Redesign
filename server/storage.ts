@@ -26,6 +26,8 @@ export interface IStorage {
 
   getDietaryPreferences(userId: string): Promise<string[]>;
   updateDietaryPreferences(userId: string, preferences: string[]): Promise<string[]>;
+  getAllergens(userId: string): Promise<string[]>;
+  updateAllergens(userId: string, allergens: string[]): Promise<string[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -111,6 +113,19 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning({ dietaryPreferences: users.dietaryPreferences });
     return updated?.dietaryPreferences ?? [];
+  }
+
+  async getAllergens(userId: string): Promise<string[]> {
+    const [user] = await db.select({ allergens: users.allergens }).from(users).where(eq(users.id, userId));
+    return user?.allergens ?? [];
+  }
+
+  async updateAllergens(userId: string, allergens: string[]): Promise<string[]> {
+    const [updated] = await db.update(users)
+      .set({ allergens })
+      .where(eq(users.id, userId))
+      .returning({ allergens: users.allergens });
+    return updated?.allergens ?? [];
   }
 }
 

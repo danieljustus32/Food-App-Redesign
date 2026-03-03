@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { User, Settings, LogOut, Bell, Shield, CircleHelp, ChevronLeft, Leaf, Wheat, MilkOff, EggOff, Nut, Fish } from "lucide-react";
+import { User, Settings, LogOut, Bell, Shield, CircleHelp, ChevronLeft, Leaf, Wheat, MilkOff, EggOff, Fish, AlertTriangle, Ban } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/hooks/use-auth";
@@ -15,12 +15,29 @@ const DIETARY_OPTIONS = [
   { id: "pescetarian", label: "Pescetarian", description: "Fish but no meat", icon: Fish, color: "cyan" },
 ];
 
+const ALLERGEN_OPTIONS = [
+  { id: "milk", label: "Milk" },
+  { id: "eggs", label: "Eggs" },
+  { id: "fish", label: "Fish" },
+  { id: "shellfish", label: "Shellfish" },
+  { id: "tree nuts", label: "Tree Nuts" },
+  { id: "peanuts", label: "Peanuts" },
+  { id: "wheat", label: "Wheat" },
+  { id: "soybeans", label: "Soybeans" },
+  { id: "sesame", label: "Sesame" },
+];
+
+interface PreferencesData {
+  dietaryPreferences: string[];
+  allergens: string[];
+}
+
 export default function Profile() {
   const { user, logout } = useAuth();
   const [notifications, setNotifications] = useState(true);
   const [view, setView] = useState<"main" | "preferences">("main");
 
-  const { data: preferences } = useQuery<{ dietaryPreferences: string[] }>({
+  const { data: preferences } = useQuery<PreferencesData>({
     queryKey: ["/api/preferences"],
     queryFn: async () => {
       const res = await fetch("/api/preferences", { credentials: "include" });
@@ -30,8 +47,8 @@ export default function Profile() {
   });
 
   const updatePreferences = useMutation({
-    mutationFn: async (dietaryPreferences: string[]) => {
-      const res = await apiRequest("PUT", "/api/preferences", { dietaryPreferences });
+    mutationFn: async (update: Partial<PreferencesData>) => {
+      const res = await apiRequest("PUT", "/api/preferences", update);
       return res.json();
     },
     onSuccess: () => {
@@ -40,17 +57,27 @@ export default function Profile() {
   });
 
   const dietaryPreferences = preferences?.dietaryPreferences ?? [];
+  const allergens = preferences?.allergens ?? [];
 
   const togglePreference = (id: string) => {
     const updated = dietaryPreferences.includes(id)
       ? dietaryPreferences.filter(p => p !== id)
       : [...dietaryPreferences, id];
-    updatePreferences.mutate(updated);
+    updatePreferences.mutate({ dietaryPreferences: updated });
+  };
+
+  const toggleAllergen = (id: string) => {
+    const updated = allergens.includes(id)
+      ? allergens.filter(a => a !== id)
+      : [...allergens, id];
+    updatePreferences.mutate({ allergens: updated });
   };
 
   const handleLogout = async () => {
     await logout();
   };
+
+  const totalFilters = dietaryPreferences.length + allergens.length;
 
   if (view === "preferences") {
     return (
@@ -66,35 +93,68 @@ export default function Profile() {
           </button>
 
           <h1 className="text-3xl font-serif font-bold text-foreground mb-2">Preferences</h1>
-          <p className="text-muted-foreground mb-8">Select your dietary preferences. We'll only show recipes that match.</p>
+          <p className="text-muted-foreground mb-8">Select your dietary preferences and allergens. We'll filter recipes to match.</p>
 
-          <section>
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-1">Dietary Preferences</h3>
-            <Card className="rounded-2xl border-0 shadow-sm overflow-hidden bg-card divide-y divide-border">
-              {DIETARY_OPTIONS.map((option) => {
-                const Icon = option.icon;
-                const isActive = dietaryPreferences.includes(option.id);
-                return (
-                  <div key={option.id} className="p-4 flex items-center justify-between" data-testid={`preference-${option.id}`}>
-                    <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-full bg-${option.color}-500/10 flex items-center justify-center text-${option.color}-500`}>
-                        <Icon size={18} />
+          <div className="space-y-6">
+            <section>
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-1">Dietary Preferences</h3>
+              <Card className="rounded-2xl border-0 shadow-sm overflow-hidden bg-card divide-y divide-border">
+                {DIETARY_OPTIONS.map((option) => {
+                  const Icon = option.icon;
+                  const isActive = dietaryPreferences.includes(option.id);
+                  return (
+                    <div key={option.id} className="p-4 flex items-center justify-between" data-testid={`preference-${option.id}`}>
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-full bg-${option.color}-500/10 flex items-center justify-center text-${option.color}-500`}>
+                          <Icon size={18} />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="font-medium text-foreground">{option.label}</span>
+                          <span className="text-xs text-muted-foreground">{option.description}</span>
+                        </div>
                       </div>
-                      <div className="flex flex-col">
-                        <span className="font-medium text-foreground">{option.label}</span>
-                        <span className="text-xs text-muted-foreground">{option.description}</span>
-                      </div>
+                      <Switch
+                        checked={isActive}
+                        onCheckedChange={() => togglePreference(option.id)}
+                        data-testid={`toggle-${option.id}`}
+                      />
                     </div>
-                    <Switch
-                      checked={isActive}
-                      onCheckedChange={() => togglePreference(option.id)}
-                      data-testid={`toggle-${option.id}`}
-                    />
-                  </div>
-                );
-              })}
-            </Card>
-          </section>
+                  );
+                })}
+              </Card>
+            </section>
+
+            <section>
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-1">Food Allergies</h3>
+              <Card className="rounded-2xl border-0 shadow-sm overflow-hidden bg-card divide-y divide-border">
+                {ALLERGEN_OPTIONS.map((option) => {
+                  const isActive = allergens.includes(option.id);
+                  return (
+                    <div key={option.id} className="p-4 flex items-center justify-between" data-testid={`allergen-${option.id}`}>
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center text-red-500">
+                          <Ban size={18} />
+                        </div>
+                        <span className="font-medium text-foreground">{option.label}</span>
+                      </div>
+                      <Switch
+                        checked={isActive}
+                        onCheckedChange={() => toggleAllergen(option.id)}
+                        data-testid={`toggle-allergen-${option.id}`}
+                      />
+                    </div>
+                  );
+                })}
+              </Card>
+            </section>
+
+            <div className="flex gap-3 p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20" data-testid="allergen-disclaimer">
+              <AlertTriangle size={20} className="text-amber-500 shrink-0 mt-0.5" />
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Allergy filtering is based on ingredient keyword matching and may not catch every allergen. Always verify recipe ingredients yourself to ensure they are safe for your dietary needs.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -130,8 +190,8 @@ export default function Profile() {
                   </div>
                   <div className="flex flex-col">
                     <span className="font-medium text-foreground">Preferences</span>
-                    {dietaryPreferences.length > 0 && (
-                      <span className="text-xs text-muted-foreground">{dietaryPreferences.length} dietary filter{dietaryPreferences.length !== 1 ? "s" : ""} active</span>
+                    {totalFilters > 0 && (
+                      <span className="text-xs text-muted-foreground">{totalFilters} filter{totalFilters !== 1 ? "s" : ""} active</span>
                     )}
                   </div>
                 </div>
