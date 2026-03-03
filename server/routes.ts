@@ -61,7 +61,7 @@ export async function registerRoutes(
         const normalizedPrefs = dietaryPreferences.map(normalize);
         recipes = recipes.filter(recipe => {
           const recipeTags = recipe.tags.map(normalize);
-          return normalizedPrefs.some(pref => recipeTags.includes(pref));
+          return normalizedPrefs.every(pref => recipeTags.includes(pref));
         });
         recipes = recipes.slice(0, count);
       }
