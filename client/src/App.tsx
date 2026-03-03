@@ -22,7 +22,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { EmailVerificationBanner } from "@/components/EmailVerificationBanner";
 
 function AppRouter() {
-  const { user, isLoading, showVerificationBanner } = useAuth();
+  const { user, isLoading } = useAuth();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [location] = useLocation();
 
@@ -48,11 +48,9 @@ function AppRouter() {
   return (
     <div className="relative w-full h-[100dvh] flex flex-col bg-background">
       <Header />
-      {showVerificationBanner && (
-        <div className="shrink-0 pt-14">
-          <EmailVerificationBanner />
-        </div>
-      )}
+      <div className="shrink-0 pt-14">
+        <EmailVerificationBanner />
+      </div>
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
         <Switch>
           <Route path="/" component={Discover} />

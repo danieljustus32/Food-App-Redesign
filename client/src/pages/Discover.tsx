@@ -23,7 +23,8 @@ const BATCH_SIZE = 10;
 const PREFETCH_THRESHOLD = 3;
 
 export default function Discover() {
-  const { showVerificationBanner: showBanner } = useAuth();
+  const { user } = useAuth();
+  const showBanner = user && !user.emailVerified;
   const [recipes, setRecipes] = useState<RecipeData[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -98,7 +99,7 @@ export default function Discover() {
 
   if (isLoading && recipes.length === 0) {
     return (
-      <div className={`${showBanner ? "h-full pt-2" : "h-[100dvh] pt-16"} bg-background flex flex-col items-center justify-center pb-24`}>
+      <div className={`h-full bg-background flex flex-col items-center justify-center ${showBanner ? "pt-2" : "pt-16"} pb-24`}>
         <Loader2 size={32} className="animate-spin text-primary mb-4" />
         <p className="text-muted-foreground">Finding delicious recipes...</p>
       </div>
@@ -106,7 +107,7 @@ export default function Discover() {
   }
 
   return (
-    <div className={`${showBanner ? "h-full pt-2" : "h-[100dvh] pt-16"} bg-background flex flex-col pb-24 overflow-hidden`}>
+    <div className={`h-full bg-background flex flex-col ${showBanner ? "pt-2" : "pt-16"} pb-24 overflow-hidden`}>
       <div className="flex-1 relative w-full max-w-md mx-auto px-4 perspective-1000 flex items-center justify-center">
         <AnimatePresence>
           {allSwiped ? (

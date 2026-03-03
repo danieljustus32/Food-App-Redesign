@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { Mail, X } from "lucide-react";
+import { Mail, X, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 
 export function EmailVerificationBanner() {
-  const { showVerificationBanner, dismissVerificationBanner, resendVerification } = useAuth();
+  const { user, resendVerification } = useAuth();
   const { toast } = useToast();
+  const [dismissed, setDismissed] = useState(false);
   const [sending, setSending] = useState(false);
 
-  if (!showVerificationBanner) return null;
+  if (!user || user.emailVerified || dismissed) return null;
 
   const handleResend = async () => {
     setSending(true);
@@ -59,7 +60,7 @@ export function EmailVerificationBanner() {
         </div>
         <button
           type="button"
-          onClick={dismissVerificationBanner}
+          onClick={() => setDismissed(true)}
           className="text-amber-500 hover:text-amber-700 shrink-0"
           data-testid="button-dismiss-verification"
         >
