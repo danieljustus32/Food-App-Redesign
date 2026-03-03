@@ -9,6 +9,7 @@ import { pool } from "./db";
 import connectPgSimple from "connect-pg-simple";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
+import jwt from "jsonwebtoken";
 import type { User } from "@shared/schema";
 
 const scryptAsync = promisify(scrypt);
@@ -165,12 +166,20 @@ export function setupAuth(app: Express) {
         async (_accessToken: string, _refreshToken: string, idToken: any, profile: any, done: any) => {
           try {
             console.log("[APPLE_AUTH] Verify callback invoked");
-            console.log("[APPLE_AUTH] idToken keys:", idToken ? Object.keys(idToken) : "null");
-            console.log("[APPLE_AUTH] idToken.sub:", idToken?.sub);
-            console.log("[APPLE_AUTH] idToken.email:", idToken?.email);
+            console.log("[APPLE_AUTH] idToken type:", typeof idToken);
             console.log("[APPLE_AUTH] profile:", JSON.stringify(profile));
-            const email = idToken?.email || profile?.email;
-            const appleId = idToken?.sub || profile?.id;
+
+            let decoded: any = idToken;
+            if (typeof idToken === "string") {
+              console.log("[APPLE_AUTH] idToken is a raw JWT string, decoding...");
+              decoded = jwt.decode(idToken);
+              console.log("[APPLE_AUTH] Decoded idToken:", JSON.stringify(decoded));
+            } else {
+              console.log("[APPLE_AUTH] idToken keys:", idToken ? Object.keys(idToken) : "null");
+            }
+
+            const email = decoded?.email || profile?.email;
+            const appleId = decoded?.sub || profile?.id;
             console.log("[APPLE_AUTH] Resolved email:", email, "appleId:", appleId);
             if (!email || !appleId) {
               console.error("[APPLE_AUTH] Missing email or appleId, failing");
