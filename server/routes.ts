@@ -183,11 +183,14 @@ export async function registerRoutes(
         return res.status(400).json({ message: "Ingredients array is required" });
       }
 
+      const cleanName = (name: string) => name.split(",")[0].trim();
+
       const existing = await storage.getShoppingItems(user.id);
-      const existingNames = new Set(existing.map(i => i.name));
+      const existingNames = new Set(existing.map(i => cleanName(i.name)));
 
       const newItems = ingredients
-        .filter(name => !existingNames.has(name))
+        .map(cleanName)
+        .filter(name => name.length > 0 && !existingNames.has(name))
         .map(name => ({
           userId: user.id,
           name,
