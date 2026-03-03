@@ -57,8 +57,24 @@ function buildSummary(recipe: EdamamHit["recipe"]): string {
   return parts.join(". ") + ".";
 }
 
-function normalizeRecipe(hit: EdamamHit): NormalizedRecipe {
+function normalizeRecipe(hit: EdamamHit, logFirst = false): NormalizedRecipe {
   const r = hit.recipe;
+
+  if (logFirst) {
+    const keys = Object.keys(r);
+    console.log(`[edamam] Recipe "${r.label}" keys: ${keys.join(", ")}`);
+    console.log(`[edamam] Has instructionLines: ${!!r.instructionLines}, count: ${r.instructionLines?.length ?? 0}`);
+    if (r.instructionLines?.length) {
+      console.log(`[edamam] Sample instruction: ${r.instructionLines[0]}`);
+    }
+    const rawRecipe = r as Record<string, any>;
+    const instructionKeys = keys.filter(k => k.toLowerCase().includes("instruct") || k.toLowerCase().includes("direct") || k.toLowerCase().includes("step") || k.toLowerCase().includes("method"));
+    if (instructionKeys.length) {
+      console.log(`[edamam] Instruction-related keys found: ${instructionKeys.join(", ")}`);
+      instructionKeys.forEach(k => console.log(`[edamam]   ${k}:`, JSON.stringify(rawRecipe[k]).slice(0, 300)));
+    }
+  }
+
   return {
     externalId: extractId(r.uri),
     source: "edamam",
@@ -109,7 +125,8 @@ export class EdamamProvider implements RecipeProvider {
     if (!data.hits?.length) return [];
 
     const shuffled = [...data.hits].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, count).map(normalizeRecipe).filter(r => r.title && r.image);
+    const selected = shuffled.slice(0, count);
+    return selected.map((hit, i) => normalizeRecipe(hit, i === 0)).filter(r => r.title && r.image);
   }
 
   async searchRecipes(query: string, count: number): Promise<NormalizedRecipe[]> {
