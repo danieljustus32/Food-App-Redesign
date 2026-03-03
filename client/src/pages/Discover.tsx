@@ -23,8 +23,7 @@ const BATCH_SIZE = 10;
 const PREFETCH_THRESHOLD = 3;
 
 export default function Discover() {
-  const { user } = useAuth();
-  const showBanner = user && !user.emailVerified;
+  const { showVerificationBanner: showBanner } = useAuth();
   const [recipes, setRecipes] = useState<RecipeData[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
