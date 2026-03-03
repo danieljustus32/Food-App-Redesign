@@ -162,6 +162,7 @@ export function setupAuth(app: Express) {
           privateKeyString: applePrivateKey,
           callbackURL: `${baseUrl}/api/auth/apple/callback`,
           scope: ["name", "email"],
+          passReqToCallback: false,
         },
         async (_accessToken: string, _refreshToken: string, idToken: any, profile: any, done: any) => {
           try {
@@ -175,6 +176,7 @@ export function setupAuth(app: Express) {
               decoded = jwt.decode(idToken);
               console.log("[APPLE_AUTH] Decoded idToken:", JSON.stringify(decoded));
             } else {
+              console.log("[APPLE_AUTH] idToken is already decoded");
               console.log("[APPLE_AUTH] idToken keys:", idToken ? Object.keys(idToken) : "null");
             }
 
