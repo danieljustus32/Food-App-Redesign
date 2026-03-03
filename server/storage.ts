@@ -11,7 +11,10 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByProvider(provider: string, providerId: string): Promise<User | undefined>;
+  getUserByVerificationToken(token: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  setEmailVerificationToken(userId: string, token: string): Promise<void>;
+  markEmailVerified(userId: string): Promise<void>;
 
   getSavedRecipes(userId: string): Promise<SavedRecipe[]>;
   getSavedRecipe(userId: string, externalId: number, source: string): Promise<SavedRecipe | undefined>;
@@ -47,9 +50,22 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async getUserByVerificationToken(token: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.emailVerificationToken, token));
+    return user;
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     const [user] = await db.insert(users).values(insertUser).returning();
     return user;
+  }
+
+  async setEmailVerificationToken(userId: string, token: string): Promise<void> {
+    await db.update(users).set({ emailVerificationToken: token }).where(eq(users.id, userId));
+  }
+
+  async markEmailVerified(userId: string): Promise<void> {
+    await db.update(users).set({ emailVerified: true, emailVerificationToken: null }).where(eq(users.id, userId));
   }
 
   async getSavedRecipes(userId: string): Promise<SavedRecipe[]> {

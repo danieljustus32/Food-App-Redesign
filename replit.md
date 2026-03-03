@@ -16,7 +16,7 @@ A Tinder-style recipe discovery app where users swipe through food photos to sav
 2. **Cookbook** - Persistent collection of saved recipes with cook mode and shopping list integration.
 3. **Shopping List** - Organized by grocery store aisle with check-off functionality.
 4. **Hands-free Cooking** - Voice-guided step-by-step cooking using browser Speech APIs.
-5. **User Auth** - Registration/login with session-based authentication. Social login with Google and Apple OAuth.
+5. **User Auth** - Registration/login with session-based authentication. Social login with Google and Apple OAuth. Email verification via Mailgun for password-based accounts.
 
 ## Recipe Provider System
 The app uses an API-agnostic provider pattern (`server/recipe-providers/`):
@@ -30,15 +30,17 @@ The app uses an API-agnostic provider pattern (`server/recipe-providers/`):
 - All providers normalize data to `NormalizedRecipe` shape: `{ externalId, source, title, image, readyInMinutes, servings, summary, ingredients, instructions, tags }`
 
 ## Data Model
-- `users` - id, username, password (hashed, empty for social auth users), authProvider (google/apple/null), authProviderId, dietaryPreferences (jsonb array of strings), allergens (jsonb array of strings)
+- `users` - id, username, password (hashed, empty for social auth users), authProvider (google/apple/null), authProviderId, emailVerified (boolean, default false), emailVerificationToken (text, nullable), dietaryPreferences (jsonb array of strings), allergens (jsonb array of strings)
 - `saved_recipes` - id, userId, externalId, source, title, image, readyInMinutes, servings, summary, ingredients (jsonb), instructions (jsonb), tags (jsonb)
 - `shopping_items` - id, userId, name, section, checked
 
 ## API Routes
-- `POST /api/auth/register` - Create account
+- `POST /api/auth/register` - Create account (sends verification email)
 - `POST /api/auth/login` - Login
 - `POST /api/auth/logout` - Logout
-- `GET /api/auth/me` - Current user
+- `GET /api/auth/me` - Current user (includes emailVerified status)
+- `GET /api/auth/verify-email?token=` - Verify email from link in email
+- `POST /api/auth/resend-verification` - Resend verification email
 - `GET /api/auth/google` - Initiate Google OAuth
 - `GET /api/auth/google/callback` - Google OAuth callback
 - `GET /api/auth/apple` - Initiate Apple OAuth
@@ -69,11 +71,14 @@ The app uses an API-agnostic provider pattern (`server/recipe-providers/`):
 - `APPLE_TEAM_ID` - Apple Developer team ID (optional, for Apple login)
 - `APPLE_KEY_ID` - Apple Sign-In key ID (optional, for Apple login)
 - `APPLE_PRIVATE_KEY` - Apple Sign-In private key (optional, for Apple login)
+- `MAILGUN_API_KEY` - Mailgun API key (for email verification)
+- `MAILGUN_DOMAIN` - Mailgun domain (for email verification)
 
 ## File Structure
 - `shared/schema.ts` - Drizzle schema + Zod types
 - `server/db.ts` - Database connection
-- `server/auth.ts` - Passport authentication setup
+- `server/auth.ts` - Passport authentication setup + email verification routes
+- `server/email.ts` - Mailgun email sending (verification emails)
 - `server/storage.ts` - Database CRUD operations
 - `server/recipe-providers/` - API-agnostic recipe provider system
   - `types.ts` - RecipeProvider interface and NormalizedRecipe type
@@ -87,3 +92,4 @@ The app uses an API-agnostic provider pattern (`server/recipe-providers/`):
 - `client/src/hooks/use-auth.tsx` - Auth context/provider
 - `client/src/pages/` - Page components (Auth, Discover, Cookbook, ShoppingList, CookingMode, Profile, PrivacyPolicy, TermsOfService)
 - `client/src/components/RecipeCard.tsx` - Swipeable recipe card
+- `client/src/components/EmailVerificationBanner.tsx` - Banner shown for unverified email accounts

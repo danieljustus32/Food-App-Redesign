@@ -6,6 +6,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 interface AuthUser {
   id: string;
   email: string;
+  emailVerified: boolean;
 }
 
 interface AuthContextType {
@@ -14,6 +15,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  resendVerification: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -29,7 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (res.status === 401) return null;
         if (!res.ok) throw new Error("Failed to fetch user");
         const data = await res.json();
-        return { id: data.id, email: data.username || data.email };
+        return { id: data.id, email: data.username || data.email, emailVerified: data.emailVerified ?? true };
       } catch {
         return null;
       }
@@ -70,6 +72,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  const resendMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/auth/resend-verification");
+      return res.json();
+    },
+  });
+
   const login = async (email: string, password: string) => {
     await loginMutation.mutateAsync({ email, password });
   };
@@ -82,8 +91,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await logoutMutation.mutateAsync();
   };
 
+  const resendVerification = async () => {
+    await resendMutation.mutateAsync();
+  };
+
   return (
-    <AuthContext.Provider value={{ user: user ?? null, isLoading, login, register, logout }}>
+    <AuthContext.Provider value={{ user: user ?? null, isLoading, login, register, logout, resendVerification }}>
       {children}
     </AuthContext.Provider>
   );

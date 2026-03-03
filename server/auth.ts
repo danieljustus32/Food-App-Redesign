@@ -11,6 +11,7 @@ import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import jwt from "jsonwebtoken";
 import type { User } from "@shared/schema";
+import { generateVerificationToken, sendVerificationEmail } from "./email";
 
 const scryptAsync = promisify(scrypt);
 
@@ -50,6 +51,7 @@ async function findOrCreateSocialUser(provider: string, providerId: string, emai
     authProvider: provider,
     authProviderId: providerId,
   });
+  await storage.markEmailVerified(user.id);
   return user;
 }
 
@@ -238,9 +240,19 @@ export function setupAuth(app: Express) {
       const hashedPassword = await hashPassword(password);
       const user = await storage.createUser({ username, password: hashedPassword });
 
+      const token = generateVerificationToken();
+      await storage.setEmailVerificationToken(user.id, token);
+
+      try {
+        await sendVerificationEmail(username, token);
+        console.log("[AUTH] Verification email sent to", username);
+      } catch (emailErr) {
+        console.error("[AUTH] Failed to send verification email:", emailErr);
+      }
+
       req.login(user, (err) => {
         if (err) return res.status(500).json({ message: "Login failed after registration" });
-        return res.status(201).json({ id: user.id, username: user.username });
+        return res.status(201).json({ id: user.id, username: user.username, emailVerified: user.emailVerified });
       });
     } catch (err: any) {
       return res.status(500).json({ message: err.message });
@@ -254,7 +266,7 @@ export function setupAuth(app: Express) {
 
       req.login(user, (err) => {
         if (err) return next(err);
-        return res.json({ id: user.id, username: user.username });
+        return res.json({ id: user.id, username: user.username, emailVerified: user.emailVerified });
       });
     })(req, res, next);
   });
@@ -348,8 +360,76 @@ export function setupAuth(app: Express) {
     console.log("[AUTH] session.passport:", JSON.stringify((req.session as any)?.passport));
     if (!req.isAuthenticated()) return res.status(401).json({ message: "Not authenticated" });
     const user = req.user as User;
-    return res.json({ id: user.id, username: user.username });
+    return res.json({ id: user.id, username: user.username, emailVerified: user.emailVerified });
   });
+
+  app.get("/api/auth/verify-email", async (req: Request, res: Response) => {
+    try {
+      const token = req.query.token as string;
+      if (!token) {
+        return res.status(400).send(verificationResultPage("Invalid Link", "The verification link is invalid or missing a token.", false));
+      }
+
+      const user = await storage.getUserByVerificationToken(token);
+      if (!user) {
+        return res.send(verificationResultPage("Link Expired or Invalid", "This verification link has already been used or is invalid. Please request a new one from the app.", false));
+      }
+
+      await storage.markEmailVerified(user.id);
+      return res.send(verificationResultPage("Email Verified!", "Your email has been verified successfully. You can now return to the app and enjoy all features.", true));
+    } catch (err: any) {
+      console.error("[AUTH] Email verification error:", err);
+      return res.status(500).send(verificationResultPage("Something Went Wrong", "We couldn't verify your email right now. Please try again later.", false));
+    }
+  });
+
+  app.post("/api/auth/resend-verification", async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ message: "Not authenticated" });
+    const user = req.user as User;
+
+    if (user.emailVerified) {
+      return res.json({ message: "Email is already verified" });
+    }
+
+    if (user.authProvider) {
+      return res.json({ message: "Social login accounts do not need email verification" });
+    }
+
+    const token = generateVerificationToken();
+    await storage.setEmailVerificationToken(user.id, token);
+
+    try {
+      await sendVerificationEmail(user.username, token);
+      return res.json({ message: "Verification email sent" });
+    } catch (err: any) {
+      console.error("[AUTH] Failed to resend verification email:", err);
+      return res.status(500).json({ message: "Failed to send verification email. Please try again later." });
+    }
+  });
+}
+
+function verificationResultPage(title: string, message: string, success: boolean): string {
+  const color = success ? "#22c55e" : "#ef4444";
+  const icon = success
+    ? `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`
+    : `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${title} - Tindish</title>
+</head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#fafafa;display:flex;align-items:center;justify-content:center;min-height:100vh;">
+  <div style="text-align:center;max-width:400px;padding:40px 24px;">
+    <div style="margin-bottom:24px;">${icon}</div>
+    <h1 style="font-size:24px;font-weight:700;color:#1a1a1a;margin:0 0 12px;">${title}</h1>
+    <p style="font-size:15px;color:#666;line-height:1.6;margin:0 0 32px;">${message}</p>
+    <a href="/" style="display:inline-block;background:#f97316;color:#fff;font-weight:600;font-size:15px;padding:12px 32px;border-radius:9999px;text-decoration:none;">Open Tindish</a>
+  </div>
+</body>
+</html>`;
 }
 
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
