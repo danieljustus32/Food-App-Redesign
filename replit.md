@@ -85,5 +85,5 @@ The app uses an API-agnostic provider pattern (`server/recipe-providers/`):
 - `server/mockRecipes.ts` - Hardcoded mock recipe data
 - `server/routes.ts` - Express API routes
 - `client/src/hooks/use-auth.tsx` - Auth context/provider
-- `client/src/pages/` - Page components (Auth, Discover, Cookbook, ShoppingList, CookingMode, Profile)
+- `client/src/pages/` - Page components (Auth, Discover, Cookbook, ShoppingList, CookingMode, Profile, PrivacyPolicy, TermsOfService)
 - `client/src/components/RecipeCard.tsx` - Swipeable recipe card

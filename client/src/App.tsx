@@ -14,6 +14,8 @@ import ShoppingList from "@/pages/ShoppingList";
 import Profile from "@/pages/Profile";
 import CookingMode from "@/pages/CookingMode";
 import RecipeDetail from "@/pages/RecipeDetail";
+import PrivacyPolicy from "@/pages/PrivacyPolicy";
+import TermsOfService from "@/pages/TermsOfService";
 
 import { Header } from "@/components/layout/Header";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -53,6 +55,8 @@ function AppRouter() {
           <Route path="/profile" component={Profile} />
           <Route path="/cook/:id" component={CookingMode} />
           <Route path="/recipe/:id" component={RecipeDetail} />
+          <Route path="/privacy-policy" component={PrivacyPolicy} />
+          <Route path="/terms-of-service" component={TermsOfService} />
           <Route component={NotFound} />
         </Switch>
       </div>

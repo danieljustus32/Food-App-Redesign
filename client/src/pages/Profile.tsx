@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { User, Settings, LogOut, Bell, Shield, CircleHelp, ChevronLeft, Leaf, Wheat, MilkOff, EggOff, Fish, AlertTriangle, Ban } from "lucide-react";
+import { useLocation } from "wouter";
+import { User, Settings, LogOut, Bell, Shield, CircleHelp, ChevronLeft, Leaf, Wheat, MilkOff, EggOff, Fish, AlertTriangle, Ban, FileText, ScrollText } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/hooks/use-auth";
@@ -34,8 +35,9 @@ interface PreferencesData {
 
 export default function Profile() {
   const { user, logout } = useAuth();
+  const [, navigate] = useLocation();
   const [notifications, setNotifications] = useState(true);
-  const [view, setView] = useState<"main" | "preferences">("main");
+  const [view, setView] = useState<"main" | "preferences" | "privacy">("main");
 
   const { data: preferences } = useQuery<PreferencesData>({
     queryKey: ["/api/preferences"],
@@ -78,6 +80,59 @@ export default function Profile() {
   };
 
   const totalFilters = dietaryPreferences.length + allergens.length;
+
+  if (view === "privacy") {
+    return (
+      <div className="bg-background pt-20 pb-24 px-4">
+        <div className="max-w-md mx-auto">
+          <button
+            onClick={() => setView("main")}
+            className="flex items-center gap-1 text-primary font-medium mb-6 hover:opacity-80 transition-opacity"
+            data-testid="button-back-profile"
+          >
+            <ChevronLeft size={20} />
+            Profile
+          </button>
+
+          <h1 className="text-3xl font-serif font-bold text-foreground mb-2">Privacy & Security</h1>
+          <p className="text-muted-foreground mb-8">Review our legal policies and how we handle your data.</p>
+
+          <Card className="rounded-2xl border-0 shadow-sm overflow-hidden bg-card divide-y divide-border">
+            <div
+              className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors cursor-pointer"
+              onClick={() => navigate("/privacy-policy")}
+              data-testid="link-privacy-policy"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
+                  <FileText size={18} />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-medium text-foreground">Privacy Policy</span>
+                  <span className="text-xs text-muted-foreground">How we collect and use your data</span>
+                </div>
+              </div>
+            </div>
+            <div
+              className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors cursor-pointer"
+              onClick={() => navigate("/terms-of-service")}
+              data-testid="link-terms-of-service"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-500">
+                  <ScrollText size={18} />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-medium text-foreground">Terms of Service</span>
+                  <span className="text-xs text-muted-foreground">Rules and conditions for using Tindish</span>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   if (view === "preferences") {
     return (
@@ -196,7 +251,11 @@ export default function Profile() {
                   </div>
                 </div>
               </div>
-              <div className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors cursor-pointer">
+              <div
+                className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors cursor-pointer"
+                onClick={() => setView("privacy")}
+                data-testid="button-privacy-security"
+              >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-500">
                     <Shield size={18} />
