@@ -213,7 +213,7 @@ export function setupAuth(app: Express) {
       console.log("[AUTH] deserializeUser called, id:", id);
       const user = await storage.getUser(id);
       console.log("[AUTH] deserializeUser result:", user ? { id: user.id, username: user.username } : "null");
-      done(null, user || undefined);
+      done(null, user || false);
     } catch (err) {
       console.error("[AUTH] deserializeUser error:", err);
       done(err);
