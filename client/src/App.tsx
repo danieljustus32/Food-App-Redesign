@@ -19,7 +19,6 @@ import TermsOfService from "@/pages/TermsOfService";
 
 import { Header } from "@/components/layout/Header";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { EmailVerificationBanner } from "@/components/EmailVerificationBanner";
 
 function AppRouter() {
   const { user, isLoading } = useAuth();
@@ -48,7 +47,6 @@ function AppRouter() {
   return (
     <div className="relative w-full h-[100dvh] flex flex-col bg-background">
       <Header />
-      <EmailVerificationBanner />
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
         <Switch>
           <Route path="/" component={Discover} />
