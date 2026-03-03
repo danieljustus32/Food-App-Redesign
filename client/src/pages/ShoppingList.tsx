@@ -127,7 +127,7 @@ export default function ShoppingList() {
 
             <button
               onClick={() => setShowClearDialog(true)}
-              className="w-full py-3 rounded-2xl bg-red-600 text-white font-semibold text-base hover:bg-red-700 transition-colors mt-4"
+              className="w-full py-3 rounded-2xl bg-destructive text-destructive-foreground font-semibold text-base hover:bg-destructive/90 transition-colors mt-4"
               data-testid="button-clear-all"
             >
               Clear Shopping List
