@@ -135,7 +135,19 @@ export default function RecipeDetail() {
                   <span className="w-6 h-6 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
                     {i + 1}
                   </span>
-                  <span className="leading-relaxed">{step}</span>
+                  <span className="leading-relaxed">
+                    {step.startsWith("Full instructions available at: ") ? (
+                      <a
+                        href={step.replace("Full instructions available at: ", "")}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary underline"
+                        data-testid={`link-instructions-${i}`}
+                      >
+                        View full instructions on source website
+                      </a>
+                    ) : step}
+                  </span>
                 </li>
               ))}
             </ol>
