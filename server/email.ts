@@ -9,6 +9,7 @@ function getClient() {
   if (!apiKey) {
     throw new Error("MAILGUN_API_KEY is not configured");
   }
+  console.log("[MAILGUN] Creating client with API key length:", apiKey.length, "starts with:", apiKey.substring(0, 6));
   return mailgun.client({ username: "api", key: apiKey });
 }
 
@@ -38,7 +39,7 @@ export async function sendVerificationEmail(
   const baseUrl = `${protocol}://${replitDomain}`;
   const verifyUrl = `${baseUrl}/api/auth/verify-email?token=${token}`;
 
-  await client.messages.create(domain, {
+  const messageData = {
     from: `Tindish <noreply@${domain}>`,
     to: [to],
     subject: "Verify your Tindish account",
@@ -65,5 +66,29 @@ export async function sendVerificationEmail(
         </div>
       </div>
     `,
+  };
+
+  console.log("[MAILGUN] Sending email with config:", {
+    domain,
+    from: messageData.from,
+    to: messageData.to,
+    subject: messageData.subject,
+    verifyUrl,
   });
+
+  try {
+    const response = await client.messages.create(domain, messageData);
+    console.log("[MAILGUN] Send response:", JSON.stringify(response, null, 2));
+  } catch (err: any) {
+    console.error("[MAILGUN] Send error:", {
+      message: err.message,
+      status: err.status,
+      details: err.details,
+      type: err.type,
+    });
+    if (err.response) {
+      console.error("[MAILGUN] Error response body:", JSON.stringify(err.response, null, 2));
+    }
+    throw err;
+  }
 }
