@@ -29,7 +29,7 @@ export function EmailVerificationBanner() {
   };
 
   return (
-    <div className="bg-amber-50 border-b border-amber-200 px-4 py-3" data-testid="banner-email-verification">
+    <div className="bg-amber-50 border-b border-amber-200 px-4 py-3 mt-14" data-testid="banner-email-verification">
       <div className="flex items-start gap-3 max-w-lg mx-auto">
         <Mail size={18} className="text-amber-600 shrink-0 mt-0.5" />
         <div className="flex-1 min-w-0">
