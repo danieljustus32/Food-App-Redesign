@@ -48,8 +48,10 @@ function AppRouter() {
   return (
     <div className="relative w-full h-[100dvh] flex flex-col bg-background">
       <Header />
-      <div ref={scrollRef} className="flex-1 overflow-y-auto">
+      <div className="shrink-0 pt-14">
         <EmailVerificationBanner />
+      </div>
+      <div ref={scrollRef} className="flex-1 overflow-y-auto">
         <Switch>
           <Route path="/" component={Discover} />
           <Route path="/cookbook" component={Cookbook} />
