@@ -18,3 +18,9 @@ id = "zg_fX5AioDrZZiB3a_j8y"
 uri = "file://attached_assets/generated_images/feastly-logo-v3.png"
 type = "image"
 title = "Variant C — Elegant & Upscale"
+
+[[outputs]]
+id = "A4mxjJ4Jb7dHgINyVMmbE"
+uri = "file://attached_assets/generated_images/feastly-logo-v4.png"
+type = "image"
+title = "Feastly Logo — Refined C"
