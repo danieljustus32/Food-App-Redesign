@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, useMotionValue, useTransform, AnimatePresence } from "framer-motion";
 import { Info, X, Heart, Clock, Users, ChefHat } from "lucide-react";
 import { useDrag } from "@use-gesture/react";
@@ -27,6 +27,8 @@ interface RecipeCardProps {
 
 export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: RecipeCardProps) {
   const [showDetails, setShowDetails] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const touchStartY = useRef(0);
 
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-10, 10]);
@@ -55,19 +57,29 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
   }, { filterTaps: true });
 
   useEffect(() => {
-    if (showDetails) {
-      document.body.style.overflow = "hidden";
-      document.body.style.position = "fixed";
-      document.body.style.width = "100%";
-    } else {
-      document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.width = "";
-    }
+    const el = scrollRef.current;
+    if (!el || !showDetails) return;
+
+    const onTouchStart = (e: TouchEvent) => {
+      touchStartY.current = e.touches[0].clientY;
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      const deltaY = e.touches[0].clientY - touchStartY.current;
+      const { scrollTop, scrollHeight, clientHeight } = el;
+      const atTop = scrollTop <= 0 && deltaY > 0;
+      const atBottom = scrollTop + clientHeight >= scrollHeight - 1 && deltaY < 0;
+      if (atTop || atBottom) {
+        e.preventDefault();
+      }
+    };
+
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchmove", onTouchMove, { passive: false });
+
     return () => {
-      document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.width = "";
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchmove", onTouchMove);
     };
   }, [showDetails]);
 
@@ -132,12 +144,13 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
         <AnimatePresence>
           {showDetails && (
             <motion.div
+              ref={scrollRef}
               initial={{ y: "100%", opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: "100%", opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="absolute inset-0 bg-white dark:bg-zinc-900 z-30 overflow-y-auto overscroll-contain"
-              style={{ overscrollBehavior: "contain" }}
+              className="absolute inset-0 bg-white dark:bg-zinc-900 z-30 overflow-y-auto"
+              style={{ overscrollBehavior: "none" }}
             >
               <div
                 className="h-64 w-full bg-cover bg-center relative"
