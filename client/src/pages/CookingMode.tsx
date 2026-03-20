@@ -38,6 +38,7 @@ export default function CookingMode() {
 
   const recognitionRef = useRef<any>(null);
   const synthRef = useRef(window.speechSynthesis);
+  const handleNextStepRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     if (recipe) {
@@ -63,7 +64,7 @@ export default function CookingMode() {
         if (lastResult.isFinal) {
           const transcript = lastResult[0].transcript.trim().toLowerCase();
           if (transcript.includes("done") || transcript.includes("next") || transcript.includes("continue") || transcript.includes("ready")) {
-            handleNextStep();
+            handleNextStepRef.current();
           }
         }
       };
@@ -146,6 +147,7 @@ export default function CookingMode() {
       }
     });
   };
+  handleNextStepRef.current = handleNextStep;
 
   const handlePrevStep = () => {
     setCurrentStepIndex(prev => {
