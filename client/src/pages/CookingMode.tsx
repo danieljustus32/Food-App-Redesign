@@ -43,7 +43,7 @@ export default function CookingMode() {
   useEffect(() => {
     if (recipe) {
       const allSteps = [
-        { type: 'instruction' as const, text: `Let's start cooking ${recipe.title}. I'll guide you through measuring out each ingredient first, then read you the recipe's instructions. Say "done" or "next" when you're ready to measure out the next ingredient or move on to the next step.` },
+        { type: 'instruction' as const, text: `Let's start cooking ${recipe.title}. I'll guide you through measuring out each ingredient first, then read you the recipe's instructions. Say "done" or "next" when you're ready to measure out the next ingredient or move on to the next step. Let's begin.` },
         ...recipe.ingredients.map(ing => ({ type: 'ingredient' as const, text: ing })),
         ...recipe.instructions.map(inst => ({ type: 'instruction' as const, text: inst }))
       ];
@@ -121,7 +121,7 @@ export default function CookingMode() {
   const startCooking = () => {
     setHasStarted(true);
     setIsListening(true);
-    speak(steps[0].text, () => handleNextStepRef.current());
+    speak(steps[0].text, () => setTimeout(() => handleNextStepRef.current(), 3000));
   };
 
   const stopCooking = () => {
