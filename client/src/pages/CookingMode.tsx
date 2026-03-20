@@ -43,7 +43,7 @@ export default function CookingMode() {
   useEffect(() => {
     if (recipe) {
       const allSteps = [
-        { type: 'instruction' as const, text: `Let's start cooking ${recipe.title}. I'll read the ingredients first, then the instructions. Say "done" or "next" when you're ready for the next step.` },
+        { type: 'instruction' as const, text: `Let's start cooking ${recipe.title}. I'll guide you through measuring out each ingredient first, then read you the recipe's instructions. Say "done" or "next" when you're ready to measure out the next ingredient or move on to the next step.` },
         ...recipe.ingredients.map(ing => ({ type: 'ingredient' as const, text: ing })),
         ...recipe.instructions.map(inst => ({ type: 'instruction' as const, text: inst }))
       ];
@@ -107,13 +107,13 @@ export default function CookingMode() {
     }
   }, [isListening, isSpeaking]);
 
-  const speak = (text: string) => {
+  const speak = (text: string, onEnd?: () => void) => {
     if (!synthRef.current) return;
     synthRef.current.cancel();
     setIsSpeaking(true);
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 0.95;
-    utterance.onend = () => setIsSpeaking(false);
+    utterance.onend = () => { setIsSpeaking(false); onEnd?.(); };
     utterance.onerror = () => setIsSpeaking(false);
     synthRef.current.speak(utterance);
   };
@@ -121,7 +121,7 @@ export default function CookingMode() {
   const startCooking = () => {
     setHasStarted(true);
     setIsListening(true);
-    speak(steps[0].text);
+    speak(steps[0].text, () => handleNextStepRef.current());
   };
 
   const stopCooking = () => {
