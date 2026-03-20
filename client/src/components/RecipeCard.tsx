@@ -119,7 +119,7 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: "100%", opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="absolute inset-0 bg-white dark:bg-zinc-900 z-30 overflow-y-auto"
+              className="absolute inset-0 bg-white dark:bg-zinc-900 z-30 overflow-y-auto overscroll-contain"
             >
               <div
                 className="h-64 w-full bg-cover bg-center relative"
