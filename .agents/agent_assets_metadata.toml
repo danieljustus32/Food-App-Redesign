@@ -42,3 +42,9 @@ id = "-okKrAF3pDV2b8Ghzvz1W"
 uri = "file://attached_assets/generated_images/feastly-logo-v7.png"
 type = "image"
 title = "Feastly Logo — Transparent background"
+
+[[outputs]]
+id = "a-NckGli-y8LDU3kthXwd"
+uri = "file://attached_assets/generated_images/feastly-logo-v8.png"
+type = "image"
+title = "Feastly Logo — Glossy 3D heart"
