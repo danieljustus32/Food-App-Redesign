@@ -33,6 +33,7 @@
 
   --font-sans: 'Plus Jakarta Sans', sans-serif;
   --font-serif: 'Playfair Display', serif;
+  --font-heading: 'Nunito', sans-serif;
 }
 
 :root {
@@ -104,5 +105,8 @@
   }
   body {
     @apply font-sans antialiased bg-background text-foreground overscroll-none;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
   }
 }
