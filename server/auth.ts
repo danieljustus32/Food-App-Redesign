@@ -65,7 +65,7 @@ export function setupAuth(app: Express) {
   app.use(
     session({
       store: new PgStore({ pool, createTableIfMissing: true }),
-      secret: process.env.SESSION_SECRET || "tindish-secret-key-change-me",
+      secret: process.env.SESSION_SECRET || "feastly-secret-key-change-me",
       resave: true,
       saveUninitialized: false,
       rolling: true,
@@ -419,14 +419,14 @@ function verificationResultPage(title: string, message: string, success: boolean
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title} - Tindish</title>
+  <title>${title} - Feastly</title>
 </head>
 <body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#fafafa;display:flex;align-items:center;justify-content:center;min-height:100vh;">
   <div style="text-align:center;max-width:400px;padding:40px 24px;">
     <div style="margin-bottom:24px;">${icon}</div>
     <h1 style="font-size:24px;font-weight:700;color:#1a1a1a;margin:0 0 12px;">${title}</h1>
     <p style="font-size:15px;color:#666;line-height:1.6;margin:0 0 32px;">${message}</p>
-    <a href="/" style="display:inline-block;background:#f97316;color:#fff;font-weight:600;font-size:15px;padding:12px 32px;border-radius:9999px;text-decoration:none;">Open Tindish</a>
+    <a href="/" style="display:inline-block;background:#f97316;color:#fff;font-weight:600;font-size:15px;padding:12px 32px;border-radius:9999px;text-decoration:none;">Open Feastly</a>
   </div>
 </body>
 </html>`;

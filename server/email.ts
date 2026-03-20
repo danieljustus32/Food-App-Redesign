@@ -37,13 +37,13 @@ export async function sendVerificationEmail(
   const verifyUrl = `${baseUrl}/api/auth/verify-email?token=${token}`;
 
   const messageData = {
-    from: `Tindish <noreply@${domain}>`,
+    from: `Feastly <noreply@${domain}>`,
     to: [to],
-    subject: "Verify your Tindish account",
+    subject: "Verify your Feastly account",
     html: `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 20px;">
         <div style="text-align: center; margin-bottom: 32px;">
-          <h1 style="font-size: 28px; font-weight: bold; color: #1a1a1a; margin: 0;">Tindish</h1>
+          <h1 style="font-size: 28px; font-weight: bold; color: #1a1a1a; margin: 0;">Feastly</h1>
           <p style="color: #666; font-size: 14px; margin-top: 4px;">Swipe. Save. Cook.</p>
         </div>
         <div style="background: #fff; border-radius: 16px; padding: 32px; border: 1px solid #e5e5e5;">

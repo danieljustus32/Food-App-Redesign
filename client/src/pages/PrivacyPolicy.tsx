@@ -23,7 +23,7 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-2">1. Introduction</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Pixel Perfect Design & Development, LLC ("we," "our," or "us") operates the Tindish application ("App"). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our App. Please read this policy carefully. By using Tindish, you agree to the collection and use of information in accordance with this policy.
+              Pixel Perfect Design & Development, LLC ("we," "our," or "us") operates the Feastly application ("App"). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our App. Please read this policy carefully. By using Feastly, you agree to the collection and use of information in accordance with this policy.
             </p>
           </section>
 
@@ -62,7 +62,7 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-2">4. Third-Party Services</h2>
             <p className="text-muted-foreground leading-relaxed mb-2">
-              Tindish retrieves recipe data from third-party recipe API providers, which may include Spoonacular, FatSecret, and Edamam. When we fetch recipes on your behalf:
+              Feastly retrieves recipe data from third-party recipe API providers, which may include Spoonacular, FatSecret, and Edamam. When we fetch recipes on your behalf:
             </p>
             <ul className="list-disc pl-5 text-muted-foreground space-y-1">
               <li>We send your dietary preferences and allergen filters to these services to return relevant recipes</li>
@@ -98,7 +98,7 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-2">8. Children's Privacy</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Tindish is not intended for use by children under the age of 13. We do not knowingly collect personal information from children under 13. If we become aware that we have collected information from a child under 13, we will take steps to delete that information promptly.
+              Feastly is not intended for use by children under the age of 13. We do not knowingly collect personal information from children under 13. If we become aware that we have collected information from a child under 13, we will take steps to delete that information promptly.
             </p>
           </section>
 
@@ -133,7 +133,7 @@ export default function PrivacyPolicy() {
             </p>
             <p className="text-muted-foreground leading-relaxed mt-2">
               <strong className="text-foreground">Pixel Perfect Design & Development, LLC</strong><br />
-              Email: privacy@tindish.app
+              Email: privacy@feastly.app
             </p>
           </section>
         </div>

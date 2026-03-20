@@ -23,14 +23,14 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-2">1. Acceptance of Terms</h2>
             <p className="text-muted-foreground leading-relaxed">
-              By accessing or using the Tindish application ("App"), operated by Pixel Perfect Design & Development, LLC ("we," "our," or "us"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, you may not use the App.
+              By accessing or using the Feastly application ("App"), operated by Pixel Perfect Design & Development, LLC ("we," "our," or "us"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, you may not use the App.
             </p>
           </section>
 
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-2">2. Description of Service</h2>
             <p className="text-muted-foreground leading-relaxed mb-2">
-              Tindish is a recipe discovery application that provides the following features:
+              Feastly is a recipe discovery application that provides the following features:
             </p>
             <ul className="list-disc pl-5 text-muted-foreground space-y-1">
               <li><strong className="text-foreground">Discover:</strong> Browse and swipe through recipe cards to find meals that interest you.</li>
@@ -44,7 +44,7 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-2">3. User Accounts</h2>
             <p className="text-muted-foreground leading-relaxed">
-              To use Tindish, you must create an account by providing a valid email address and password, or by signing in through Google or Apple. You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You agree to notify us immediately of any unauthorized use of your account.
+              To use Feastly, you must create an account by providing a valid email address and password, or by signing in through Google or Apple. You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You agree to notify us immediately of any unauthorized use of your account.
             </p>
           </section>
 
@@ -66,17 +66,17 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-2">5. Recipe Content Disclaimer</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Recipe content displayed in Tindish is sourced from third-party recipe API providers. We do not create, verify, or guarantee the accuracy, completeness, or safety of any recipe, including its ingredients, nutritional information, or preparation instructions.
+              Recipe content displayed in Feastly is sourced from third-party recipe API providers. We do not create, verify, or guarantee the accuracy, completeness, or safety of any recipe, including its ingredients, nutritional information, or preparation instructions.
             </p>
             <p className="text-muted-foreground leading-relaxed mt-2">
-              <strong className="text-foreground">Allergen Warning:</strong> While Tindish offers allergen filtering based on ingredient keyword matching, this filtering is not guaranteed to catch every allergen or ingredient variant. You must always independently verify recipe ingredients to ensure they are safe for your dietary needs and allergies. We are not responsible for any adverse reactions resulting from reliance on the App's allergen filtering.
+              <strong className="text-foreground">Allergen Warning:</strong> While Feastly offers allergen filtering based on ingredient keyword matching, this filtering is not guaranteed to catch every allergen or ingredient variant. You must always independently verify recipe ingredients to ensure they are safe for your dietary needs and allergies. We are not responsible for any adverse reactions resulting from reliance on the App's allergen filtering.
             </p>
           </section>
 
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-2">6. Intellectual Property</h2>
             <p className="text-muted-foreground leading-relaxed">
-              The Tindish name, logo, design, and original content are the property of Pixel Perfect Design & Development, LLC. Recipe content is provided by and remains the property of their respective sources. You may not copy, modify, distribute, or create derivative works from the App's proprietary content without our express written permission.
+              The Feastly name, logo, design, and original content are the property of Pixel Perfect Design & Development, LLC. Recipe content is provided by and remains the property of their respective sources. You may not copy, modify, distribute, or create derivative works from the App's proprietary content without our express written permission.
             </p>
           </section>
 
@@ -129,7 +129,7 @@ export default function TermsOfService() {
             </p>
             <p className="text-muted-foreground leading-relaxed mt-2">
               <strong className="text-foreground">Pixel Perfect Design & Development, LLC</strong><br />
-              Email: legal@tindish.app
+              Email: legal@feastly.app
             </p>
           </section>
         </div>

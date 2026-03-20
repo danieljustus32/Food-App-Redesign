@@ -1,4 +1,4 @@
-const CACHE_NAME = "tindish-v1";
+const CACHE_NAME = "feastly-v1";
 const STATIC_ASSETS = [
   "/",
   "/icon-192.png",

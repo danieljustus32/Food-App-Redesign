@@ -139,7 +139,7 @@ export default function Profile() {
                 </div>
                 <div className="flex flex-col">
                   <span className="font-medium text-foreground">Terms of Service</span>
-                  <span className="text-xs text-muted-foreground">Rules and conditions for using Tindish</span>
+                  <span className="text-xs text-muted-foreground">Rules and conditions for using Feastly</span>
                 </div>
               </div>
             </div>
@@ -241,7 +241,7 @@ export default function Profile() {
           </div>
           <div>
             <h2 className="text-xl font-bold" data-testid="text-email">{user?.email || "User"}</h2>
-            <p className="text-muted-foreground text-sm">Tindish Member</p>
+            <p className="text-muted-foreground text-sm">Feastly Member</p>
           </div>
         </div>
 

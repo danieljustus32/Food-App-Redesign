@@ -1,4 +1,4 @@
-# Tindish - Recipe Discovery App
+# Feastly - Recipe Discovery App
 
 ## Overview
 A Tinder-style recipe discovery app where users swipe through food photos to save recipes to their Cookbook. Features hands-free cooking mode with voice commands, a shopping list organized by grocery aisle, and user authentication.

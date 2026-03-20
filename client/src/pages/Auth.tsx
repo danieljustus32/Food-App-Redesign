@@ -117,7 +117,7 @@ export default function Auth() {
           <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-3">
             <ChefHat size={32} className="text-primary" />
           </div>
-          <h1 className="text-3xl font-serif font-bold text-foreground">Tindish</h1>
+          <h1 className="text-3xl font-serif font-bold text-foreground">Feastly</h1>
           <p className="text-muted-foreground text-sm mt-1">Swipe. Save. Cook.</p>
         </div>
 
