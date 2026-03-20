@@ -120,8 +120,10 @@ export default function CookingMode() {
 
   const startCooking = () => {
     setHasStarted(true);
-    setIsListening(true);
-    speak(steps[0].text, () => setTimeout(() => handleNextStepRef.current(), 3000));
+    speak(steps[0].text, () => setTimeout(() => {
+      setIsListening(true);
+      handleNextStepRef.current();
+    }, 3000));
   };
 
   const stopCooking = () => {
