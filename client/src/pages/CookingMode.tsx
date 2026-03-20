@@ -276,8 +276,19 @@ export default function CookingMode() {
                   className="w-full"
                 >
                   <div className="text-sm font-bold text-primary mb-4 uppercase tracking-wider">
-                    {steps[currentStepIndex].type === 'ingredient' ? 'Ingredient' : 'Instruction'}
-                    {currentStepIndex > 0 && ` ${currentStepIndex} of ${steps.length - 1}`}
+                    {(() => {
+                      const currentStep = steps[currentStepIndex];
+                      if (currentStepIndex === 0) return 'Introduction';
+                      if (currentStep.type === 'ingredient') {
+                        const position = steps.slice(0, currentStepIndex).filter(s => s.type === 'ingredient').length + 1;
+                        const total = steps.filter(s => s.type === 'ingredient').length;
+                        return `Ingredient ${position} of ${total}`;
+                      } else {
+                        const position = steps.slice(0, currentStepIndex).filter(s => s.type === 'instruction').length;
+                        const total = steps.filter(s => s.type === 'instruction').length - 1;
+                        return `Instruction ${position} of ${total}`;
+                      }
+                    })()}
                   </div>
                   <h3 className="text-3xl sm:text-4xl lg:text-5xl font-serif leading-tight">
                     {steps[currentStepIndex].text}
