@@ -7,7 +7,7 @@ export function Header() {
         <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-md">
           <Flame size={18} className="text-white fill-white" />
         </div>
-        <h1 className="text-xl font-bold tracking-tight text-primary" style={{ fontFamily: "Playfair Display" }}>
+        <h1 className="text-xl font-bold tracking-tight text-primary font-serif">
           Feastly
         </h1>
       </div>
