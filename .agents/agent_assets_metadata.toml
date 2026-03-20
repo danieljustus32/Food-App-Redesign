@@ -24,3 +24,9 @@ id = "A4mxjJ4Jb7dHgINyVMmbE"
 uri = "file://attached_assets/generated_images/feastly-logo-v4.png"
 type = "image"
 title = "Feastly Logo — Refined C"
+
+[[outputs]]
+id = "TZoDJkFivQBL2M3wGKTli"
+uri = "file://attached_assets/generated_images/feastly-logo-v5.png"
+type = "image"
+title = "Feastly Logo — No rings, large heart, transparent background"
