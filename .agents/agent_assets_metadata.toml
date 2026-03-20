@@ -1,0 +1,20 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "qydXdNm1cOR1JYEHTQC0U"
+uri = "file://attached_assets/generated_images/feastly-logo-v1.png"
+type = "image"
+title = "Variant A — Light & Minimal"
+
+[[outputs]]
+id = "Uo4LbxOPRxWjcqmPl6FRR"
+uri = "file://attached_assets/generated_images/feastly-logo-v2.png"
+type = "image"
+title = "Variant B — Bold & Vibrant"
+
+[[outputs]]
+id = "zg_fX5AioDrZZiB3a_j8y"
+uri = "file://attached_assets/generated_images/feastly-logo-v3.png"
+type = "image"
+title = "Variant C — Elegant & Upscale"
