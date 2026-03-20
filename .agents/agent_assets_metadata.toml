@@ -30,3 +30,9 @@ id = "TZoDJkFivQBL2M3wGKTli"
 uri = "file://attached_assets/generated_images/feastly-logo-v5.png"
 type = "image"
 title = "Feastly Logo — No rings, large heart, transparent background"
+
+[[outputs]]
+id = "yU6Mt9QriyO-ReFVScOjM"
+uri = "file://attached_assets/generated_images/feastly-logo-v6.png"
+type = "image"
+title = "Feastly Logo — Rings removed"
