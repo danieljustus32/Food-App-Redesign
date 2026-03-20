@@ -39,6 +39,7 @@ export default function CookingMode() {
   const recognitionRef = useRef<any>(null);
   const synthRef = useRef(window.speechSynthesis);
   const handleNextStepRef = useRef<() => void>(() => {});
+  const currentUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   useEffect(() => {
     if (recipe) {
@@ -113,8 +114,16 @@ export default function CookingMode() {
     setIsSpeaking(true);
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 0.95;
-    utterance.onend = () => { setIsSpeaking(false); onEnd?.(); };
-    utterance.onerror = () => setIsSpeaking(false);
+    currentUtteranceRef.current = utterance;
+    utterance.onend = () => {
+      if (currentUtteranceRef.current !== utterance) return;
+      setIsSpeaking(false);
+      onEnd?.();
+    };
+    utterance.onerror = () => {
+      if (currentUtteranceRef.current !== utterance) return;
+      setIsSpeaking(false);
+    };
     synthRef.current.speak(utterance);
   };
 
