@@ -48,3 +48,9 @@ id = "a-NckGli-y8LDU3kthXwd"
 uri = "file://attached_assets/generated_images/feastly-logo-v8.png"
 type = "image"
 title = "Feastly Logo — Glossy 3D heart"
+
+[[outputs]]
+id = "-Ff_0CkaPbPy17hgOn5r7"
+uri = "file://attached_assets/generated_images/feastly-logo-v9.png"
+type = "image"
+title = "Feastly Logo — 3D plate with Variant C heart"
