@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, useMotionValue, useTransform, AnimatePresence } from "framer-motion";
 import { Info, X, Heart, Clock, Users, ChefHat } from "lucide-react";
 import { useDrag } from "@use-gesture/react";
@@ -53,6 +53,23 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
       }
     }
   }, { filterTaps: true });
+
+  useEffect(() => {
+    if (showDetails) {
+      document.body.style.overflow = "hidden";
+      document.body.style.position = "fixed";
+      document.body.style.width = "100%";
+    } else {
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.width = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.width = "";
+    };
+  }, [showDetails]);
 
   const handleInfoClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -120,6 +137,7 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
               exit={{ y: "100%", opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
               className="absolute inset-0 bg-white dark:bg-zinc-900 z-30 overflow-y-auto overscroll-contain"
+              style={{ overscrollBehavior: "contain" }}
             >
               <div
                 className="h-64 w-full bg-cover bg-center relative"
