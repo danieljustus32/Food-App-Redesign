@@ -213,7 +213,7 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
                               : null;
                             return url ? (
                               <>
-                                {step.startsWith("Full instructions available at: ") && "Full instructions available at: "}
+                                {step.startsWith("Full instructions available at: ") && <>"Full instructions available at: "<br /></>}
                                 <a
                                   href={url}
                                   target="_blank"
