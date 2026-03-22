@@ -27,15 +27,27 @@ const NOTIFICATION_INTERVAL_MS = 4 * 60 * 60 * 1000;
 
 export type NotificationPermissionState = "default" | "granted" | "denied" | "unsupported";
 
+function detectInIframe(): boolean {
+  try {
+    return window.self !== window.top;
+  } catch {
+    return true;
+  }
+}
+
 export function usePushNotifications() {
   const [, navigate] = useLocation();
   const [permission, setPermission] = useState<NotificationPermissionState>("unsupported");
   const [enabled, setEnabled] = useState(false);
   const [showPrompt, setShowPrompt] = useState(false);
+  const [isInIframe, setIsInIframe] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (!("Notification" in window)) {
+    const inIframe = detectInIframe();
+    setIsInIframe(inIframe);
+
+    if (!("Notification" in window) || inIframe) {
       setPermission("unsupported");
       return;
     }
@@ -188,6 +200,7 @@ export function usePushNotifications() {
   return {
     permission,
     enabled,
+    isInIframe,
     showPrompt,
     requestPermission,
     toggleEnabled,

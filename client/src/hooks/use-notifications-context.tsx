@@ -11,6 +11,7 @@ interface SavedRecipe {
 interface NotificationsContextType {
   permission: NotificationPermissionState;
   enabled: boolean;
+  isInIframe: boolean;
   showPrompt: boolean;
   toggleEnabled: () => Promise<void>;
   requestPermission: () => Promise<NotificationPermissionState>;

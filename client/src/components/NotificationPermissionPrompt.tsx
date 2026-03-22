@@ -1,12 +1,12 @@
 import { Bell, X } from "lucide-react";
-import { usePushNotifications } from "@/hooks/use-push-notifications";
+import { useNotifications } from "@/hooks/use-notifications-context";
 
 interface NotificationPermissionPromptProps {
   onDismiss: () => void;
 }
 
 export function NotificationPermissionPrompt({ onDismiss }: NotificationPermissionPromptProps) {
-  const { requestPermission, dismissPrompt } = usePushNotifications();
+  const { requestPermission, dismissPrompt } = useNotifications();
 
   const handleAllow = async () => {
     await requestPermission();

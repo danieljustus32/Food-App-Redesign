@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { User, Settings, LogOut, Bell, Shield, CircleHelp, ChevronLeft, Leaf, Wheat, MilkOff, EggOff, Fish, AlertTriangle, Ban, FileText, ScrollText, Mail, CheckCircle2 } from "lucide-react";
+import { User, Settings, LogOut, Bell, Shield, CircleHelp, ChevronLeft, Leaf, Wheat, MilkOff, EggOff, Fish, AlertTriangle, Ban, FileText, ScrollText, Mail, CheckCircle2, ExternalLink } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/hooks/use-auth";
@@ -39,7 +39,7 @@ export default function Profile() {
   const { user, logout, resendVerification } = useAuth();
   const { toast } = useToast();
   const [, navigate] = useLocation();
-  const { permission, enabled, toggleEnabled, requestPermission } = useNotifications();
+  const { permission, enabled, isInIframe, toggleEnabled } = useNotifications();
   const [view, setView] = useState<"main" | "preferences" | "privacy">("main");
   const [resending, setResending] = useState(false);
 
@@ -320,21 +320,33 @@ export default function Profile() {
                 className="p-4 flex items-center justify-between"
                 data-testid="section-push-notifications"
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500 shrink-0">
                     <Bell size={18} />
                   </div>
-                  <div className="flex flex-col">
+                  <div className="flex flex-col min-w-0">
                     <span className="font-medium text-foreground">Push Notifications</span>
-                    {permission === "denied" && (
+                    {isInIframe && (
+                      <a
+                        href={window.location.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-primary flex items-center gap-1 hover:underline mt-0.5"
+                        data-testid="link-open-in-new-tab"
+                      >
+                        Open app in new tab to enable
+                        <ExternalLink size={11} />
+                      </a>
+                    )}
+                    {!isInIframe && permission === "denied" && (
                       <span className="text-xs text-muted-foreground">Enable in your browser settings</span>
                     )}
-                    {permission === "unsupported" && (
+                    {!isInIframe && permission === "unsupported" && (
                       <span className="text-xs text-muted-foreground">Not supported by your browser</span>
                     )}
                   </div>
                 </div>
-                {permission === "denied" || permission === "unsupported" ? (
+                {isInIframe || permission === "denied" || permission === "unsupported" ? (
                   <Switch checked={false} disabled data-testid="toggle-push-notifications" />
                 ) : (
                   <Switch
