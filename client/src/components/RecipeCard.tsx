@@ -190,7 +190,7 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
                     {recipe.ingredients.map((ing, i) => (
                       <li key={i} className="flex items-start gap-3">
                         <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
-                        <span className="text-muted-foreground">{ing}</span>
+                        <span className="text-muted-foreground">{ing.charAt(0).toUpperCase() + ing.slice(1)}</span>
                       </li>
                     ))}
                   </ul>
@@ -223,7 +223,7 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
                                   {url}
                                 </a>
                               </>
-                            ) : step;
+                            ) : step.charAt(0).toUpperCase() + step.slice(1);
                           })()}
                         </span>
                       </li>

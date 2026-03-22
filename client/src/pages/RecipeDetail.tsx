@@ -122,7 +122,7 @@ export default function RecipeDetail() {
               {recipe.ingredients.map((item, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm text-foreground">
                   <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-                  {item}
+                  {item.charAt(0).toUpperCase() + item.slice(1)}
                 </li>
               ))}
             </ul>
@@ -156,7 +156,7 @@ export default function RecipeDetail() {
                             {url}
                           </a>
                         </>
-                      ) : step;
+                      ) : step.charAt(0).toUpperCase() + step.slice(1);
                     })()}
                   </span>
                 </li>
