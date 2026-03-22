@@ -136,17 +136,24 @@ export default function RecipeDetail() {
                     {i + 1}
                   </span>
                   <span className="leading-relaxed min-w-0 break-words">
-                    {step.startsWith("Full instructions available at: ") ? (
-                      <a
-                        href={step.replace("Full instructions available at: ", "")}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary underline break-all"
-                        data-testid={`link-instructions-${i}`}
-                      >
-                        {step.replace("Full instructions available at: ", "")}
-                      </a>
-                    ) : step}
+                    {(() => {
+                      const url = step.startsWith("Full instructions available at: ")
+                        ? step.replace("Full instructions available at: ", "")
+                        : step.startsWith("http://") || step.startsWith("https://")
+                        ? step
+                        : null;
+                      return url ? (
+                        <a
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary underline break-all"
+                          data-testid={`link-instructions-${i}`}
+                        >
+                          {url}
+                        </a>
+                      ) : step;
+                    })()}
                   </span>
                 </li>
               ))}
