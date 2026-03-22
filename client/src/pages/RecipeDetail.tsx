@@ -4,7 +4,7 @@ import { ArrowLeft, Clock, Users, ShoppingCart, Mic } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { isSaltOrPepper } from "@/lib/ingredientFilters";
+import { isSaltOrPepper, cleanIngredient } from "@/lib/ingredientFilters";
 
 interface SavedRecipe {
   id: string;
@@ -122,7 +122,7 @@ export default function RecipeDetail() {
               {recipe.ingredients.map((item, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm text-foreground">
                   <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-                  {item.charAt(0).toUpperCase() + item.slice(1)}
+                  {cleanIngredient(item)}
                 </li>
               ))}
             </ul>

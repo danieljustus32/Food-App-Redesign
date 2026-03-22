@@ -4,6 +4,7 @@ import { Info, X, Heart, Clock, Users, ChefHat } from "lucide-react";
 import { useDrag } from "@use-gesture/react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { cleanIngredient } from "@/lib/ingredientFilters";
 
 export interface RecipeData {
   externalId: number;
@@ -190,7 +191,7 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
                     {recipe.ingredients.map((ing, i) => (
                       <li key={i} className="flex items-start gap-3">
                         <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
-                        <span className="text-muted-foreground">{ing.charAt(0).toUpperCase() + ing.slice(1)}</span>
+                        <span className="text-muted-foreground">{cleanIngredient(ing)}</span>
                       </li>
                     ))}
                   </ul>
