@@ -3,6 +3,7 @@ import { useRoute, useLocation } from "wouter";
 import { Mic, MicOff, Volume2, X, Play, CheckCircle, ChevronRight, Pause, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
+import { isSaltOrPepper } from "@/lib/ingredientFilters";
 
 interface SavedRecipe {
   id: string;
@@ -45,7 +46,7 @@ export default function CookingMode() {
     if (recipe) {
       const allSteps = [
         { type: 'instruction' as const, text: `Let's start cooking ${recipe.title}. I'll guide you through measuring out each ingredient first, then read you the recipe's instructions. Say "done" or "next" when you're ready to measure out the next ingredient or move on to the next step. Let's begin.` },
-        ...recipe.ingredients.map(ing => ({ type: 'ingredient' as const, text: ing })),
+        ...recipe.ingredients.filter(ing => !isSaltOrPepper(ing)).map(ing => ({ type: 'ingredient' as const, text: ing })),
         ...recipe.instructions.map(inst => ({ type: 'instruction' as const, text: inst }))
       ];
       setSteps(allSteps);

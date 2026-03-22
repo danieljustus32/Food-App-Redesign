@@ -4,6 +4,7 @@ import { ArrowLeft, Clock, Users, ShoppingCart, Mic } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { isSaltOrPepper } from "@/lib/ingredientFilters";
 
 interface SavedRecipe {
   id: string;
@@ -96,7 +97,7 @@ export default function RecipeDetail() {
 
           <div className="flex gap-3 mb-6">
             <button
-              onClick={() => addToListMutation.mutate(recipe.ingredients)}
+              onClick={() => addToListMutation.mutate(recipe.ingredients.filter(i => !isSaltOrPepper(i)))}
               className="flex-1 flex items-center justify-center gap-2 bg-muted text-foreground font-semibold py-3 rounded-full active:scale-[0.98] transition-transform"
               data-testid="button-add-to-list"
             >
