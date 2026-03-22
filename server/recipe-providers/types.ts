@@ -9,6 +9,11 @@ export interface NormalizedRecipe {
   ingredients: string[];
   instructions: string[];
   tags: string[];
+  calories?: number | null;
+  protein?: number | null;
+  carbs?: number | null;
+  fat?: number | null;
+  pricePerServing?: number | null;
 }
 
 export interface RecipeProvider {

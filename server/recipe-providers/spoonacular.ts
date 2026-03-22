@@ -3,6 +3,12 @@ import type { RecipeProvider, NormalizedRecipe } from "./types";
 const API_KEY = process.env.SPOONACULAR_API_KEY;
 const BASE_URL = "https://api.spoonacular.com";
 
+interface SpoonacularNutrient {
+  name: string;
+  amount: number;
+  unit: string;
+}
+
 interface SpoonacularRecipe {
   id: number;
   title: string;
@@ -15,6 +21,10 @@ interface SpoonacularRecipe {
   dishTypes: string[];
   diets: string[];
   cuisines: string[];
+  pricePerServing?: number;
+  nutrition?: {
+    nutrients: SpoonacularNutrient[];
+  };
 }
 
 function stripHtml(html: string): string {
@@ -29,7 +39,21 @@ function buildTags(recipe: SpoonacularRecipe): string[] {
   return [...new Set(tags)].slice(0, 4);
 }
 
+function findNutrient(nutrients: SpoonacularNutrient[], name: string): number | null {
+  const n = nutrients.find(n => n.name.toLowerCase() === name.toLowerCase());
+  return n ? Math.round(n.amount * 10) / 10 : null;
+}
+
 function normalize(raw: SpoonacularRecipe): NormalizedRecipe {
+  const nutrients = raw.nutrition?.nutrients ?? [];
+  const calories = findNutrient(nutrients, "Calories");
+  const protein = findNutrient(nutrients, "Protein");
+  const carbs = findNutrient(nutrients, "Carbohydrates");
+  const fat = findNutrient(nutrients, "Fat");
+  const pricePerServing = raw.pricePerServing != null
+    ? Math.round(raw.pricePerServing) / 100
+    : null;
+
   return {
     externalId: raw.id,
     source: "spoonacular",
@@ -41,6 +65,11 @@ function normalize(raw: SpoonacularRecipe): NormalizedRecipe {
     ingredients: raw.extendedIngredients?.map(i => i.original) || [],
     instructions: raw.analyzedInstructions?.[0]?.steps?.map(s => s.step) || [],
     tags: buildTags(raw),
+    calories,
+    protein,
+    carbs,
+    fat,
+    pricePerServing,
   };
 }
 
@@ -54,7 +83,7 @@ export class SpoonacularProvider implements RecipeProvider {
   async getRandomRecipes(count: number): Promise<NormalizedRecipe[]> {
     if (!API_KEY) throw new Error("SPOONACULAR_API_KEY is not set");
 
-    const url = `${BASE_URL}/recipes/random?number=${count}&apiKey=${API_KEY}`;
+    const url = `${BASE_URL}/recipes/random?number=${count}&includeNutrition=true&apiKey=${API_KEY}`;
     const res = await fetch(url);
 
     if (!res.ok) {
@@ -69,7 +98,7 @@ export class SpoonacularProvider implements RecipeProvider {
   async searchRecipes(query: string, count: number): Promise<NormalizedRecipe[]> {
     if (!API_KEY) throw new Error("SPOONACULAR_API_KEY is not set");
 
-    const url = `${BASE_URL}/recipes/complexSearch?query=${encodeURIComponent(query)}&number=${count}&addRecipeInformation=true&fillIngredients=true&apiKey=${API_KEY}`;
+    const url = `${BASE_URL}/recipes/complexSearch?query=${encodeURIComponent(query)}&number=${count}&addRecipeInformation=true&addRecipeNutrition=true&fillIngredients=true&apiKey=${API_KEY}`;
     const res = await fetch(url);
 
     if (!res.ok) {

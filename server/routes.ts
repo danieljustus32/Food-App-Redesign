@@ -136,7 +136,7 @@ export async function registerRoutes(
   app.post("/api/cookbook", requireAuth, async (req: Request, res: Response) => {
     try {
       const user = req.user as User;
-      const { externalId, source, title, image, readyInMinutes, servings, summary, ingredients, instructions, tags } = req.body;
+      const { externalId, source, title, image, readyInMinutes, servings, summary, ingredients, instructions, tags, calories, protein, carbs, fat, pricePerServing } = req.body;
 
       const existing = await storage.getSavedRecipe(user.id, externalId, source || "spoonacular");
       if (existing) {
@@ -155,6 +155,11 @@ export async function registerRoutes(
         ingredients,
         instructions,
         tags,
+        calories: calories ?? null,
+        protein: protein ?? null,
+        carbs: carbs ?? null,
+        fat: fat ?? null,
+        pricePerServing: pricePerServing ?? null,
       });
       res.status(201).json(saved);
     } catch (err: any) {
