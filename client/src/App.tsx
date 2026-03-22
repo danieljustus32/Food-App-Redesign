@@ -5,6 +5,8 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
+import { NotificationsProvider, useNotifications } from "@/hooks/use-notifications-context";
+import { NotificationPermissionPrompt } from "@/components/NotificationPermissionPrompt";
 
 import NotFound from "@/pages/not-found";
 import Auth from "@/pages/Auth";
@@ -20,14 +22,23 @@ import TermsOfService from "@/pages/TermsOfService";
 import { Header } from "@/components/layout/Header";
 import { BottomNav } from "@/components/layout/BottomNav";
 
-function AppRouter() {
+function AppRouterInner() {
   const { user, isLoading } = useAuth();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [location] = useLocation();
+  const { showPrompt, dismissPrompt, triggerPromptIfNeeded } = useNotifications();
+  const promptTriggeredRef = useRef(false);
 
   useEffect(() => {
     scrollRef.current?.scrollTo(0, 0);
   }, [location]);
+
+  useEffect(() => {
+    if (user && !promptTriggeredRef.current) {
+      promptTriggeredRef.current = true;
+      triggerPromptIfNeeded();
+    }
+  }, [user, triggerPromptIfNeeded]);
 
   if (isLoading) {
     return (
@@ -61,7 +72,16 @@ function AppRouter() {
         </Switch>
       </div>
       <BottomNav />
+      {showPrompt && <NotificationPermissionPrompt onDismiss={dismissPrompt} />}
     </div>
+  );
+}
+
+function AppRouter() {
+  return (
+    <NotificationsProvider>
+      <AppRouterInner />
+    </NotificationsProvider>
   );
 }
 

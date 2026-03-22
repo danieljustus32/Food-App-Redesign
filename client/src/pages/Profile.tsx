@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useNotifications } from "@/hooks/use-notifications-context";
 
 const DIETARY_OPTIONS = [
   { id: "vegetarian", label: "Vegetarian", description: "No meat or fish", icon: Leaf, color: "green" },
@@ -38,7 +39,7 @@ export default function Profile() {
   const { user, logout, resendVerification } = useAuth();
   const { toast } = useToast();
   const [, navigate] = useLocation();
-  const [notifications, setNotifications] = useState(true);
+  const { permission, enabled, toggleEnabled, requestPermission } = useNotifications();
   const [view, setView] = useState<"main" | "preferences" | "privacy">("main");
   const [resending, setResending] = useState(false);
 
@@ -315,14 +316,33 @@ export default function Profile() {
           <section>
             <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-1">App Settings</h3>
             <Card className="rounded-2xl border-0 shadow-sm overflow-hidden bg-card divide-y divide-border">
-              <div className="p-4 flex items-center justify-between">
+              <div
+                className="p-4 flex items-center justify-between"
+                data-testid="section-push-notifications"
+              >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500">
                     <Bell size={18} />
                   </div>
-                  <span className="font-medium text-foreground">Push Notifications</span>
+                  <div className="flex flex-col">
+                    <span className="font-medium text-foreground">Push Notifications</span>
+                    {permission === "denied" && (
+                      <span className="text-xs text-muted-foreground">Enable in your browser settings</span>
+                    )}
+                    {permission === "unsupported" && (
+                      <span className="text-xs text-muted-foreground">Not supported by your browser</span>
+                    )}
+                  </div>
                 </div>
-                <Switch checked={notifications} onCheckedChange={setNotifications} />
+                {permission === "denied" || permission === "unsupported" ? (
+                  <Switch checked={false} disabled data-testid="toggle-push-notifications" />
+                ) : (
+                  <Switch
+                    checked={enabled}
+                    onCheckedChange={toggleEnabled}
+                    data-testid="toggle-push-notifications"
+                  />
+                )}
               </div>
               <div className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors cursor-pointer">
                 <div className="flex items-center gap-3">
