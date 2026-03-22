@@ -5,6 +5,7 @@ import { useDrag } from "@use-gesture/react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cleanIngredient } from "@/lib/ingredientFilters";
+import { MacroChart } from "@/components/MacroChart";
 
 export interface RecipeData {
   externalId: number;
@@ -17,6 +18,11 @@ export interface RecipeData {
   ingredients: string[];
   instructions: string[];
   tags: string[];
+  calories?: number | null;
+  protein?: number | null;
+  carbs?: number | null;
+  fat?: number | null;
+  pricePerServing?: number | null;
 }
 
 interface RecipeCardProps {
@@ -168,7 +174,14 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
 
               <div className="p-6 pb-20">
                 <h2 className="text-2xl font-serif font-bold mb-4 text-foreground">{recipe.title}</h2>
-                <p className="text-muted-foreground mb-6 leading-relaxed">{recipe.summary.replace(/[^.]*spoonacular score.*$/i, "").trim()}</p>
+
+                <MacroChart
+                  calories={recipe.calories}
+                  protein={recipe.protein}
+                  carbs={recipe.carbs}
+                  fat={recipe.fat}
+                  pricePerServing={recipe.pricePerServing}
+                />
 
                 <div className="grid grid-cols-2 gap-4 mb-8">
                   <div className="bg-primary/5 rounded-2xl p-4 flex flex-col items-center justify-center text-primary">
