@@ -55,8 +55,9 @@ function buildSummary(recipe: EdamamHit["recipe"]): string {
   if (recipe.cuisineType?.length) parts.push(`${recipe.cuisineType.join(", ")} cuisine`);
   if (recipe.dietLabels?.length) parts.push(recipe.dietLabels.join(", "));
   if (recipe.healthLabels?.length) parts.push(recipe.healthLabels.slice(0, 3).join(", "));
-  parts.push(`From ${recipe.source}.`);
-  return parts.join(". ") + ".";
+  parts.push(`From ${recipe.source}`);
+  const summary = parts.join(". ") + ".";
+  return summary.charAt(0).toUpperCase() + summary.slice(1);
 }
 
 function normalizeRecipe(hit: EdamamHit): NormalizedRecipe {
