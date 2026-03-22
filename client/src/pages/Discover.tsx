@@ -23,6 +23,7 @@ interface RecipeData {
 const BATCH_SIZE = 10;
 const PREFETCH_THRESHOLD = 3;
 const AD_EVERY_N_SWIPES = 10;
+const ADS_ENABLED = Boolean(import.meta.env.VITE_CHICORY_SITE_ID);
 
 export default function Discover() {
   const { user } = useAuth();
@@ -83,6 +84,7 @@ export default function Discover() {
   });
 
   const incrementSwipeCounter = useCallback(() => {
+    if (!ADS_ENABLED) return;
     swipeCountRef.current += 1;
     if (swipeCountRef.current >= AD_EVERY_N_SWIPES) {
       swipeCountRef.current = 0;

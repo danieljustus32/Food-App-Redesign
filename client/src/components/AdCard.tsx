@@ -36,12 +36,13 @@ export function AdCard({ onDismiss, active }: AdCardProps) {
   }, [siteId]);
 
   const bind = useDrag(
-    ({ active: isDragging, movement: [mx], velocity: [vx] }) => {
+    ({ active: isDragging, movement: [mx], direction: [dx], velocity: [vx] }) => {
       if (!active) return;
       if (isDragging) {
         x.set(mx);
       } else {
-        if (Math.abs(mx) > 100 || vx > 0.5) {
+        const swipedLeft = mx < -100 || (dx < 0 && vx > 0.5);
+        if (swipedLeft) {
           onDismiss();
         } else {
           x.set(0);
