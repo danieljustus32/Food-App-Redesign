@@ -204,7 +204,25 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
                     {recipe.instructions.map((step, i) => (
                       <li key={i} className="flex gap-4">
                         <span className="font-serif font-bold text-xl text-muted-foreground/40">{i + 1}</span>
-                        <span className="text-foreground/80 mt-1">{step}</span>
+                        <span className="text-foreground/80 mt-1 min-w-0 break-words">
+                          {(() => {
+                            const url = step.startsWith("Full instructions available at: ")
+                              ? step.replace("Full instructions available at: ", "")
+                              : step.startsWith("http://") || step.startsWith("https://")
+                              ? step
+                              : null;
+                            return url ? (
+                              <a
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primary underline break-all"
+                              >
+                                {url}
+                              </a>
+                            ) : step;
+                          })()}
+                        </span>
                       </li>
                     ))}
                   </ol>
