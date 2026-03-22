@@ -143,15 +143,18 @@ export default function RecipeDetail() {
                         ? step
                         : null;
                       return url ? (
-                        <a
-                          href={url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary underline break-all"
-                          data-testid={`link-instructions-${i}`}
-                        >
-                          {url}
-                        </a>
+                        <>
+                          {step.startsWith("Full instructions available at: ") && "Full instructions available at: "}
+                          <a
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary underline break-all"
+                            data-testid={`link-instructions-${i}`}
+                          >
+                            {url}
+                          </a>
+                        </>
                       ) : step;
                     })()}
                   </span>

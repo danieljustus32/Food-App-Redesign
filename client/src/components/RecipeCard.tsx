@@ -212,14 +212,17 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
                               ? step
                               : null;
                             return url ? (
-                              <a
-                                href={url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-primary underline break-all"
-                              >
-                                {url}
-                              </a>
+                              <>
+                                {step.startsWith("Full instructions available at: ") && "Full instructions available at: "}
+                                <a
+                                  href={url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-primary underline break-all"
+                                >
+                                  {url}
+                                </a>
+                              </>
                             ) : step;
                           })()}
                         </span>
