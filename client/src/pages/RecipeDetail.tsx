@@ -144,7 +144,7 @@ export default function RecipeDetail() {
                         : null;
                       return url ? (
                         <>
-                          {step.startsWith("Full instructions available at: ") && <>"Full instructions available at: "<br /></>}
+                          {step.startsWith("Full instructions available at: ") && <>Full instructions available at: <br /></>}
                           <a
                             href={url}
                             target="_blank"
