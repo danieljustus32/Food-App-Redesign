@@ -138,7 +138,7 @@ function MacroChart({ calories, protein, carbs, fat, pricePerServing }: MacroCha
             >
               <DollarSign size={13} className="text-muted-foreground shrink-0" />
               <span className="text-sm font-semibold text-foreground">
-                ${pricePerServing.toFixed(2)}
+                ${(pricePerServing / 100).toFixed(2)}
               </span>
               <span className="text-xs text-muted-foreground">/ serving</span>
             </div>

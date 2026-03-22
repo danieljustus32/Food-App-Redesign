@@ -41,7 +41,7 @@ function buildTags(recipe: SpoonacularRecipe): string[] {
 
 function findNutrient(nutrients: SpoonacularNutrient[], name: string): number | null {
   const n = nutrients.find(n => n.name.toLowerCase() === name.toLowerCase());
-  return n ? Math.round(n.amount * 10) / 10 : null;
+  return n ? Math.round(n.amount) : null;
 }
 
 function normalize(raw: SpoonacularRecipe): NormalizedRecipe {
@@ -51,7 +51,7 @@ function normalize(raw: SpoonacularRecipe): NormalizedRecipe {
   const carbs = findNutrient(nutrients, "Carbohydrates");
   const fat = findNutrient(nutrients, "Fat");
   const pricePerServing = raw.pricePerServing != null
-    ? Math.round(raw.pricePerServing) / 100
+    ? Math.round(raw.pricePerServing)
     : null;
 
   return {

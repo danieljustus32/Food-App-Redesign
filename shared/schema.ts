@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, boolean, timestamp, jsonb, real } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -29,10 +29,10 @@ export const savedRecipes = pgTable("saved_recipes", {
   instructions: jsonb("instructions").notNull().$type<string[]>(),
   tags: jsonb("tags").notNull().$type<string[]>(),
   calories: integer("calories"),
-  protein: real("protein"),
-  carbs: real("carbs"),
-  fat: real("fat"),
-  pricePerServing: real("price_per_serving"),
+  protein: integer("protein"),
+  carbs: integer("carbs"),
+  fat: integer("fat"),
+  pricePerServing: integer("price_per_serving"),
 });
 
 export const shoppingItems = pgTable("shopping_items", {
