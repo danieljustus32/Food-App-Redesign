@@ -12,13 +12,14 @@ function buildProviders(): { real: RecipeProvider[]; mock: RecipeProvider } {
   const mock = new MockProvider();
   const real: RecipeProvider[] = [];
 
-  const spoonacular = new SpoonacularProvider();
-  if (spoonacular.isAvailable()) {
-    real.push(spoonacular);
-    console.log("[recipe-providers] Spoonacular provider: available");
-  } else {
-    console.log("[recipe-providers] Spoonacular provider: not available (missing SPOONACULAR_API_KEY)");
-  }
+  // TEMP: Spoonacular disabled for FatSecret-only testing
+  // const spoonacular = new SpoonacularProvider();
+  // if (spoonacular.isAvailable()) {
+  //   real.push(spoonacular);
+  //   console.log("[recipe-providers] Spoonacular provider: available");
+  // } else {
+  //   console.log("[recipe-providers] Spoonacular provider: not available (missing SPOONACULAR_API_KEY)");
+  // }
 
   const fatsecret = new FatSecretProvider();
   if (fatsecret.isAvailable()) {
@@ -28,13 +29,14 @@ function buildProviders(): { real: RecipeProvider[]; mock: RecipeProvider } {
     console.log("[recipe-providers] FatSecret provider: not available (missing FATSECRET_CONSUMER_KEY / FATSECRET_CONSUMER_SECRET)");
   }
 
-  const edamam = new EdamamProvider();
-  if (edamam.isAvailable()) {
-    real.push(edamam);
-    console.log("[recipe-providers] Edamam provider: available");
-  } else {
-    console.log("[recipe-providers] Edamam provider: not available (missing EDAMAM_APP_ID / EDAMAM_APP_KEY)");
-  }
+  // TEMP: Edamam disabled for FatSecret-only testing
+  // const edamam = new EdamamProvider();
+  // if (edamam.isAvailable()) {
+  //   real.push(edamam);
+  //   console.log("[recipe-providers] Edamam provider: available");
+  // } else {
+  //   console.log("[recipe-providers] Edamam provider: not available (missing EDAMAM_APP_ID / EDAMAM_APP_KEY)");
+  // }
 
   if (real.length === 0 && isDev) {
     console.log("[recipe-providers] No real providers available, using mock provider (APP_ENV=dev)");
