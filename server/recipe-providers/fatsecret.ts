@@ -30,7 +30,7 @@ function buildOAuthSignature(
     percentEncode(sortedParams),
   ].join("&");
 
-  const signingKey = `${percentEncode(CONSUMER_SECRET!)}&&`;
+  const signingKey = `${percentEncode(CONSUMER_SECRET!)}&`;
   const signature = crypto
     .createHmac("sha1", signingKey)
     .update(baseString)
@@ -44,11 +44,14 @@ async function apiCall(apiParams: Record<string, string>): Promise<any> {
     throw new Error("FATSECRET_CONSUMER_KEY or FATSECRET_CONSUMER_SECRET is not set");
   }
 
+  const nonce = crypto.randomBytes(16).toString("hex");
+  const timestamp = String(Math.floor(Date.now() / 1000));
+
   const oauthParams: Record<string, string> = {
     oauth_consumer_key: CONSUMER_KEY,
-    oauth_nonce: crypto.randomBytes(16).toString("hex"),
+    oauth_nonce: nonce,
     oauth_signature_method: "HMAC-SHA1",
-    oauth_timestamp: String(Math.floor(Date.now() / 1000)),
+    oauth_timestamp: timestamp,
     oauth_version: "1.0",
   };
 
@@ -63,6 +66,11 @@ async function apiCall(apiParams: Record<string, string>): Promise<any> {
 
   const body = new URLSearchParams(allParams);
 
+  console.log(`[fatsecret] → ${apiParams.method} | params:`, JSON.stringify(
+    Object.fromEntries(Object.entries(apiParams).filter(([k]) => k !== "method"))
+  ));
+  console.log(`[fatsecret]   oauth_timestamp=${timestamp} nonce=${nonce.slice(0, 8)}…`);
+
   const res = await fetch(API_URL, {
     method: "POST",
     headers: {
@@ -71,16 +79,23 @@ async function apiCall(apiParams: Record<string, string>): Promise<any> {
     body: body.toString(),
   });
 
+  console.log(`[fatsecret] ← HTTP ${res.status} ${res.statusText}`);
+
   if (!res.ok) {
     const text = await res.text();
+    console.error(`[fatsecret] Error body:`, text);
     throw new Error(`FatSecret API error ${res.status}: ${text}`);
   }
 
   const data = await res.json();
 
   if (data?.error) {
+    console.error(`[fatsecret] API-level error:`, JSON.stringify(data.error));
     throw new Error(`FatSecret API error ${data.error.code}: ${data.error.message}`);
   }
+
+  const topLevelKeys = Object.keys(data);
+  console.log(`[fatsecret] ✓ Response keys: [${topLevelKeys.join(", ")}]`);
 
   return data;
 }
@@ -104,7 +119,7 @@ interface FatSecretDetailRecipe {
   recipe_id: string;
   recipe_name: string;
   recipe_description: string;
-  recipe_images?: { recipe_image: { image_url: string } | { image_url: string }[] };
+  recipe_images?: { recipe_image: string | string[] };
   recipe_url: string;
   number_of_servings: string;
   preparation_time_min?: string;
@@ -144,10 +159,10 @@ function normalizeSearchResult(raw: FatSecretSearchRecipe): NormalizedRecipe {
 }
 
 function normalizeDetailResult(raw: FatSecretDetailRecipe): NormalizedRecipe {
-  const images = raw.recipe_images?.recipe_image
+  const imageUrls = raw.recipe_images?.recipe_image
     ? ensureArray(raw.recipe_images.recipe_image)
     : [];
-  const image = images[0]?.image_url || "";
+  const image = imageUrls[0] || "";
 
   const ingredientItems = raw.ingredients?.ingredient
     ? ensureArray(raw.ingredients.ingredient)
