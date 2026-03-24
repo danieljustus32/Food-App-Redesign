@@ -42,7 +42,7 @@ function extractId(uri: string): number {
 }
 
 function formatTag(tag: string): string {
-  return tag.split(" / ").map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(" / ");
+  return tag.split(/\s*\/\s*/).map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(" / ");
 }
 
 function buildTags(recipe: EdamamHit["recipe"]): string[] {
