@@ -41,13 +41,17 @@ function extractId(uri: string): number {
   return Math.abs(num);
 }
 
+function formatTag(tag: string): string {
+  return tag.split(" / ").map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(" / ");
+}
+
 function buildTags(recipe: EdamamHit["recipe"]): string[] {
   const tags: string[] = [];
   if (recipe.mealType?.length) tags.push(...recipe.mealType);
   if (recipe.dishType?.length) tags.push(...recipe.dishType);
   if (recipe.cuisineType?.length) tags.push(...recipe.cuisineType);
   if (recipe.dietLabels?.length) tags.push(...recipe.dietLabels);
-  return [...new Set(tags)].slice(0, 4);
+  return [...new Set(tags)].slice(0, 4).map(formatTag);
 }
 
 function buildSummary(recipe: EdamamHit["recipe"]): string {

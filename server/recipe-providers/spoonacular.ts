@@ -31,12 +31,16 @@ function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, "").replace(/&[^;]+;/g, " ").trim();
 }
 
+function formatTag(tag: string): string {
+  return tag.split(" / ").map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(" / ");
+}
+
 function buildTags(recipe: SpoonacularRecipe): string[] {
   const tags: string[] = [];
   if (recipe.cuisines?.length) tags.push(...recipe.cuisines.slice(0, 2));
   if (recipe.dishTypes?.length) tags.push(...recipe.dishTypes.slice(0, 2));
   if (recipe.diets?.length) tags.push(...recipe.diets.slice(0, 2));
-  return [...new Set(tags)].slice(0, 4);
+  return [...new Set(tags)].slice(0, 4).map(formatTag);
 }
 
 function findNutrient(nutrients: SpoonacularNutrient[], name: string): number | null {

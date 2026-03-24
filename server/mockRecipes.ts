@@ -28,7 +28,7 @@ export const mockRecipes = [
       "Bake for 10-12 minutes until crust is golden and cheese is bubbly.",
       "Top with fresh basil and drizzle with olive oil before serving."
     ],
-    tags: ["Italian", "dinner", "vegetarian"]
+    tags: ["Italian", "Dinner", "Vegetarian"]
   },
   {
     spoonacularId: 90002,
@@ -58,7 +58,7 @@ export const mockRecipes = [
       "Transfer skillet to a 400°F oven and bake for 8 minutes.",
       "Garnish with sesame seeds and green onions before serving."
     ],
-    tags: ["seafood", "dinner", "gluten free"]
+    tags: ["Seafood", "Dinner", "Gluten free"]
   },
   {
     spoonacularId: 90003,
@@ -90,7 +90,7 @@ export const mockRecipes = [
       "Add Thai basil and cook for 1 more minute.",
       "Serve over steamed jasmine rice."
     ],
-    tags: ["Thai", "dinner", "dairy free"]
+    tags: ["Thai", "Dinner", "Dairy free"]
   },
   {
     spoonacularId: 90004,
@@ -121,7 +121,7 @@ export const mockRecipes = [
       "Sprinkle with red pepper flakes, sea salt, and chives.",
       "Drizzle with olive oil and serve immediately."
     ],
-    tags: ["breakfast", "vegetarian", "healthy"]
+    tags: ["Breakfast", "Vegetarian", "Healthy"]
   },
   {
     spoonacularId: 90005,
@@ -152,7 +152,7 @@ export const mockRecipes = [
       "Fill tortillas with meat, diced pineapple, onion, and cilantro.",
       "Serve with lime wedges and your favorite salsa."
     ],
-    tags: ["Mexican", "dinner", "dairy free"]
+    tags: ["Mexican", "Dinner", "Dairy free"]
   },
   {
     spoonacularId: 90006,
@@ -184,7 +184,7 @@ export const mockRecipes = [
       "Return chicken to the pan, add pasta and parmesan.",
       "Toss everything together, adding pasta water as needed for desired consistency."
     ],
-    tags: ["Italian", "dinner", "pasta"]
+    tags: ["Italian", "Dinner", "Pasta"]
   },
   {
     spoonacularId: 90007,
@@ -216,7 +216,7 @@ export const mockRecipes = [
       "Top with halved soft-boiled eggs, chashu, corn, nori, and green onions.",
       "Drizzle with chili oil if desired and serve immediately."
     ],
-    tags: ["Japanese", "dinner", "soup"]
+    tags: ["Japanese", "Dinner", "Soup"]
   },
   {
     spoonacularId: 90008,
@@ -248,7 +248,7 @@ export const mockRecipes = [
       "Flip and cook for another 1-2 minutes until golden.",
       "Serve stacked with maple syrup and extra blueberries."
     ],
-    tags: ["breakfast", "vegetarian", "American"]
+    tags: ["Breakfast", "Vegetarian", "American"]
   },
   {
     spoonacularId: 90009,
@@ -278,7 +278,7 @@ export const mockRecipes = [
       "Garnish with fresh parsley.",
       "Serve immediately or refrigerate for 30 minutes for flavors to meld."
     ],
-    tags: ["Mediterranean", "salad", "vegetarian", "healthy"]
+    tags: ["Mediterranean", "Salad", "Vegetarian", "Healthy"]
   },
   {
     spoonacularId: 90010,
@@ -310,6 +310,6 @@ export const mockRecipes = [
       "Let cool for 1 minute, then invert onto plates.",
       "Dust with powdered sugar and serve immediately with vanilla ice cream."
     ],
-    tags: ["dessert", "French", "chocolate"]
+    tags: ["Dessert", "French", "Chocolate"]
   }
 ];
