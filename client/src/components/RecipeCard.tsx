@@ -125,21 +125,22 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
           PASS
         </motion.div>
 
-        <button
-          onClick={handleInfoClick}
-          className="absolute right-4 bottom-32 w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white z-20 hover:bg-white/40 transition-colors"
-          data-testid="button-info"
-        >
-          {showDetails ? <X size={20} /> : <Info size={20} />}
-        </button>
-
         <div className="absolute bottom-0 left-0 right-0 p-6 text-white pb-10 z-10 pointer-events-none">
-          <div className="flex gap-2 mb-3 flex-wrap">
-            {recipe.tags.slice(0, 3).map(tag => (
-              <Badge key={tag} variant="secondary" className="bg-white/20 hover:bg-white/30 text-white backdrop-blur-md border-0 rounded-full px-3">
-                {tag}
-              </Badge>
-            ))}
+          <div className="flex items-center gap-2 mb-3">
+            <div className="flex gap-2 flex-wrap flex-1">
+              {recipe.tags.slice(0, 3).map(tag => (
+                <Badge key={tag} variant="secondary" className="bg-white/20 hover:bg-white/30 text-white backdrop-blur-md border-0 rounded-full px-3">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+            <button
+              onClick={handleInfoClick}
+              className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/40 transition-colors pointer-events-auto flex-shrink-0"
+              data-testid="button-info"
+            >
+              {showDetails ? <X size={20} /> : <Info size={20} />}
+            </button>
           </div>
           <h2 className="text-3xl font-serif font-bold mb-2 leading-tight">{recipe.title}</h2>
           <div className="flex items-center gap-4 text-sm font-medium text-white/90">
