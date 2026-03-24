@@ -58,7 +58,7 @@ export const mockRecipes = [
       "Transfer skillet to a 400°F oven and bake for 8 minutes.",
       "Garnish with sesame seeds and green onions before serving."
     ],
-    tags: ["Seafood", "Dinner", "Gluten free"]
+    tags: ["Seafood", "Dinner", "Gluten-free"]
   },
   {
     spoonacularId: 90003,
@@ -90,7 +90,7 @@ export const mockRecipes = [
       "Add Thai basil and cook for 1 more minute.",
       "Serve over steamed jasmine rice."
     ],
-    tags: ["Thai", "Dinner", "Dairy free"]
+    tags: ["Thai", "Dinner", "Dairy-free"]
   },
   {
     spoonacularId: 90004,
@@ -152,7 +152,7 @@ export const mockRecipes = [
       "Fill tortillas with meat, diced pineapple, onion, and cilantro.",
       "Serve with lime wedges and your favorite salsa."
     ],
-    tags: ["Mexican", "Dinner", "Dairy free"]
+    tags: ["Mexican", "Dinner", "Dairy-free"]
   },
   {
     spoonacularId: 90006,
