@@ -25,7 +25,7 @@ function buildProviders(): { real: RecipeProvider[]; mock: RecipeProvider } {
     real.push(fatsecret);
     console.log("[recipe-providers] FatSecret provider: available");
   } else {
-    console.log("[recipe-providers] FatSecret provider: not available (missing FATSECRET_CLIENT_ID / FATSECRET_CLIENT_SECRET)");
+    console.log("[recipe-providers] FatSecret provider: not available (missing FATSECRET_CONSUMER_KEY / FATSECRET_CONSUMER_SECRET)");
   }
 
   const edamam = new EdamamProvider();

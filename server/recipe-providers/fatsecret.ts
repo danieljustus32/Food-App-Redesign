@@ -1,52 +1,71 @@
 import type { RecipeProvider, NormalizedRecipe } from "./types";
+import crypto from "crypto";
 
-const CLIENT_ID = process.env.FATSECRET_CLIENT_ID;
-const CLIENT_SECRET = process.env.FATSECRET_CLIENT_SECRET;
-const TOKEN_URL = "https://oauth.fatsecret.com/connect/token";
+const CONSUMER_KEY = process.env.FATSECRET_CONSUMER_KEY;
+const CONSUMER_SECRET = process.env.FATSECRET_CONSUMER_SECRET;
 const API_URL = "https://platform.fatsecret.com/rest/server.api";
 
-let cachedToken: { value: string; expiresAt: number } | null = null;
-
-async function getAccessToken(): Promise<string> {
-  if (cachedToken && Date.now() < cachedToken.expiresAt - 60_000) {
-    return cachedToken.value;
-  }
-
-  if (!CLIENT_ID || !CLIENT_SECRET) {
-    throw new Error("FATSECRET_CLIENT_ID or FATSECRET_CLIENT_SECRET is not set");
-  }
-
-  const credentials = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString("base64");
-  const res = await fetch(TOKEN_URL, {
-    method: "POST",
-    headers: {
-      "Authorization": `Basic ${credentials}`,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: "grant_type=client_credentials&scope=basic",
-  });
-
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`FatSecret token error ${res.status}: ${text}`);
-  }
-
-  const data = await res.json() as { access_token: string; expires_in: number };
-  cachedToken = {
-    value: data.access_token,
-    expiresAt: Date.now() + data.expires_in * 1000,
-  };
-  return cachedToken.value;
+function percentEncode(str: string): string {
+  return encodeURIComponent(str)
+    .replace(/!/g, "%21")
+    .replace(/'/g, "%27")
+    .replace(/\(/g, "%28")
+    .replace(/\)/g, "%29")
+    .replace(/\*/g, "%2A");
 }
 
-async function apiCall(params: Record<string, string>): Promise<any> {
-  const token = await getAccessToken();
-  const body = new URLSearchParams({ ...params, format: "json" });
+function buildOAuthSignature(
+  method: string,
+  url: string,
+  params: Record<string, string>
+): string {
+  const sortedParams = Object.keys(params)
+    .sort()
+    .map(k => `${percentEncode(k)}=${percentEncode(params[k])}`)
+    .join("&");
+
+  const baseString = [
+    method.toUpperCase(),
+    percentEncode(url),
+    percentEncode(sortedParams),
+  ].join("&");
+
+  const signingKey = `${percentEncode(CONSUMER_SECRET!)}&&`;
+  const signature = crypto
+    .createHmac("sha1", signingKey)
+    .update(baseString)
+    .digest("base64");
+
+  return signature;
+}
+
+async function apiCall(apiParams: Record<string, string>): Promise<any> {
+  if (!CONSUMER_KEY || !CONSUMER_SECRET) {
+    throw new Error("FATSECRET_CONSUMER_KEY or FATSECRET_CONSUMER_SECRET is not set");
+  }
+
+  const oauthParams: Record<string, string> = {
+    oauth_consumer_key: CONSUMER_KEY,
+    oauth_nonce: crypto.randomBytes(16).toString("hex"),
+    oauth_signature_method: "HMAC-SHA1",
+    oauth_timestamp: String(Math.floor(Date.now() / 1000)),
+    oauth_version: "1.0",
+  };
+
+  const allParams: Record<string, string> = {
+    ...apiParams,
+    ...oauthParams,
+    format: "json",
+  };
+
+  const signature = buildOAuthSignature("POST", API_URL, allParams);
+  allParams.oauth_signature = signature;
+
+  const body = new URLSearchParams(allParams);
 
   const res = await fetch(API_URL, {
     method: "POST",
     headers: {
-      "Authorization": `Bearer ${token}`,
       "Content-Type": "application/x-www-form-urlencoded",
     },
     body: body.toString(),
@@ -200,7 +219,7 @@ export class FatSecretProvider implements RecipeProvider {
   name = "fatsecret";
 
   isAvailable(): boolean {
-    return !!(CLIENT_ID && CLIENT_SECRET);
+    return !!(CONSUMER_KEY && CONSUMER_SECRET);
   }
 
   async getRandomRecipes(count: number): Promise<NormalizedRecipe[]> {
