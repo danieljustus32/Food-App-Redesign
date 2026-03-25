@@ -336,16 +336,18 @@ export default function Cookbook() {
                           <span className="flex items-center gap-1"><Clock size={12} /> {recipe.readyInMinutes}m</span>
                           {recipe.tags[0] && <span className="text-primary font-medium">{recipe.tags[0]}</span>}
                         </div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setLocation(`/cook/${recipe.id}`);
-                          }}
-                          className="flex items-center gap-1 text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-full active:scale-95 transition-transform"
-                          data-testid={`button-cook-${recipe.id}`}
-                        >
-                          <Mic size={12} /> Cook
-                        </button>
+                        {recipe.source !== "edamam" && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setLocation(`/cook/${recipe.id}`);
+                            }}
+                            className="flex items-center gap-1 text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-full active:scale-95 transition-transform"
+                            data-testid={`button-cook-${recipe.id}`}
+                          >
+                            <Mic size={12} /> Cook
+                          </button>
+                        )}
                       </div>
                     </div>
 
