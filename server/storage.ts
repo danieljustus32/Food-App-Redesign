@@ -31,6 +31,8 @@ export interface IStorage {
   updateDietaryPreferences(userId: string, preferences: string[]): Promise<string[]>;
   getAllergens(userId: string): Promise<string[]>;
   updateAllergens(userId: string, allergens: string[]): Promise<string[]>;
+
+  deleteAllUsers(): Promise<{ users: number; recipes: number; shoppingItems: number }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -142,6 +144,17 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning({ allergens: users.allergens });
     return updated?.allergens ?? [];
+  }
+
+  async deleteAllUsers(): Promise<{ users: number; recipes: number; shoppingItems: number }> {
+    const deletedItems = await db.delete(shoppingItems).returning();
+    const deletedRecipes = await db.delete(savedRecipes).returning();
+    const deletedUsers = await db.delete(users).returning();
+    return {
+      users: deletedUsers.length,
+      recipes: deletedRecipes.length,
+      shoppingItems: deletedItems.length,
+    };
   }
 }
 

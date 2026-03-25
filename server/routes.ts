@@ -237,5 +237,19 @@ export async function registerRoutes(
     res.json({ message: "Cleared all items" });
   });
 
+  // TEMPORARY: Admin endpoint to clear all users for testing. Remove after use.
+  app.post("/api/admin/clear-all-users", async (req: Request, res: Response) => {
+    const secret = req.headers["x-admin-secret"];
+    if (secret !== "temp-reset-2026-abc9") {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+    try {
+      const result = await storage.deleteAllUsers();
+      res.json({ message: "All users cleared", ...result });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
   return httpServer;
 }
