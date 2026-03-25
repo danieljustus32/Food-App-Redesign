@@ -283,7 +283,7 @@ export default function Auth() {
                     <button
                       type="button"
                       onClick={() => switchTab(false)}
-                      className="underline font-semibold"
+                      className="underline font-semibold cursor-pointer"
                       data-testid="link-signup-from-error"
                     >
                       Sign up
