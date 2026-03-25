@@ -240,7 +240,7 @@ export async function registerRoutes(
   // TEMPORARY: Admin endpoint to clear all users for testing. Remove after use.
   app.post("/api/admin/clear-all-users", async (req: Request, res: Response) => {
     const secret = req.headers["x-admin-secret"];
-    if (secret !== "temp-reset-2026-abc9") {
+    if (secret !== "xK9$mR2#pL7vNq4wZj") {
       return res.status(403).json({ message: "Forbidden" });
     }
     try {
