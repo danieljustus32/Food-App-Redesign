@@ -85,8 +85,11 @@ export function setupAuth(app: Express) {
     new LocalStrategy(async (username, password, done) => {
       try {
         const user = await storage.getUserByUsername(username);
-        if (!user || !(await comparePasswords(password, user.password))) {
-          return done(null, false, { message: "Invalid username or password" });
+        if (!user) {
+          return done(null, false, { message: "Email not found" });
+        }
+        if (!(await comparePasswords(password, user.password))) {
+          return done(null, false, { message: "Incorrect password" });
         }
         return done(null, user);
       } catch (err) {

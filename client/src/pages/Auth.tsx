@@ -86,11 +86,21 @@ export default function Auth() {
         await register(email, password);
       }
     } catch (err: any) {
-      setError(
-        err.message?.includes("409") ? "An account with this email already exists" :
-        err.message?.includes("401") ? "Invalid email or password" :
-        "Something went wrong. Please try again."
-      );
+      let serverMessage = "";
+      try {
+        const jsonPart = err.message?.replace(/^\d+:\s*/, "");
+        serverMessage = JSON.parse(jsonPart)?.message || "";
+      } catch {}
+
+      if (serverMessage === "Email not found") {
+        setError("Email not found");
+      } else if (serverMessage === "Incorrect password") {
+        setError("Incorrect password. Please try again.");
+      } else if (err.message?.includes("409") || serverMessage.includes("already exists")) {
+        setError("An account with this email already exists");
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -267,7 +277,20 @@ export default function Auth() {
 
             {error && (
               <p className="text-sm text-destructive bg-destructive/10 rounded-xl px-4 py-2.5" data-testid="text-error">
-                {error}
+                {error === "Email not found" ? (
+                  <>
+                    Email not found.{" "}
+                    <button
+                      type="button"
+                      onClick={() => switchTab(false)}
+                      className="underline font-semibold"
+                      data-testid="link-signup-from-error"
+                    >
+                      Sign up
+                    </button>{" "}
+                    instead?
+                  </>
+                ) : error}
               </p>
             )}
 
