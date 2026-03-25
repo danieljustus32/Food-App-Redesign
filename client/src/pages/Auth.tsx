@@ -136,7 +136,7 @@ export default function Auth() {
             <button
               type="button"
               onClick={() => switchTab(true)}
-              className={`flex-1 py-2.5 text-sm font-semibold rounded-full transition-all ${isLogin ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}
+              className={`flex-1 py-2.5 text-sm font-semibold rounded-full transition-all cursor-pointer ${isLogin ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}
               data-testid="tab-login"
             >
               Log In
@@ -144,7 +144,7 @@ export default function Auth() {
             <button
               type="button"
               onClick={() => switchTab(false)}
-              className={`flex-1 py-2.5 text-sm font-semibold rounded-full transition-all ${!isLogin ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}
+              className={`flex-1 py-2.5 text-sm font-semibold rounded-full transition-all cursor-pointer ${!isLogin ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}
               data-testid="tab-register"
             >
               Sign Up
@@ -155,7 +155,7 @@ export default function Auth() {
             <button
               type="button"
               onClick={() => handleSocialAuth("google")}
-              className="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 text-gray-700 font-medium py-3 rounded-full hover:bg-gray-50 transition-all active:scale-[0.98] shadow-sm"
+              className="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 text-gray-700 font-medium py-3 rounded-full hover:bg-gray-50 transition-all active:scale-[0.98] shadow-sm cursor-pointer"
               data-testid="button-google-auth"
             >
               <GoogleIcon />
@@ -164,7 +164,7 @@ export default function Auth() {
             <button
               type="button"
               onClick={() => handleSocialAuth("apple")}
-              className="w-full flex items-center justify-center gap-3 bg-black text-white font-medium py-3 rounded-full hover:bg-gray-900 transition-all active:scale-[0.98] shadow-sm"
+              className="w-full flex items-center justify-center gap-3 bg-black text-white font-medium py-3 rounded-full hover:bg-gray-900 transition-all active:scale-[0.98] shadow-sm cursor-pointer"
               data-testid="button-apple-auth"
             >
               <AppleIcon />
@@ -297,7 +297,7 @@ export default function Auth() {
             <button
               type="submit"
               disabled={loading || (!isLogin && signupDisabled)}
-              className="w-full bg-primary text-primary-foreground font-bold py-3.5 rounded-full shadow-lg hover:shadow-primary/25 transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full bg-primary text-primary-foreground font-bold py-3.5 rounded-full shadow-lg hover:shadow-primary/25 transition-all active:scale-[0.98] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
               data-testid="button-submit"
             >
               {loading ? "Please wait..." : isLogin ? "Log In" : "Create Account"}
