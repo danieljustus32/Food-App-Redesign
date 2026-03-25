@@ -1,5 +1,6 @@
 import type { RecipeProvider, NormalizedRecipe } from "./types";
 import { mockRecipes as rawMockRecipes } from "../mockRecipes";
+import { formatTag } from "../tagUtils";
 
 function shuffleArray<T>(arr: T[]): T[] {
   const shuffled = [...arr];
@@ -14,6 +15,7 @@ const mockData: NormalizedRecipe[] = rawMockRecipes.map(r => ({
   ...r,
   externalId: r.spoonacularId,
   source: "mock",
+  tags: r.tags.map(formatTag),
 }));
 
 export class MockProvider implements RecipeProvider {

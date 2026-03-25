@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, requireAuth } from "./auth";
 import { getRandomRecipes, searchRecipes } from "./recipe-providers";
+import { formatTag } from "./tagUtils";
 import type { User } from "@shared/schema";
 
 function getSection(ingredient: string): string {
@@ -130,7 +131,8 @@ export async function registerRoutes(
   app.get("/api/cookbook", requireAuth, async (req: Request, res: Response) => {
     const user = req.user as User;
     const recipes = await storage.getSavedRecipes(user.id);
-    res.json(recipes);
+    const formatted = recipes.map(r => ({ ...r, tags: r.tags.map(formatTag) }));
+    res.json(formatted);
   });
 
   app.post("/api/cookbook", requireAuth, async (req: Request, res: Response) => {
