@@ -9,7 +9,7 @@ export default function TermsOfService() {
       <div className="max-w-md mx-auto">
         <button
           onClick={() => navigate("/profile")}
-          className="flex items-center gap-1 text-primary font-medium mb-6 hover:opacity-80 transition-opacity"
+          className="flex items-center gap-1 text-primary font-medium mb-6 hover:opacity-80 transition-opacity cursor-pointer"
           data-testid="button-back-profile"
         >
           <ChevronLeft size={20} />
