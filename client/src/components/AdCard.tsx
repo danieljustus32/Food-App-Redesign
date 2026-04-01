@@ -61,7 +61,7 @@ export function AdCard({ onDismiss, active }: AdCardProps) {
       {...(active ? bind() : {})}
       data-testid="card-ad"
     >
-      <Card className="w-full h-full overflow-hidden rounded-3xl shadow-xl relative border-0 touch-none flex flex-col bg-white dark:bg-zinc-900">
+      <Card className="w-full h-full overflow-hidden rounded-3xl shadow-xl relative border-0 touch-none flex flex-col bg-card">
         <div className="absolute top-4 left-4 z-20">
           <span className="bg-black/50 text-white text-xs font-medium px-3 py-1 rounded-full backdrop-blur-md tracking-wide">
             Sponsored
@@ -87,8 +87,8 @@ export function AdCard({ onDismiss, active }: AdCardProps) {
               data-testid="ad-chicory-slot"
             />
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center text-center bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:from-zinc-800 dark:via-zinc-800 dark:to-zinc-800 rounded-2xl p-8">
-              <div className="w-20 h-20 bg-gradient-to-br from-orange-400 to-amber-500 rounded-full flex items-center justify-center mb-5 shadow-lg shadow-orange-200 dark:shadow-orange-900/30">
+            <div className="w-full h-full flex flex-col items-center justify-center text-center bg-muted rounded-2xl p-8">
+              <div className="w-20 h-20 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center mb-5 shadow-lg shadow-primary/20">
                 <ShoppingBag size={32} className="text-white" />
               </div>
               <h3 className="text-2xl font-serif font-bold text-foreground mb-3 leading-tight">
@@ -98,7 +98,7 @@ export function AdCard({ onDismiss, active }: AdCardProps) {
                 Hand-picked ingredients and products from top food brands, matched to the recipes you love.
               </p>
               <button
-                className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold px-8 py-3 rounded-full text-sm transition-all shadow-md shadow-orange-200 dark:shadow-orange-900/30 active:scale-95"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-3 rounded-full text-sm transition-all shadow-md shadow-primary/20 active:scale-95"
                 data-testid="button-ad-cta"
               >
                 Shop Ingredients

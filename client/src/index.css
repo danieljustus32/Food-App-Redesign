@@ -37,66 +37,73 @@
 }
 
 :root {
-  /* Cast Iron & Fire palette — open flame, bold contrast, rustic warmth */
-  --background: 30 60% 97%; /* Warm cream (#FDF5ED light) */
-  --foreground: 0 0% 11%; /* Cast iron black (#1C1C1C) */
-  
-  --card: 30 40% 99%;
-  --card-foreground: 0 0% 11%;
-  
-  --popover: 30 40% 99%;
-  --popover-foreground: 0 0% 11%;
-  
-  --primary: 15 67% 50%; /* Vivid flame orange (#D4552A) */
+  /* Fire, Brick & Cast Iron palette */
+  /* Firebrick #B22222 = 0° 68% 42% — Primary */
+  /* Forge #1A1A1A = 0° 0% 10% — Darkest */
+  /* Ash #C0A090 = 20° 28% 66% — Warm neutral */
+  /* Ember #FF4500 = 16° 100% 50% — Hot accent */
+  /* Ember Glow #F5C07A = 34° 86% 72% — Warm highlight */
+  /* Smoke #F5EDE8 = 20° 60% 94% — Lightest warm surface */
+
+  --background: 20 28% 91%;       /* Pale ash — warm off-white */
+  --foreground: 0 0% 10%;         /* Forge */
+
+  --card: 20 20% 95%;
+  --card-foreground: 0 0% 10%;
+
+  --popover: 20 20% 95%;
+  --popover-foreground: 0 0% 10%;
+
+  --primary: 0 68% 42%;           /* Firebrick #B22222 */
   --primary-foreground: 0 0% 100%;
-  
-  --secondary: 30 84% 63%; /* Amber glow (#F0A050) */
+
+  --secondary: 16 100% 50%;       /* Ember #FF4500 */
   --secondary-foreground: 0 0% 100%;
-  
-  --muted: 30 35% 92%;
-  --muted-foreground: 0 5% 45%;
-  
-  --accent: 30 84% 63%; /* Amber glow */
-  --accent-foreground: 0 0% 100%;
-  
+
+  --muted: 20 20% 82%;            /* Mid ash — muted surfaces */
+  --muted-foreground: 10 15% 38%; /* Dark warm gray */
+
+  --accent: 34 70% 65%;           /* Ember Glow — warm gold highlight */
+  --accent-foreground: 0 0% 10%;
+
   --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 100%;
-  
-  --border: 30 20% 88%;
-  --input: 30 20% 88%;
-  --ring: 15 67% 50%;
-  
+
+  --border: 20 18% 80%;
+  --input: 20 18% 80%;
+  --ring: 0 68% 42%;              /* Firebrick */
+
   --radius: 1rem;
 }
 
 .dark {
-  --background: 0 0% 11%; /* Cast iron black (#1C1C1C) */
-  --foreground: 30 80% 96%; /* Warm cream (#FDF5ED) */
-  
-  --card: 0 0% 15%;
-  --card-foreground: 30 80% 96%;
-  
+  --background: 0 0% 10%;         /* Forge #1A1A1A */
+  --foreground: 20 28% 75%;       /* Light ash */
+
+  --card: 0 0% 15%;               /* Soot — card surfaces */
+  --card-foreground: 20 20% 80%;
+
   --popover: 0 0% 15%;
-  --popover-foreground: 30 80% 96%;
-  
-  --primary: 15 67% 55%; /* Slightly lighter flame for dark mode */
+  --popover-foreground: 20 20% 80%;
+
+  --primary: 0 68% 50%;           /* Firebrick — slightly brighter in dark */
   --primary-foreground: 0 0% 100%;
-  
-  --secondary: 30 75% 58%;
+
+  --secondary: 16 100% 50%;       /* Ember */
   --secondary-foreground: 0 0% 100%;
-  
-  --muted: 0 0% 18%;
-  --muted-foreground: 30 30% 65%;
-  
-  --accent: 30 75% 58%;
-  --accent-foreground: 0 0% 100%;
-  
+
+  --muted: 0 0% 20%;              /* Soot */
+  --muted-foreground: 20 20% 55%; /* Mid ash */
+
+  --accent: 34 75% 60%;           /* Ember Glow — adjusted for dark */
+  --accent-foreground: 0 0% 10%;
+
   --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 100%;
-  
-  --border: 0 0% 18%;
-  --input: 0 0% 18%;
-  --ring: 15 67% 55%;
+
+  --border: 0 0% 20%;
+  --input: 0 0% 20%;
+  --ring: 0 68% 50%;
 }
 
 @layer base {
