@@ -194,7 +194,7 @@ export default function Discover() {
           {showAdCard ? (
             <button
               onClick={handleAdDismiss}
-              className="w-16 h-16 rounded-full bg-card shadow-[0_8px_30px_rgb(0,0,0,0.08)] flex items-center justify-center text-muted-foreground active:scale-90 transition-transform hover:bg-muted/50"
+              className="w-16 h-16 rounded-full bg-white shadow-[0_8px_30px_rgb(0,0,0,0.08)] flex items-center justify-center text-muted-foreground active:scale-90 transition-transform hover:bg-muted/50"
               data-testid="button-ad-dismiss-bottom"
             >
               <X size={28} strokeWidth={2} />
@@ -203,7 +203,7 @@ export default function Discover() {
             <>
               <button
                 onClick={handleSwipeLeft}
-                className="w-16 h-16 rounded-full bg-card shadow-[0_8px_30px_rgb(0,0,0,0.08)] flex items-center justify-center text-destructive active:scale-90 transition-transform hover:bg-destructive/5"
+                className="w-16 h-16 rounded-full bg-white shadow-[0_8px_30px_rgb(0,0,0,0.08)] flex items-center justify-center text-red-500 active:scale-90 transition-transform hover:bg-red-50"
                 data-testid="button-dislike"
               >
                 <X size={32} strokeWidth={2.5} />
@@ -211,10 +211,10 @@ export default function Discover() {
 
               <button
                 onClick={handleSwipeRight}
-                className="w-16 h-16 rounded-full bg-card shadow-[0_8px_30px_rgb(0,0,0,0.08)] flex items-center justify-center text-canopy active:scale-90 transition-transform hover:bg-canopy/5"
+                className="w-16 h-16 rounded-full bg-white shadow-[0_8px_30px_rgb(0,0,0,0.08)] flex items-center justify-center text-green-500 active:scale-90 transition-transform hover:bg-green-50"
                 data-testid="button-like"
               >
-                <Heart size={32} strokeWidth={2.5} className="fill-canopy" />
+                <Heart size={32} strokeWidth={2.5} className="fill-green-500" />
               </button>
             </>
           )}

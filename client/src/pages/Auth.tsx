@@ -155,7 +155,7 @@ export default function Auth() {
             <button
               type="button"
               onClick={() => handleSocialAuth("google")}
-              className="w-full flex items-center justify-center gap-3 bg-card border border-border text-foreground font-medium py-3 rounded-full hover:bg-muted/50 transition-all active:scale-[0.98] shadow-sm cursor-pointer"
+              className="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 text-gray-700 font-medium py-3 rounded-full hover:bg-gray-50 transition-all active:scale-[0.98] shadow-sm cursor-pointer"
               data-testid="button-google-auth"
             >
               <GoogleIcon />
@@ -164,7 +164,7 @@ export default function Auth() {
             <button
               type="button"
               onClick={() => handleSocialAuth("apple")}
-              className="w-full flex items-center justify-center gap-3 bg-foreground text-background font-medium py-3 rounded-full hover:bg-foreground/90 transition-all active:scale-[0.98] shadow-sm cursor-pointer"
+              className="w-full flex items-center justify-center gap-3 bg-black text-white font-medium py-3 rounded-full hover:bg-gray-900 transition-all active:scale-[0.98] shadow-sm cursor-pointer"
               data-testid="button-apple-auth"
             >
               <AppleIcon />
@@ -227,11 +227,11 @@ export default function Auth() {
                 {passwordRules.map((rule, i) => (
                   <div key={i} className="flex items-center gap-2 text-sm">
                     {ruleResults[i] ? (
-                      <Check size={14} className="text-canopy shrink-0" />
+                      <Check size={14} className="text-green-500 shrink-0" />
                     ) : (
                       <X size={14} className="text-muted-foreground/50 shrink-0" />
                     )}
-                    <span className={ruleResults[i] ? "text-canopy" : "text-muted-foreground"}>
+                    <span className={ruleResults[i] ? "text-green-600" : "text-muted-foreground"}>
                       {rule.label}
                     </span>
                   </div>
@@ -268,7 +268,7 @@ export default function Auth() {
                   </p>
                 )}
                 {!isLogin && confirmPassword.length > 0 && passwordsMatch && (
-                  <p className="text-xs text-canopy mt-1.5 ml-1 flex items-center gap-1">
+                  <p className="text-xs text-green-600 mt-1.5 ml-1 flex items-center gap-1">
                     <Check size={12} /> Passwords match
                   </p>
                 )}

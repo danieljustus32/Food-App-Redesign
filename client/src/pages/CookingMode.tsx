@@ -175,7 +175,7 @@ export default function CookingMode() {
 
   if (isLoading) {
     return (
-      <div className="fixed inset-0 z-[100] bg-[#1A1A1A] text-white flex items-center justify-center">
+      <div className="fixed inset-0 z-[100] bg-zinc-950 text-white flex items-center justify-center">
         <Loader2 size={32} className="animate-spin" />
       </div>
     );
@@ -183,9 +183,9 @@ export default function CookingMode() {
 
   if (!recipe || !steps.length) {
     return (
-      <div className="fixed inset-0 z-[100] bg-[#1A1A1A] text-white flex flex-col items-center justify-center p-8 text-center">
+      <div className="fixed inset-0 z-[100] bg-zinc-950 text-white flex flex-col items-center justify-center p-8 text-center">
         <h2 className="text-2xl font-serif font-bold mb-4">Recipe not found</h2>
-        <p className="text-[#C0A090] mb-8">This recipe may have been removed from your cookbook.</p>
+        <p className="text-zinc-400 mb-8">This recipe may have been removed from your cookbook.</p>
         <button onClick={() => setLocation("/cookbook")} className="bg-white/10 hover:bg-white/20 text-white px-8 py-3 rounded-full font-bold">
           Back to Cookbook
         </button>
@@ -194,7 +194,7 @@ export default function CookingMode() {
   }
 
   return (
-    <div className="fixed inset-0 z-[100] bg-[#1A1A1A] text-white flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-[100] bg-zinc-950 text-white flex flex-col overflow-hidden">
       <div className="flex items-center justify-between p-6 z-10">
         <button
           onClick={() => { stopCooking(); setLocation("/cookbook"); }}
@@ -207,7 +207,7 @@ export default function CookingMode() {
         </h2>
         <button
           onClick={toggleListening}
-          className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${isListening ? 'bg-primary text-white shadow-[0_0_15px_rgba(178,34,34,0.5)]' : 'bg-white/10 text-white/50'}`}
+          className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${isListening ? 'bg-primary text-white shadow-[0_0_15px_rgba(255,50,50,0.5)]' : 'bg-white/10 text-white/50'}`}
         >
           {isListening ? <Mic size={24} /> : <MicOff size={24} />}
         </button>
@@ -216,13 +216,13 @@ export default function CookingMode() {
       {!hasStarted ? (
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center relative">
           <div className="absolute inset-0 bg-cover bg-center opacity-20 blur-xl scale-110" style={{ backgroundImage: `url(${recipe.image})` }} />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#1A1A1A]/50 to-[#1A1A1A]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/50 to-zinc-950" />
           <div className="relative z-10 flex flex-col items-center max-w-md">
             <div className="w-32 h-32 rounded-full bg-primary/20 flex items-center justify-center mb-8">
               <Mic size={48} className="text-primary" />
             </div>
             <h1 className="text-4xl font-serif font-bold mb-4">Hands-free Cooking</h1>
-            <p className="text-[#C0A090] text-lg mb-12">
+            <p className="text-zinc-400 text-lg mb-12">
               I'll read you the ingredients and instructions step-by-step. Just say <strong className="text-white">"done"</strong> or <strong className="text-white">"next"</strong> when you're ready to proceed.
             </p>
             <button
@@ -237,7 +237,7 @@ export default function CookingMode() {
         </div>
       ) : (
         <div className="flex-1 flex flex-col px-6 pb-8 relative">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 text-xs font-medium uppercase tracking-widest text-[#C0A090] flex items-center gap-2">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 text-xs font-medium uppercase tracking-widest text-zinc-500 flex items-center gap-2">
             {isSpeaking ? (
               <><Volume2 size={14} className="text-primary animate-pulse" /> Speaking...</>
             ) : isListening ? (
@@ -266,11 +266,11 @@ export default function CookingMode() {
                   exit={{ opacity: 0, scale: 0.9 }}
                   className="flex flex-col items-center text-center"
                 >
-                  <div className="w-24 h-24 rounded-full bg-canopy/20 text-canopy flex items-center justify-center mb-6">
+                  <div className="w-24 h-24 rounded-full bg-green-500/20 text-green-500 flex items-center justify-center mb-6">
                     <CheckCircle size={48} />
                   </div>
                   <h2 className="text-3xl font-serif font-bold mb-4">Bon Appétit!</h2>
-                  <p className="text-[#C0A090] text-lg mb-8">You've completed all the steps for this recipe.</p>
+                  <p className="text-zinc-400 text-lg mb-8">You've completed all the steps for this recipe.</p>
                   <button
                     onClick={() => setLocation("/cookbook")}
                     className="bg-white/10 hover:bg-white/20 text-white px-8 py-4 rounded-full font-bold text-lg transition-colors"
