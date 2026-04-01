@@ -1,5 +1,16 @@
 uploads = []
-generated = []
+
+[[generated]]
+id = "115sjx39cQMCzjeG9sFGv"
+uri = "file://.canvas/assets/feastly-logo-light.png"
+type = "image"
+title = "feastly logo light"
+
+[[generated]]
+id = "8j62DrPyaMps1vbTpQEQi"
+uri = "file://.canvas/assets/feastly-logo-dark.png"
+type = "image"
+title = "feastly logo dark"
 
 [[outputs]]
 id = "qydXdNm1cOR1JYEHTQC0U"
