@@ -244,11 +244,13 @@ export function setupAuth(app: Express) {
       const user = await storage.createUser({ username, password: hashedPassword });
 
       const token = generateVerificationToken();
+      console.log("[AUTH] Generated verification token for new user:", { userId: user.id, tokenPreview: token.substring(0, 8) + "..." });
       await storage.setEmailVerificationToken(user.id, token);
+      console.log("[AUTH] Stored verification token in database for user:", user.id);
 
       try {
         await sendVerificationEmail(username, token);
-        console.log("[AUTH] Verification email sent to", username);
+        console.log("[AUTH] Verification email sent successfully to", username);
       } catch (emailErr) {
         console.error("[AUTH] Failed to send verification email:", emailErr);
       }
@@ -369,19 +371,38 @@ export function setupAuth(app: Express) {
   app.get("/api/auth/verify-email", async (req: Request, res: Response) => {
     try {
       const token = req.query.token as string;
+      console.log("[VERIFY] Email verification attempt:", {
+        hasToken: !!token,
+        tokenLength: token?.length,
+        tokenPreview: token ? token.substring(0, 8) + "..." : "none",
+        host: req.headers.host,
+        url: req.url,
+      });
+
       if (!token) {
+        console.warn("[VERIFY] No token provided in request");
         return res.status(400).send(verificationResultPage("Invalid Link", "The verification link is invalid or missing a token.", false));
       }
 
+      console.log("[VERIFY] Looking up user by verification token...");
       const user = await storage.getUserByVerificationToken(token);
+
       if (!user) {
+        console.warn("[VERIFY] No user found for token:", token.substring(0, 8) + "... (token may be used or invalid)");
         return res.send(verificationResultPage("Link Expired or Invalid", "This verification link has already been used or is invalid. Please request a new one from the app.", false));
       }
 
+      console.log("[VERIFY] User found for token:", { userId: user.id, email: user.username, alreadyVerified: user.emailVerified });
+
+      if (user.emailVerified) {
+        console.log("[VERIFY] User email is already verified, marking again is a no-op");
+      }
+
       await storage.markEmailVerified(user.id);
+      console.log("[VERIFY] Email successfully marked as verified for user:", user.id);
       return res.send(verificationResultPage("Email Verified!", "Your email has been verified successfully. You can now return to the app and enjoy all features.", true));
     } catch (err: any) {
-      console.error("[AUTH] Email verification error:", err);
+      console.error("[VERIFY] Email verification error:", err);
       return res.status(500).send(verificationResultPage("Something Went Wrong", "We couldn't verify your email right now. Please try again later.", false));
     }
   });
@@ -390,19 +411,26 @@ export function setupAuth(app: Express) {
     if (!req.isAuthenticated()) return res.status(401).json({ message: "Not authenticated" });
     const user = req.user as User;
 
+    console.log("[AUTH] Resend verification requested for user:", { userId: user.id, email: user.username, emailVerified: user.emailVerified, authProvider: user.authProvider });
+
     if (user.emailVerified) {
+      console.log("[AUTH] Resend skipped - email already verified for user:", user.id);
       return res.json({ message: "Email is already verified" });
     }
 
     if (user.authProvider) {
+      console.log("[AUTH] Resend skipped - social login account for user:", user.id);
       return res.json({ message: "Social login accounts do not need email verification" });
     }
 
     const token = generateVerificationToken();
+    console.log("[AUTH] Generated new verification token for resend:", { userId: user.id, tokenPreview: token.substring(0, 8) + "..." });
     await storage.setEmailVerificationToken(user.id, token);
+    console.log("[AUTH] Stored new verification token in database for user:", user.id);
 
     try {
       await sendVerificationEmail(user.username, token);
+      console.log("[AUTH] Resend verification email sent successfully to:", user.username);
       return res.json({ message: "Verification email sent" });
     } catch (err: any) {
       console.error("[AUTH] Failed to resend verification email:", err);

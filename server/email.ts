@@ -25,6 +25,20 @@ export function generateVerificationToken(): string {
   return randomBytes(32).toString("hex");
 }
 
+export function getAppBaseUrl(): string {
+  const replitDomains = process.env.REPLIT_DOMAINS;
+  if (replitDomains) {
+    const primaryDomain = replitDomains.split(",")[0].trim();
+    const url = `https://${primaryDomain}`;
+    console.log("[EMAIL] Resolved app base URL from REPLIT_DOMAINS:", url);
+    return url;
+  }
+  const port = process.env.PORT || 5000;
+  const url = `http://localhost:${port}`;
+  console.log("[EMAIL] Resolved app base URL (local fallback):", url);
+  return url;
+}
+
 export async function sendVerificationEmail(
   to: string,
   token: string
@@ -32,9 +46,16 @@ export async function sendVerificationEmail(
   const domain = getDomain();
   const client = getClient();
 
-  const productionDomain = "recipe-swipe.replit.app";
-  const baseUrl = `https://${productionDomain}`;
+  const baseUrl = getAppBaseUrl();
   const verifyUrl = `${baseUrl}/api/auth/verify-email?token=${token}`;
+
+  console.log("[EMAIL] Building verification email:", {
+    to,
+    baseUrl,
+    verifyUrl,
+    tokenLength: token.length,
+    tokenPreview: token.substring(0, 8) + "...",
+  });
 
   const messageData = {
     from: `Feastly <noreply@${domain}>`,
@@ -76,6 +97,7 @@ export async function sendVerificationEmail(
   try {
     const response = await client.messages.create(domain, messageData);
     console.log("[MAILGUN] Send response:", JSON.stringify(response, null, 2));
+    console.log("[EMAIL] Verification email sent successfully to:", to);
   } catch (err: any) {
     console.error("[MAILGUN] Send error:", {
       message: err.message,
