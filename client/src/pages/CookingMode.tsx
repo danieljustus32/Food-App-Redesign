@@ -432,7 +432,10 @@ export default function CookingMode() {
     }
   };
 
-  const repeatCurrent = () => speak(getStepSpeechText(currentStepIndex));
+  const repeatCurrent = () => {
+    const step = steps[currentStepIndex];
+    if (step) speak(expandAbbreviations(step.text));
+  };
   repeatCurrentRef.current = repeatCurrent;
 
   if (isLoading) {
