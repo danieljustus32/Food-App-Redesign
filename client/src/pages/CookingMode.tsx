@@ -36,6 +36,9 @@ export default function CookingMode() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
+  const [micBlocked, setMicBlocked] = useState(false);
+
+  const isInIframe = window.self !== window.top;
 
   const recognitionRef = useRef<any>(null);
   const handleNextStepRef = useRef<() => void>(() => {});
@@ -91,6 +94,7 @@ export default function CookingMode() {
         if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
           isListeningRef.current = false;
           setIsListening(false);
+          setMicBlocked(true);
         }
       };
 
@@ -357,14 +361,38 @@ export default function CookingMode() {
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center relative">
           <div className="absolute inset-0 bg-cover bg-center opacity-20 blur-xl scale-110" style={{ backgroundImage: `url(${recipe.image})` }} />
           <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/50 to-zinc-950" />
-          <div className="relative z-10 flex flex-col items-center max-w-md">
+          <div className="relative z-10 flex flex-col items-center max-w-md w-full">
             <div className="w-32 h-32 rounded-full bg-primary/20 flex items-center justify-center mb-8">
               <Mic size={48} className="text-primary" />
             </div>
             <h1 className="text-4xl font-serif font-bold mb-4">Hands-free Cooking</h1>
-            <p className="text-zinc-400 text-lg mb-12">
+            <p className="text-zinc-400 text-lg mb-8">
               I'll read you the ingredients and instructions step-by-step. Say <strong className="text-white">"next"</strong> or <strong className="text-white">"done"</strong> to advance, or <strong className="text-white">"repeat"</strong> to hear the current step again.
             </p>
+
+            {isInIframe && (
+              <div className="w-full bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 mb-6 text-left">
+                <p className="text-amber-300 text-sm font-medium mb-2">Microphone requires a full browser tab</p>
+                <p className="text-amber-300/70 text-xs mb-3">This feature can't access your microphone inside the Replit preview pane. Open the app in a new tab first.</p>
+                <a
+                  href={window.location.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-semibold px-4 py-2 rounded-full transition-colors"
+                  data-testid="link-open-new-tab"
+                >
+                  Open in new tab
+                </a>
+              </div>
+            )}
+
+            {micBlocked && !isInIframe && (
+              <div className="w-full bg-red-500/10 border border-red-500/30 rounded-2xl p-4 mb-6 text-left">
+                <p className="text-red-300 text-sm font-medium mb-1">Microphone access blocked</p>
+                <p className="text-red-300/70 text-xs">Allow microphone access in your browser's address bar, then try again.</p>
+              </div>
+            )}
+
             <button
               onClick={startCooking}
               className="bg-primary hover:bg-primary/90 text-white w-full py-5 rounded-full font-bold text-xl flex items-center justify-center gap-3 transition-transform active:scale-95 shadow-xl shadow-primary/30"
@@ -377,13 +405,15 @@ export default function CookingMode() {
         </div>
       ) : (
         <div className="flex-1 flex flex-col px-6 pb-8 relative">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 text-xs font-medium uppercase tracking-widest text-zinc-500 flex items-center gap-2">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 text-xs font-medium uppercase tracking-widest flex items-center gap-2">
             {isSpeaking ? (
-              <><Volume2 size={14} className="text-primary animate-pulse" /> Speaking...</>
+              <span className="text-zinc-500"><Volume2 size={14} className="inline text-primary animate-pulse mr-1" />Speaking...</span>
+            ) : micBlocked ? (
+              <span className="text-red-400">Mic blocked — check browser permissions</span>
             ) : isListening ? (
-              <><div className="w-2 h-2 rounded-full bg-primary animate-ping" /> Listening for "Done", "Next", or "Repeat"</>
+              <span className="text-zinc-500"><span className="inline-block w-2 h-2 rounded-full bg-primary animate-ping mr-1" />Listening for "Done", "Next", or "Repeat"</span>
             ) : (
-              <><Pause size={14} /> Paused</>
+              <span className="text-zinc-500"><Pause size={14} className="inline mr-1" />Paused</span>
             )}
           </div>
 
