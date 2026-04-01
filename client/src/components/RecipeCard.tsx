@@ -104,10 +104,10 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
     >
       <Card className="w-full h-full overflow-hidden rounded-3xl shadow-xl relative border-0 touch-none flex flex-col">
-        {/* Image section — contain so landscape photos aren't cropped */}
+        {/* Image section — fixed 3:2 ratio matches Spoonacular landscape images */}
         <div
-          className="flex-1 bg-neutral-100 bg-contain bg-center bg-no-repeat"
-          style={{ backgroundImage: `url(${recipe.image})` }}
+          className="w-full bg-neutral-100 bg-contain bg-center bg-no-repeat flex-shrink-0"
+          style={{ backgroundImage: `url(${recipe.image})`, aspectRatio: "3/2" }}
         />
 
         {/* SAVE / PASS indicators */}
@@ -125,8 +125,8 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
           PASS
         </motion.div>
 
-        {/* Info panel — slightly-darker-than-white background */}
-        <div className="bg-neutral-50 px-5 pt-4 pb-6 z-10 pointer-events-none" style={{ flexShrink: 0 }}>
+        {/* Info panel — slightly-darker-than-white background, fills remaining card height */}
+        <div className="bg-neutral-50 px-5 pt-4 pb-6 z-10 pointer-events-none flex-1 flex flex-col justify-between">
           <div className="flex items-center gap-2 mb-2">
             <div className="flex gap-2 flex-wrap flex-1">
               {recipe.tags.slice(0, 3).map(tag => (
