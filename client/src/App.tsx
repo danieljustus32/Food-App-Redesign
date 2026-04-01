@@ -9,6 +9,7 @@ import { NotificationsProvider, useNotifications } from "@/hooks/use-notificatio
 import { NotificationPermissionPrompt } from "@/components/NotificationPermissionPrompt";
 import { MicrophonePermissionModal } from "@/components/MicrophonePermissionModal";
 import { useMicPermission } from "@/hooks/use-mic-permission";
+import { isInIframe } from "@/lib/iframeCheck";
 
 import NotFound from "@/pages/not-found";
 import Auth from "@/pages/Auth";
@@ -35,23 +36,26 @@ function AppRouterInner() {
   const promptTriggeredRef = useRef(false);
   const { status: micStatus, checked: micChecked } = useMicPermission();
   const [micModalDismissed, setMicModalDismissed] = useState(() => {
-    const until = localStorage.getItem(MIC_DISMISS_KEY);
-    return until ? Date.now() < parseInt(until, 10) : false;
+    try {
+      const until = localStorage.getItem(MIC_DISMISS_KEY);
+      return until ? Date.now() < parseInt(until, 10) : false;
+    } catch {
+      return false;
+    }
   });
-
-  const isInIframe = window.self !== window.top;
 
   const showMicModal =
     !!user &&
-    !isInIframe &&
     micChecked &&
     !micModalDismissed &&
     (micStatus === "prompt" || micStatus === "denied");
 
   const handleDismissMicModal = () => {
     if (micStatus === "prompt") {
-      const until = Date.now() + MIC_DISMISS_DAYS * 24 * 60 * 60 * 1000;
-      localStorage.setItem(MIC_DISMISS_KEY, String(until));
+      try {
+        const until = Date.now() + MIC_DISMISS_DAYS * 24 * 60 * 60 * 1000;
+        localStorage.setItem(MIC_DISMISS_KEY, String(until));
+      } catch {}
     }
     setMicModalDismissed(true);
   };
@@ -100,7 +104,7 @@ function AppRouterInner() {
       </div>
       <BottomNav />
       {showPrompt && <NotificationPermissionPrompt onDismiss={dismissPrompt} />}
-      {showMicModal && <MicrophonePermissionModal onDismiss={handleDismissMicModal} />}
+      {showMicModal && <MicrophonePermissionModal onDismiss={handleDismissMicModal} inIframe={isInIframe()} />}
     </div>
   );
 }

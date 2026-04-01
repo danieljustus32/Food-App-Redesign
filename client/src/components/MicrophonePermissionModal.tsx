@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { Mic, MicOff, X } from "lucide-react";
+import { Mic, MicOff, X, ExternalLink } from "lucide-react";
 import { useMicPermission } from "@/hooks/use-mic-permission";
 
 interface MicrophonePermissionModalProps {
   onDismiss: () => void;
+  inIframe?: boolean;
 }
 
-export function MicrophonePermissionModal({ onDismiss }: MicrophonePermissionModalProps) {
+export function MicrophonePermissionModal({ onDismiss, inIframe }: MicrophonePermissionModalProps) {
   const { status, requestPermission } = useMicPermission();
   const [requesting, setRequesting] = useState(false);
 
@@ -42,23 +43,40 @@ export function MicrophonePermissionModal({ onDismiss }: MicrophonePermissionMod
           <>
             <h2 className="text-xl font-bold text-foreground mb-2">Microphone access blocked</h2>
             <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-              Feastly's hands-free cooking mode reads each step aloud and listens for your voice commands like "next" or "repeat" — so your hands stay clean and on the task.
+              Feastly's hands-free cooking mode reads each step aloud and listens for your voice commands — so your hands stay clean and on the task.
             </p>
             <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-              Your browser has blocked microphone access. To fix this, click the <strong className="text-foreground">lock icon</strong> in your browser's address bar, find <strong className="text-foreground">Microphone</strong>, and set it to <strong className="text-foreground">Allow</strong>.
+              Your browser has blocked microphone access. Click the <strong className="text-foreground">lock icon</strong> in your browser's address bar, find <strong className="text-foreground">Microphone</strong>, and set it to <strong className="text-foreground">Allow</strong>, then reload the page.
             </p>
           </>
         ) : (
           <>
             <h2 className="text-xl font-bold text-foreground mb-2">Enable hands-free cooking</h2>
-            <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+            <p className="text-sm text-muted-foreground leading-relaxed mb-4">
               Feastly reads each ingredient and step aloud, then listens for your voice — say <strong className="text-foreground">"next"</strong>, <strong className="text-foreground">"repeat"</strong>, or <strong className="text-foreground">"done"</strong> without touching your phone. Microphone access is only used while you're actively cooking.
             </p>
+            {inIframe && (
+              <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-3 mb-4">
+                <p className="text-amber-300 text-xs leading-relaxed">
+                  For voice commands to work, open the app in its own browser tab — not inside an embedded view.
+                </p>
+                <a
+                  href={window.location.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-amber-300 text-xs font-semibold mt-2 hover:underline"
+                  data-testid="link-open-new-tab-modal"
+                >
+                  <ExternalLink size={12} />
+                  Open in new tab
+                </a>
+              </div>
+            )}
           </>
         )}
 
         <div className="space-y-3">
-          {!isDenied && (
+          {!isDenied && !inIframe && (
             <button
               onClick={handleAllow}
               disabled={requesting}

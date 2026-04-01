@@ -4,6 +4,7 @@ import { Mic, MicOff, Volume2, X, Play, CheckCircle, ChevronRight, Pause, Loader
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { isSaltOrPepper } from "@/lib/ingredientFilters";
+import { isInIframe } from "@/lib/iframeCheck";
 
 interface SavedRecipe {
   id: string;
@@ -38,7 +39,7 @@ export default function CookingMode() {
   const [isFinished, setIsFinished] = useState(false);
   const [micBlocked, setMicBlocked] = useState(false);
 
-  const isInIframe = window.self !== window.top;
+  const inIframe = isInIframe();
 
   const recognitionRef = useRef<any>(null);
   const handleNextStepRef = useRef<() => void>(() => {});
@@ -370,7 +371,7 @@ export default function CookingMode() {
               I'll read you the ingredients and instructions step-by-step. Say <strong className="text-white">"next"</strong> or <strong className="text-white">"done"</strong> to advance, or <strong className="text-white">"repeat"</strong> to hear the current step again.
             </p>
 
-            {isInIframe && (
+            {inIframe && (
               <div className="w-full bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 mb-6 text-left">
                 <p className="text-amber-300 text-sm font-medium mb-2">Microphone requires a full browser tab</p>
                 <p className="text-amber-300/70 text-xs mb-3">This feature can't access your microphone inside the Replit preview pane. Open the app in a new tab first.</p>
@@ -386,7 +387,7 @@ export default function CookingMode() {
               </div>
             )}
 
-            {micBlocked && !isInIframe && (
+            {micBlocked && !inIframe && (
               <div className="w-full bg-red-500/10 border border-red-500/30 rounded-2xl p-4 mb-6 text-left">
                 <p className="text-red-300 text-sm font-medium mb-1">Microphone access blocked</p>
                 <p className="text-red-300/70 text-xs">Allow microphone access in your browser's address bar, then try again.</p>
