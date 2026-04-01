@@ -41,6 +41,7 @@ export default function CookingMode() {
   const handleNextStepRef = useRef<() => void>(() => {});
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
   const currentFetchAbortRef = useRef<AbortController | null>(null);
+  const cookingActiveRef = useRef(false);
 
   const isListeningRef = useRef(isListening);
   const isSpeakingRef = useRef(isSpeaking);
@@ -101,6 +102,7 @@ export default function CookingMode() {
     }
 
     return () => {
+      cookingActiveRef.current = false;
       if (recognitionRef.current) recognitionRef.current.stop();
       if (currentFetchAbortRef.current) currentFetchAbortRef.current.abort();
       if (currentAudioRef.current) {
@@ -161,7 +163,10 @@ export default function CookingMode() {
         if (!res.ok) throw new Error("TTS API failed");
         const blob = await res.blob();
 
-        if (abortController.signal.aborted) return;
+        if (abortController.signal.aborted || !cookingActiveRef.current) {
+          setIsSpeaking(false);
+          return;
+        }
 
         const url = URL.createObjectURL(blob);
         const audio = new Audio(url);
@@ -172,18 +177,20 @@ export default function CookingMode() {
           currentAudioRef.current = null;
           setIsSpeaking(false);
           setTimeout(() => {
-            onEnd?.();
+            if (cookingActiveRef.current) onEnd?.();
           }, 1500);
         };
 
         audio.onerror = () => {
           URL.revokeObjectURL(url);
           currentAudioRef.current = null;
-          speakWithBrowserFallback(text, onEnd);
+          if (cookingActiveRef.current) speakWithBrowserFallback(text, onEnd);
+          else setIsSpeaking(false);
         };
 
         audio.play().catch(() => {
-          speakWithBrowserFallback(text, onEnd);
+          if (cookingActiveRef.current) speakWithBrowserFallback(text, onEnd);
+          else setIsSpeaking(false);
         });
       })
       .catch(err => {
@@ -191,7 +198,8 @@ export default function CookingMode() {
           setIsSpeaking(false);
           return;
         }
-        speakWithBrowserFallback(text, onEnd);
+        if (cookingActiveRef.current) speakWithBrowserFallback(text, onEnd);
+        else setIsSpeaking(false);
       });
   }, [cancelCurrentSpeech, speakWithBrowserFallback]);
 
@@ -206,12 +214,14 @@ export default function CookingMode() {
   }, [steps]);
 
   const startCooking = () => {
+    cookingActiveRef.current = true;
     setHasStarted(true);
     setIsListening(true);
     speak(getStepSpeechText(0));
   };
 
   const stopCooking = useCallback(() => {
+    cookingActiveRef.current = false;
     cancelCurrentSpeech();
     setHasStarted(false);
     setIsListening(false);
