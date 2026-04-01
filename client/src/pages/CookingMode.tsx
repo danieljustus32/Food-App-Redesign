@@ -45,28 +45,28 @@ export default function CookingMode() {
 
   const inIframe = isInIframe();
   const { status: micStatus, checked: micChecked } = useMicPermission();
-
-  const [micModalDismissed, setMicModalDismissed] = useState(() => {
-    try {
-      const until = localStorage.getItem(MIC_DISMISS_KEY);
-      return until ? Date.now() < parseInt(until, 10) : false;
-    } catch {
-      return false;
-    }
-  });
+  const [micModalDismissed, setMicModalDismissed] = useState(false);
 
   const showMicModal =
     micChecked &&
     !micModalDismissed &&
     (micStatus === "prompt" || micStatus === "denied");
 
-  const handleDismissMicModal = () => {
-    if (micStatus === "prompt") {
-      try {
-        const until = Date.now() + 14 * 24 * 60 * 60 * 1000;
-        localStorage.setItem(MIC_DISMISS_KEY, String(until));
-      } catch {}
+  useEffect(() => {
+    if (micChecked) {
+      console.log("[CookingMode] mic state →", {
+        micStatus,
+        micChecked,
+        micModalDismissed,
+        showMicModal: micChecked && !micModalDismissed && (micStatus === "prompt" || micStatus === "denied"),
+        inIframe,
+        localStorageKey: (() => { try { return localStorage.getItem(MIC_DISMISS_KEY); } catch { return "inaccessible"; } })(),
+      });
     }
+  }, [micChecked, micStatus, micModalDismissed, inIframe]);
+
+  const handleDismissMicModal = () => {
+    console.log("[CookingMode] mic modal dismissed, status was:", micStatus);
     setMicModalDismissed(true);
   };
 
@@ -121,6 +121,7 @@ export default function CookingMode() {
       };
 
       recognition.onerror = (event: any) => {
+        console.log("[CookingMode] recognition.onerror →", event.error);
         if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
           isListeningRef.current = false;
           setIsListening(false);
@@ -281,12 +282,24 @@ export default function CookingMode() {
   }, [steps]);
 
   const startCooking = () => {
+    console.log("[CookingMode] startCooking →", {
+      micStatus,
+      hasRecognition: !!recognitionRef.current,
+      inIframe,
+    });
     cookingActiveRef.current = true;
     isListeningRef.current = true;
     setHasStarted(true);
     setIsListening(true);
     if (recognitionRef.current) {
-      try { recognitionRef.current.start(); } catch (e) {}
+      try {
+        recognitionRef.current.start();
+        console.log("[CookingMode] recognition.start() called");
+      } catch (e) {
+        console.warn("[CookingMode] recognition.start() threw:", e);
+      }
+    } else {
+      console.warn("[CookingMode] recognitionRef.current is null — SpeechRecognition not initialised");
     }
     speak(getStepSpeechText(0));
   };
