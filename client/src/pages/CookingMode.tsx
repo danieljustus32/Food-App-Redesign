@@ -93,7 +93,7 @@ export default function CookingMode() {
       };
 
       recognition.onend = () => {
-        if (isListeningRef.current && !isSpeakingRef.current) {
+        if (cookingActiveRef.current && isListeningRef.current && !isSpeakingRef.current) {
           try { recognition.start(); } catch (e) { }
         }
       };
@@ -103,7 +103,12 @@ export default function CookingMode() {
 
     return () => {
       cookingActiveRef.current = false;
-      if (recognitionRef.current) recognitionRef.current.stop();
+      isListeningRef.current = false;
+      isSpeakingRef.current = false;
+      if (recognitionRef.current) {
+        try { recognitionRef.current.stop(); } catch (e) {}
+        recognitionRef.current = null;
+      }
       if (currentFetchAbortRef.current) currentFetchAbortRef.current.abort();
       if (currentAudioRef.current) {
         currentAudioRef.current.pause();
@@ -243,6 +248,8 @@ export default function CookingMode() {
 
   const startCooking = () => {
     cookingActiveRef.current = true;
+    isListeningRef.current = true;
+    isSpeakingRef.current = false;
     setHasStarted(true);
     setIsListening(true);
     speak(getStepSpeechText(0));
@@ -250,7 +257,12 @@ export default function CookingMode() {
 
   const stopCooking = useCallback(() => {
     cookingActiveRef.current = false;
+    isListeningRef.current = false;
+    isSpeakingRef.current = false;
     cancelCurrentSpeech();
+    if (recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch (e) {}
+    }
     setHasStarted(false);
     setIsListening(false);
     setIsSpeaking(false);
@@ -282,7 +294,11 @@ export default function CookingMode() {
     });
   };
 
-  const toggleListening = () => setIsListening(!isListening);
+  const toggleListening = () => {
+    const next = !isListening;
+    isListeningRef.current = next;
+    setIsListening(next);
+  };
 
   const repeatCurrent = () => speak(getStepSpeechText(currentStepIndex));
   repeatCurrentRef.current = repeatCurrent;
