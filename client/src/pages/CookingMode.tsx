@@ -203,14 +203,42 @@ export default function CookingMode() {
       });
   }, [cancelCurrentSpeech, speakWithBrowserFallback]);
 
+  const expandAbbreviations = (text: string): string =>
+    text
+      .replace(/\bfl\.?\s*oz\.?\b/gi, 'fluid ounce')
+      .replace(/\btbsp\.?\b/gi, 'tablespoon')
+      .replace(/\btbs\.?\b/gi, 'tablespoon')
+      .replace(/\btsp\.?\b/gi, 'teaspoon')
+      .replace(/\bkg\.?\b/gi, 'kilogram')
+      .replace(/\bmg\.?\b/gi, 'milligram')
+      .replace(/\bmL\.?\b/g, 'milliliter')
+      .replace(/\bml\.?\b/gi, 'milliliter')
+      .replace(/\blbs?\.?\b/gi, 'pound')
+      .replace(/\boz\.?\b/gi, 'ounce')
+      .replace(/\bqt\.?\b/gi, 'quart')
+      .replace(/\bpt\.?\b/gi, 'pint')
+      .replace(/\bgal\.?\b/gi, 'gallon')
+      .replace(/(\d)\s*g\b/g, '$1 gram')
+      .replace(/\bL\.?\b/g, 'liter')
+      .replace(/\bcm\.?\b/gi, 'centimeter')
+      .replace(/\bmm\.?\b/gi, 'millimeter')
+      .replace(/(\d)\s*in\.?\b/g, '$1 inch')
+      .replace(/\bhr\.?\b/gi, 'hour')
+      .replace(/\bmin\.?\b/gi, 'minute')
+      .replace(/\bpkg\.?\b/gi, 'package')
+      .replace(/\bdeg\.?\b/gi, 'degree')
+      .replace(/°F\b/g, 'degrees Fahrenheit')
+      .replace(/°C\b/g, 'degrees Celsius');
+
   const getStepSpeechText = useCallback((index: number): string => {
     const step = steps[index];
     if (!step) return "";
+    const expanded = expandAbbreviations(step.text);
     const isFirstIngredient = index === 0 && step.type === 'ingredient';
     const isFirstInstruction = step.type === 'instruction' && index > 0 && steps[index - 1]?.type === 'ingredient';
-    if (isFirstIngredient) return `Measure the following ingredients: ${step.text}`;
-    if (isFirstInstruction) return `Let's begin cooking: ${step.text}`;
-    return step.text;
+    if (isFirstIngredient) return `Measure the following ingredients: ${expanded}`;
+    if (isFirstInstruction) return `Let's begin cooking: ${expanded}`;
+    return expanded;
   }, [steps]);
 
   const startCooking = () => {
@@ -328,7 +356,7 @@ export default function CookingMode() {
             {isSpeaking ? (
               <><Volume2 size={14} className="text-primary animate-pulse" /> Speaking...</>
             ) : isListening ? (
-              <><div className="w-2 h-2 rounded-full bg-primary animate-ping" /> Listening for "done"...</>
+              <><div className="w-2 h-2 rounded-full bg-primary animate-ping" /> Listening for "Done", "Next", or "Repeat"</>
             ) : (
               <><Pause size={14} /> Paused</>
             )}
@@ -343,7 +371,7 @@ export default function CookingMode() {
             />
           </div>
 
-          <div className="flex-1 flex flex-col justify-center relative">
+          <div className="flex-1 min-h-0 overflow-y-auto relative">
             <AnimatePresence mode="wait">
               {isFinished ? (
                 <motion.div
@@ -351,7 +379,7 @@ export default function CookingMode() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
-                  className="flex flex-col items-center text-center"
+                  className="flex flex-col items-center text-center py-8"
                 >
                   <div className="w-24 h-24 rounded-full bg-green-500/20 text-green-500 flex items-center justify-center mb-6">
                     <CheckCircle size={48} />
@@ -372,7 +400,7 @@ export default function CookingMode() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.4 }}
-                  className="w-full"
+                  className="w-full py-4"
                 >
                   <div className="text-sm font-bold text-primary mb-4 uppercase tracking-wider" data-testid="text-step-label">
                     {(() => {
