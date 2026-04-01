@@ -127,11 +127,11 @@ export default function Auth() {
           <img
             src="/logo.png"
             alt="Feastly"
-            className="w-60 h-60 object-contain -mb-6"
+            className="w-60 h-60 object-contain -mb-10"
             style={{ filter: "drop-shadow(0 2px 4px rgba(178,34,34,0.35))" }}
           />
           <h1 className="text-3xl font-serif font-bold text-primary">Feastly</h1>
-          <p className="text-muted-foreground text-sm mt-1">Swipe. Save. Cook.</p>
+          <p className="text-muted-foreground text-sm mt-1 mb-10">Swipe. Save. Cook.</p>
         </div>
 
         <Card className="rounded-3xl border-0 shadow-lg p-5 bg-card transition-all duration-300 mb-8" data-testid="auth-card">
