@@ -10,12 +10,12 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useNotifications } from "@/hooks/use-notifications-context";
 
 const DIETARY_OPTIONS = [
-  { id: "vegetarian", label: "Vegetarian", description: "No meat or fish", icon: Leaf, color: "green" },
-  { id: "vegan", label: "Vegan", description: "No animal products", icon: Leaf, color: "emerald" },
-  { id: "gluten free", label: "Gluten-Free", description: "No gluten-containing grains", icon: Wheat, color: "amber" },
-  { id: "dairy free", label: "Dairy-Free", description: "No milk or dairy products", icon: MilkOff, color: "blue" },
-  { id: "ketogenic", label: "Keto", description: "Low carb, high fat", icon: EggOff, color: "purple" },
-  { id: "pescetarian", label: "Pescetarian", description: "Fish but no meat", icon: Fish, color: "cyan" },
+  { id: "vegetarian", label: "Vegetarian", description: "No meat or fish", icon: Leaf, iconClass: "bg-primary/10 text-primary" },
+  { id: "vegan", label: "Vegan", description: "No animal products", icon: Leaf, iconClass: "bg-secondary/10 text-secondary" },
+  { id: "gluten free", label: "Gluten-Free", description: "No gluten-containing grains", icon: Wheat, iconClass: "bg-accent/20 text-foreground" },
+  { id: "dairy free", label: "Dairy-Free", description: "No milk or dairy products", icon: MilkOff, iconClass: "bg-primary/10 text-primary" },
+  { id: "ketogenic", label: "Keto", description: "Low carb, high fat", icon: EggOff, iconClass: "bg-muted text-muted-foreground" },
+  { id: "pescetarian", label: "Pescetarian", description: "Fish but no meat", icon: Fish, iconClass: "bg-secondary/10 text-secondary" },
 ];
 
 const ALLERGEN_OPTIONS = [
@@ -120,7 +120,7 @@ export default function Profile() {
               data-testid="link-privacy-policy"
             >
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                   <FileText size={18} />
                 </div>
                 <div className="flex flex-col">
@@ -135,7 +135,7 @@ export default function Profile() {
               data-testid="link-terms-of-service"
             >
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-500">
+                <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
                   <ScrollText size={18} />
                 </div>
                 <div className="flex flex-col">
@@ -176,7 +176,7 @@ export default function Profile() {
                   return (
                     <div key={option.id} className="p-4 flex items-center justify-between" data-testid={`preference-${option.id}`}>
                       <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full bg-${option.color}-500/10 flex items-center justify-center text-${option.color}-500`}>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${option.iconClass}`}>
                           <Icon size={18} />
                         </div>
                         <div className="flex flex-col">
@@ -203,7 +203,7 @@ export default function Profile() {
                   return (
                     <div key={option.id} className="p-4 flex items-center justify-between" data-testid={`allergen-${option.id}`}>
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center text-red-500">
+                        <div className="w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center text-destructive">
                           <Ban size={18} />
                         </div>
                         <span className="font-medium text-foreground">{option.label}</span>
@@ -219,8 +219,8 @@ export default function Profile() {
               </Card>
             </section>
 
-            <div className="flex gap-3 p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20" data-testid="allergen-disclaimer">
-              <AlertTriangle size={20} className="text-amber-500 shrink-0 mt-0.5" />
+            <div className="flex gap-3 p-4 rounded-2xl bg-accent/10 border border-accent/30" data-testid="allergen-disclaimer">
+              <AlertTriangle size={20} className="text-accent-foreground shrink-0 mt-0.5" />
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Allergy filtering is based on ingredient keyword matching and may not catch every allergen. Always verify recipe ingredients yourself to ensure they are safe for your dietary needs.
               </p>
@@ -248,20 +248,20 @@ export default function Profile() {
 
         <div className="space-y-6">
           {user && !user.emailVerified && (
-            <Card className="rounded-2xl border-0 shadow-sm overflow-hidden bg-amber-50 p-4" data-testid="card-email-verification">
+            <Card className="rounded-2xl border-0 shadow-sm overflow-hidden bg-accent/10 border border-accent/30 p-4" data-testid="card-email-verification">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-600 shrink-0">
+                <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-foreground shrink-0">
                   <Mail size={18} />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-medium text-amber-900 text-sm" data-testid="text-verify-prompt">Email not verified</h3>
-                  <p className="text-xs text-amber-700 mt-0.5 mb-3">
+                  <h3 className="font-medium text-foreground text-sm" data-testid="text-verify-prompt">Email not verified</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5 mb-3">
                     Please verify your email address to secure your account. Check your inbox or request a new link.
                   </p>
                   <button
                     onClick={handleResendVerification}
                     disabled={resending}
-                    className="text-sm font-semibold text-amber-700 bg-amber-100 hover:bg-amber-200 px-4 py-2 rounded-full transition-colors disabled:opacity-50"
+                    className="text-sm font-semibold text-foreground bg-accent/20 hover:bg-accent/30 px-4 py-2 rounded-full transition-colors disabled:opacity-50"
                     data-testid="button-profile-resend-verification"
                   >
                     {resending ? "Sending..." : "Resend Verification Email"}
@@ -272,7 +272,7 @@ export default function Profile() {
           )}
 
           {user && user.emailVerified && (
-            <div className="flex items-center gap-2 px-1 text-sm text-green-600" data-testid="text-email-verified">
+            <div className="flex items-center gap-2 px-1 text-sm text-primary" data-testid="text-email-verified">
               <CheckCircle2 size={16} />
               <span>Email verified</span>
             </div>
@@ -287,7 +287,7 @@ export default function Profile() {
                 data-testid="button-preferences"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                     <Settings size={18} />
                   </div>
                   <div className="flex flex-col">
@@ -304,7 +304,7 @@ export default function Profile() {
                 data-testid="button-privacy-security"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-500">
+                  <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
                     <Shield size={18} />
                   </div>
                   <span className="font-medium text-foreground">Privacy & Security</span>
@@ -321,7 +321,7 @@ export default function Profile() {
                 data-testid="section-push-notifications"
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500 shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center text-secondary shrink-0">
                     <Bell size={18} />
                   </div>
                   <div className="flex flex-col min-w-0">
@@ -358,7 +358,7 @@ export default function Profile() {
               </div>
               <div className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors cursor-pointer">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-gray-500/10 flex items-center justify-center text-gray-500">
+                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
                     <CircleHelp size={18} />
                   </div>
                   <span className="font-medium text-foreground">Help & Support</span>

@@ -29,20 +29,20 @@ export function EmailVerificationBanner() {
   };
 
   return (
-    <div className="bg-amber-50 border-b border-amber-200 px-4 py-3" data-testid="banner-email-verification">
+    <div className="bg-accent/15 border-b border-accent/30 px-4 py-3" data-testid="banner-email-verification">
       <div className="flex items-start gap-3 max-w-lg mx-auto">
-        <Mail size={18} className="text-amber-600 shrink-0 mt-0.5" />
+        <Mail size={18} className="text-foreground shrink-0 mt-0.5" />
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-amber-900 font-medium" data-testid="text-verification-message">
+          <p className="text-sm text-foreground font-medium" data-testid="text-verification-message">
             Please verify your email address
           </p>
-          <p className="text-xs text-amber-700 mt-0.5">
+          <p className="text-xs text-muted-foreground mt-0.5">
             Check your inbox for a verification link. 
             <button
               type="button"
               onClick={handleResend}
               disabled={sending}
-              className="underline hover:text-amber-900 ml-1 disabled:opacity-50"
+              className="underline hover:text-foreground ml-1 disabled:opacity-50"
               data-testid="button-resend-verification"
             >
               {sending ? "Sending..." : "Resend email"}
@@ -51,7 +51,7 @@ export function EmailVerificationBanner() {
             <button
               type="button"
               onClick={handleRefresh}
-              className="underline hover:text-amber-900 inline-flex items-center gap-1"
+              className="underline hover:text-foreground inline-flex items-center gap-1"
               data-testid="button-refresh-verification"
             >
               Already verified? Refresh
@@ -61,7 +61,7 @@ export function EmailVerificationBanner() {
         <button
           type="button"
           onClick={() => setDismissed(true)}
-          className="text-amber-500 hover:text-amber-700 shrink-0"
+          className="text-muted-foreground hover:text-foreground shrink-0"
           data-testid="button-dismiss-verification"
         >
           <X size={16} />
