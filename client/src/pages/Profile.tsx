@@ -321,7 +321,7 @@ export default function Profile() {
                 data-testid="section-push-notifications"
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ background: "#E9C46A1A", color: "#E9C46A" }}>
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ background: "#C07A001A", color: "#C07A00" }}>
                     <Bell size={18} />
                   </div>
                   <div className="flex flex-col min-w-0">
