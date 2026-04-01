@@ -62,22 +62,22 @@ export async function sendVerificationEmail(
     to: [to],
     subject: "Verify your Feastly account",
     html: `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 20px;">
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 20px; background: #f0ebe7;">
         <div style="text-align: center; margin-bottom: 32px;">
-          <h1 style="font-size: 28px; font-weight: bold; color: #1a1a1a; margin: 0;">Feastly</h1>
-          <p style="color: #666; font-size: 14px; margin-top: 4px;">Swipe. Save. Cook.</p>
+          <h1 style="font-size: 28px; font-weight: bold; color: #1a1a1a; margin: 0 0 4px;">Feastly</h1>
+          <p style="color: #8a6e5e; font-size: 14px; margin: 0;">Swipe. Save. Cook.</p>
         </div>
-        <div style="background: #fff; border-radius: 16px; padding: 32px; border: 1px solid #e5e5e5;">
+        <div style="background: #faf7f5; border-radius: 16px; padding: 32px; border: 1px solid #ddd3cc;">
           <h2 style="font-size: 20px; color: #1a1a1a; margin: 0 0 12px;">Verify your email</h2>
-          <p style="color: #555; font-size: 15px; line-height: 1.6; margin: 0 0 24px;">
+          <p style="color: #5a4a42; font-size: 15px; line-height: 1.6; margin: 0 0 24px;">
             Thanks for signing up! Please click the button below to verify your email address and activate your account.
           </p>
           <div style="text-align: center; margin-bottom: 24px;">
-            <a href="${verifyUrl}" style="display: inline-block; background: #f97316; color: #fff; font-weight: 600; font-size: 15px; padding: 12px 32px; border-radius: 9999px; text-decoration: none;">
+            <a href="${verifyUrl}" style="display: inline-block; background: #b22222; color: #fff; font-weight: 600; font-size: 15px; padding: 12px 32px; border-radius: 9999px; text-decoration: none;">
               Verify Email
             </a>
           </div>
-          <p style="color: #999; font-size: 12px; line-height: 1.5; margin: 0;">
+          <p style="color: #a08878; font-size: 12px; line-height: 1.5; margin: 0;">
             If you didn't create an account, you can safely ignore this email.
             This link will expire eventually, but you can always request a new one.
           </p>

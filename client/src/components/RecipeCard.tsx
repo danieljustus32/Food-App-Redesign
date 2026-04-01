@@ -120,7 +120,7 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
 
         <motion.div
           style={{ opacity: nopeOpacity }}
-          className="absolute top-8 left-8 border-4 border-red-500 text-red-500 rounded-xl px-4 py-2 text-4xl font-bold uppercase tracking-wider -rotate-12 z-10"
+          className="absolute top-8 left-8 border-4 border-primary text-primary rounded-xl px-4 py-2 text-4xl font-bold uppercase tracking-wider -rotate-12 z-10"
         >
           PASS
         </motion.div>
