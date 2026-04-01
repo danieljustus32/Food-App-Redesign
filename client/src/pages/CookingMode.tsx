@@ -195,10 +195,20 @@ export default function CookingMode() {
       });
   }, [cancelCurrentSpeech, speakWithBrowserFallback]);
 
+  const getStepSpeechText = useCallback((index: number): string => {
+    const step = steps[index];
+    if (!step) return "";
+    const isFirstIngredient = index === 0 && step.type === 'ingredient';
+    const isFirstInstruction = step.type === 'instruction' && index > 0 && steps[index - 1]?.type === 'ingredient';
+    if (isFirstIngredient) return `Measure the following ingredients: ${step.text}`;
+    if (isFirstInstruction) return `Let's begin cooking: ${step.text}`;
+    return step.text;
+  }, [steps]);
+
   const startCooking = () => {
     setHasStarted(true);
     setIsListening(true);
-    speak(steps[0].text);
+    speak(getStepSpeechText(0));
   };
 
   const stopCooking = useCallback(() => {
@@ -214,7 +224,7 @@ export default function CookingMode() {
     setCurrentStepIndex(prev => {
       const nextIndex = prev + 1;
       if (nextIndex < steps.length) {
-        speak(steps[nextIndex].text);
+        speak(getStepSpeechText(nextIndex));
         return nextIndex;
       } else {
         setIsFinished(true);
@@ -229,14 +239,14 @@ export default function CookingMode() {
   const handlePrevStep = () => {
     setCurrentStepIndex(prev => {
       const prevIndex = Math.max(0, prev - 1);
-      speak(steps[prevIndex].text);
+      speak(getStepSpeechText(prevIndex));
       return prevIndex;
     });
   };
 
   const toggleListening = () => setIsListening(!isListening);
 
-  const repeatCurrent = () => speak(steps[currentStepIndex].text);
+  const repeatCurrent = () => speak(getStepSpeechText(currentStepIndex));
   repeatCurrentRef.current = repeatCurrent;
 
   if (isLoading) {
