@@ -8,7 +8,7 @@ export function Header() {
           className="w-16 h-16 object-contain"
           style={{ filter: "drop-shadow(0 2px 4px rgba(178,34,34,0.35))" }}
         />
-        <h1 className="text-xl font-normal tracking-tight text-primary font-serif">
+        <h1 className="text-xl font-bold tracking-tight text-primary font-serif">
           Feastly
         </h1>
       </div>
