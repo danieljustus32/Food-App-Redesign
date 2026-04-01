@@ -440,17 +440,17 @@ export default function CookingMode() {
 
   if (isLoading) {
     return (
-      <div className="fixed inset-0 z-[100] bg-zinc-950 text-white flex items-center justify-center">
-        <Loader2 size={32} className="animate-spin" />
+      <div className="fixed inset-0 z-[100] bg-[#1A1A1A] text-white flex items-center justify-center">
+        <Loader2 size={32} className="animate-spin text-primary" />
       </div>
     );
   }
 
   if (!recipe || !steps.length) {
     return (
-      <div className="fixed inset-0 z-[100] bg-zinc-950 text-white flex flex-col items-center justify-center p-8 text-center">
+      <div className="fixed inset-0 z-[100] bg-[#1A1A1A] text-white flex flex-col items-center justify-center p-8 text-center">
         <h2 className="text-2xl font-serif font-bold mb-4">Recipe not found</h2>
-        <p className="text-zinc-400 mb-8">This recipe may have been removed from your cookbook.</p>
+        <p className="text-[#E8A96A]/70 mb-8">This recipe may have been removed from your cookbook.</p>
         <button onClick={() => setLocation("/cookbook")} className="bg-white/10 hover:bg-white/20 text-white px-8 py-3 rounded-full font-bold">
           Back to Cookbook
         </button>
@@ -459,7 +459,7 @@ export default function CookingMode() {
   }
 
   return (
-    <div className="fixed inset-0 z-[100] bg-zinc-950 text-white flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-[100] bg-[#1A1A1A] text-white flex flex-col overflow-hidden">
       <div className="flex items-center justify-between p-6 z-10">
         <button
           onClick={() => { stopCooking(); setLocation("/cookbook"); }}
@@ -473,7 +473,7 @@ export default function CookingMode() {
         <button
           onClick={toggleListening}
           data-testid="button-toggle-mic"
-          className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${isListening ? 'bg-primary text-white shadow-[0_0_15px_rgba(255,50,50,0.5)]' : 'bg-white/10 text-white/50'}`}
+          className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${isListening ? 'bg-primary text-white shadow-[0_0_15px_rgba(178,34,34,0.5)]' : 'bg-white/10 text-white/50'}`}
         >
           {isListening ? <Mic size={24} /> : <MicOff size={24} />}
         </button>
@@ -482,25 +482,25 @@ export default function CookingMode() {
       {!hasStarted ? (
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center relative">
           <div className="absolute inset-0 bg-cover bg-center opacity-20 blur-xl scale-110" style={{ backgroundImage: `url(${recipe.image})` }} />
-          <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/50 to-zinc-950" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#1A1A1A]/50 to-[#1A1A1A]" />
           <div className="relative z-10 flex flex-col items-center max-w-md w-full">
             <div className="w-32 h-32 rounded-full bg-primary/20 flex items-center justify-center mb-8">
               <Mic size={48} className="text-primary" />
             </div>
             <h1 className="text-4xl font-serif font-bold mb-4">Hands-free Cooking</h1>
-            <p className="text-zinc-400 text-lg mb-8">
+            <p className="text-[#E8A96A]/70 text-lg mb-8">
               I'll read you the ingredients and instructions step-by-step. Say <strong className="text-white">"next"</strong> or <strong className="text-white">"done"</strong> to advance, or <strong className="text-white">"repeat"</strong> to hear the current step again.
             </p>
 
             {inIframe && (
-              <div className="w-full bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 mb-6 text-left">
-                <p className="text-amber-300 text-sm font-medium mb-2">Microphone requires a full browser tab</p>
-                <p className="text-amber-300/70 text-xs mb-3">This feature can't access your microphone inside the Replit preview pane. Open the app in a new tab first.</p>
+              <div className="w-full bg-[#F59E0B]/10 border border-[#F59E0B]/30 rounded-2xl p-4 mb-6 text-left">
+                <p className="text-[#F59E0B] text-sm font-medium mb-2">Microphone requires a full browser tab</p>
+                <p className="text-[#F59E0B]/70 text-xs mb-3">This feature can't access your microphone inside the Replit preview pane. Open the app in a new tab first.</p>
                 <a
                   href={window.location.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-semibold px-4 py-2 rounded-full transition-colors"
+                  className="inline-flex items-center gap-2 bg-[#F59E0B]/20 hover:bg-[#F59E0B]/30 text-[#F59E0B] text-xs font-semibold px-4 py-2 rounded-full transition-colors"
                   data-testid="link-open-new-tab"
                 >
                   Open in new tab
@@ -509,16 +509,16 @@ export default function CookingMode() {
             )}
 
             {micError === 'denied' && !inIframe && (
-              <div className="w-full bg-red-500/10 border border-red-500/30 rounded-2xl p-4 mb-6 text-left">
-                <p className="text-red-300 text-sm font-medium mb-1">Microphone access blocked</p>
-                <p className="text-red-300/70 text-xs">Click the lock icon in your browser's address bar, set Microphone to Allow, then try again.</p>
+              <div className="w-full bg-[#D42020]/10 border border-[#D42020]/30 rounded-2xl p-4 mb-6 text-left">
+                <p className="text-[#D42020] text-sm font-medium mb-1">Microphone access blocked</p>
+                <p className="text-[#D42020]/70 text-xs">Click the lock icon in your browser's address bar, set Microphone to Allow, then try again.</p>
               </div>
             )}
 
             {micError === 'no-device' && !inIframe && (
-              <div className="w-full bg-zinc-500/10 border border-zinc-500/30 rounded-2xl p-4 mb-6 text-left">
-                <p className="text-zinc-300 text-sm font-medium mb-1">No microphone found</p>
-                <p className="text-zinc-400 text-xs">Voice commands won't be available, but you can still navigate steps with the buttons below.</p>
+              <div className="w-full bg-[#2C2C2C] border border-white/10 rounded-2xl p-4 mb-6 text-left">
+                <p className="text-[#E8A96A] text-sm font-medium mb-1">No microphone found</p>
+                <p className="text-[#E8A96A]/60 text-xs">Voice commands won't be available, but you can still navigate steps with the buttons below.</p>
               </div>
             )}
 
@@ -536,11 +536,11 @@ export default function CookingMode() {
         <div className="flex-1 flex flex-col px-6 pb-8 relative">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 text-xs font-medium uppercase tracking-widest flex items-center gap-2">
             {isSpeaking ? (
-              <span className="text-zinc-500"><Volume2 size={14} className="inline text-primary animate-pulse mr-1" />Speaking...</span>
+              <span className="text-[#E8A96A]/60"><Volume2 size={14} className="inline text-primary animate-pulse mr-1" />Speaking...</span>
             ) : micError === 'no-device' ? (
-              <span className="text-zinc-500">No mic — use buttons to navigate</span>
+              <span className="text-[#E8A96A]/50">No mic — use buttons to navigate</span>
             ) : micError === 'denied' ? (
-              <span className="flex items-center gap-2 text-red-400">
+              <span className="flex items-center gap-2 text-[#D42020]">
                 Mic blocked
                 <button
                   onClick={async () => {
@@ -563,20 +563,20 @@ export default function CookingMode() {
                       }
                     }
                   }}
-                  className="text-xs bg-red-500/20 hover:bg-red-500/30 text-red-300 px-2 py-0.5 rounded-full normal-case font-semibold transition-colors"
+                  className="text-xs bg-[#D42020]/20 hover:bg-[#D42020]/30 text-[#D42020]/80 px-2 py-0.5 rounded-full normal-case font-semibold transition-colors"
                   data-testid="button-retry-mic"
                 >
                   Retry
                 </button>
               </span>
             ) : isListening ? (
-              <span className="text-zinc-500"><span className="inline-block w-2 h-2 rounded-full bg-primary animate-ping mr-1" />Listening for "Done", "Next", or "Repeat"</span>
+              <span className="text-[#E8A96A]/60"><span className="inline-block w-2 h-2 rounded-full bg-primary animate-ping mr-1" />Listening for "Done", "Next", or "Repeat"</span>
             ) : (
-              <span className="text-zinc-500"><Pause size={14} className="inline mr-1" />Paused</span>
+              <span className="text-[#E8A96A]/50"><Pause size={14} className="inline mr-1" />Paused</span>
             )}
           </div>
 
-          <div className="w-full h-1 bg-white/10 rounded-full mt-8 mb-8 overflow-hidden">
+          <div className="w-full h-1 bg-[#E8A96A]/10 rounded-full mt-8 mb-8 overflow-hidden">
             <motion.div
               className="h-full bg-primary"
               initial={{ width: 0 }}
@@ -595,11 +595,11 @@ export default function CookingMode() {
                   exit={{ opacity: 0, scale: 0.9 }}
                   className="flex flex-col items-center text-center py-8"
                 >
-                  <div className="w-24 h-24 rounded-full bg-green-500/20 text-green-500 flex items-center justify-center mb-6">
+                  <div className="w-24 h-24 rounded-full bg-[#16A34A]/20 text-[#16A34A] flex items-center justify-center mb-6">
                     <CheckCircle size={48} />
                   </div>
                   <h2 className="text-3xl font-serif font-bold mb-4">Bon Appétit!</h2>
-                  <p className="text-zinc-400 text-lg mb-8">You've completed all the steps for this recipe.</p>
+                  <p className="text-[#E8A96A]/70 text-lg mb-8">You've completed all the steps for this recipe.</p>
                   <button
                     onClick={() => setLocation("/cookbook")}
                     className="bg-white/10 hover:bg-white/20 text-white px-8 py-4 rounded-full font-bold text-lg transition-colors"
@@ -651,7 +651,7 @@ export default function CookingMode() {
               <button
                 onClick={repeatCurrent}
                 data-testid="button-repeat"
-                className="flex-1 h-16 rounded-full bg-white/10 flex items-center justify-center gap-2 font-semibold text-lg active:scale-95 transition-transform"
+                className="flex-1 h-16 rounded-full bg-[#2C2C2C] flex items-center justify-center gap-2 font-semibold text-lg text-[#E8A96A] active:scale-95 transition-transform"
               >
                 <Volume2 size={20} />
                 Repeat
@@ -659,7 +659,7 @@ export default function CookingMode() {
               <button
                 onClick={handleNextStep}
                 data-testid="button-next-step"
-                className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white active:scale-95 transition-transform"
+                className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white active:scale-95 transition-transform shadow-lg shadow-primary/30"
               >
                 <ChevronRight size={24} />
               </button>
