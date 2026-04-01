@@ -123,11 +123,11 @@ export default function Auth() {
   return (
     <div className="min-h-[100dvh] bg-background flex flex-col items-center px-6 py-8 overflow-y-auto">
       <div className="w-full max-w-sm flex flex-col">
-        <div className="flex flex-col items-center justify-center py-4">
+        <div className="flex flex-col items-center justify-center py-1">
           <img
             src="/logo.png"
             alt="Feastly"
-            className="w-20 h-20 object-contain mb-3"
+            className="w-60 h-60 object-contain mb-1"
             style={{ filter: "drop-shadow(0 2px 4px rgba(178,34,34,0.35))" }}
           />
           <h1 className="text-3xl font-serif font-bold text-primary">Feastly</h1>
