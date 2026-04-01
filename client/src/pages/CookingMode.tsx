@@ -41,7 +41,9 @@ export default function CookingMode() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
-  const [micBlocked, setMicBlocked] = useState(false);
+  // 'none' = ok, 'denied' = permission blocked (retryable), 'no-device' = no hardware
+  const [micError, setMicError] = useState<'none' | 'denied' | 'no-device'>('none');
+  const micBlocked = micError !== 'none';
 
   const inIframe = isInIframe();
   const { status: micStatus, checked: micChecked } = useMicPermission();
@@ -74,8 +76,8 @@ export default function CookingMode() {
   // clear the blocked state and restart recognition if cooking is in progress.
   useEffect(() => {
     if (micStatus !== "granted") return;
-    console.log("[CookingMode] micStatus → granted; clearing micBlocked");
-    setMicBlocked(false);
+    console.log("[CookingMode] micStatus → granted; clearing mic error");
+    setMicError('none');
     if (cookingActiveRef.current && !isListeningRef.current) {
       console.log("[CookingMode] auto-restarting listening after permission granted");
       isListeningRef.current = true;
@@ -140,9 +142,15 @@ export default function CookingMode() {
 
       recognition.onerror = (event: any) => {
         console.log("[CookingMode] recognition.onerror →", event.error);
-        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-          // Try getUserMedia as a recovery path: it may trigger a browser permission
-          // dialog (if status is "prompt") or give a definitive denial.
+
+        if (event.error === 'audio-capture') {
+          // No microphone device found — hardware issue, not a permission issue.
+          console.warn("[CookingMode] no mic device found (audio-capture)");
+          isListeningRef.current = false;
+          setIsListening(false);
+          setMicError('no-device');
+        } else if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+          // Permission denied — try getUserMedia to surface the browser dialog.
           if (navigator.mediaDevices?.getUserMedia) {
             navigator.mediaDevices.getUserMedia({ audio: true })
               .then(stream => {
@@ -158,12 +166,13 @@ export default function CookingMode() {
                 console.warn("[CookingMode] getUserMedia recovery denied:", err);
                 isListeningRef.current = false;
                 setIsListening(false);
-                setMicBlocked(true);
+                const name = (err as any)?.name ?? '';
+                setMicError(name === 'NotFoundError' || name === 'DevicesNotFoundError' ? 'no-device' : 'denied');
               });
           } else {
             isListeningRef.current = false;
             setIsListening(false);
-            setMicBlocked(true);
+            setMicError('denied');
           }
         }
       };
@@ -334,9 +343,18 @@ export default function CookingMode() {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         stream.getTracks().forEach(t => t.stop());
         console.log("[CookingMode] getUserMedia granted — mic is available");
-      } catch (err) {
-        console.warn("[CookingMode] getUserMedia denied:", err);
-        micGranted = false;
+      } catch (err: any) {
+        const name = err?.name ?? '';
+        console.warn("[CookingMode] getUserMedia failed:", name, err);
+        // Only treat permission errors as blocking — NotFoundError means no hardware.
+        if (name === 'NotAllowedError' || name === 'SecurityError') {
+          micGranted = false;
+          setMicError('denied');
+        } else if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
+          micGranted = false;
+          setMicError('no-device');
+        }
+        // Other errors (NotReadableError, OverconstrainedError) — let recognition try anyway.
       }
     } else {
       console.warn("[CookingMode] getUserMedia not available, trying recognition directly");
@@ -356,8 +374,6 @@ export default function CookingMode() {
           console.warn("[CookingMode] recognition.start() threw:", e);
         }
       }
-    } else {
-      setMicBlocked(true);
     }
 
     speak(getStepSpeechText(0));
@@ -376,7 +392,7 @@ export default function CookingMode() {
     setIsSpeaking(false);
     setIsFinished(false);
     setCurrentStepIndex(0);
-    setMicBlocked(false);
+    setMicError('none');
   }, [cancelCurrentSpeech]);
 
   const handleNextStep = () => {
@@ -489,10 +505,17 @@ export default function CookingMode() {
               </div>
             )}
 
-            {micBlocked && !inIframe && (
+            {micError === 'denied' && !inIframe && (
               <div className="w-full bg-red-500/10 border border-red-500/30 rounded-2xl p-4 mb-6 text-left">
                 <p className="text-red-300 text-sm font-medium mb-1">Microphone access blocked</p>
-                <p className="text-red-300/70 text-xs">Allow microphone access in your browser's address bar, then try again.</p>
+                <p className="text-red-300/70 text-xs">Click the lock icon in your browser's address bar, set Microphone to Allow, then try again.</p>
+              </div>
+            )}
+
+            {micError === 'no-device' && !inIframe && (
+              <div className="w-full bg-zinc-500/10 border border-zinc-500/30 rounded-2xl p-4 mb-6 text-left">
+                <p className="text-zinc-300 text-sm font-medium mb-1">No microphone found</p>
+                <p className="text-zinc-400 text-xs">Voice commands won't be available, but you can still navigate steps with the buttons below.</p>
               </div>
             )}
 
@@ -511,7 +534,9 @@ export default function CookingMode() {
           <div className="absolute top-0 left-1/2 -translate-x-1/2 text-xs font-medium uppercase tracking-widest flex items-center gap-2">
             {isSpeaking ? (
               <span className="text-zinc-500"><Volume2 size={14} className="inline text-primary animate-pulse mr-1" />Speaking...</span>
-            ) : micBlocked ? (
+            ) : micError === 'no-device' ? (
+              <span className="text-zinc-500">No mic — use buttons to navigate</span>
+            ) : micError === 'denied' ? (
               <span className="flex items-center gap-2 text-red-400">
                 Mic blocked
                 <button
@@ -522,7 +547,7 @@ export default function CookingMode() {
                         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                         stream.getTracks().forEach(t => t.stop());
                         console.log("[CookingMode] retry getUserMedia granted");
-                        setMicBlocked(false);
+                        setMicError('none');
                         isListeningRef.current = true;
                         setIsListening(true);
                         if (recognitionRef.current) {
