@@ -12,6 +12,18 @@ uri = "file://.canvas/assets/feastly-logo-dark.png"
 type = "image"
 title = "feastly logo dark"
 
+[[generated]]
+id = "x_elZ_HzbBo1PYIfVvpvS"
+uri = "file://.canvas/assets/feastly-logo-plate-a.png"
+type = "image"
+title = "feastly plate heart logo"
+
+[[generated]]
+id = "tnc1IajrjWLKxTa9EfE3D"
+uri = "file://.canvas/assets/feastly-logo-plate-b.png"
+type = "image"
+title = "feastly plate cutlery heart logo"
+
 [[outputs]]
 id = "qydXdNm1cOR1JYEHTQC0U"
 uri = "file://attached_assets/generated_images/feastly-logo-v1.png"
