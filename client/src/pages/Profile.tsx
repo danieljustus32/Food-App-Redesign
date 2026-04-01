@@ -287,7 +287,7 @@ export default function Profile() {
                 data-testid="button-preferences"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "#0077B61A", color: "#0077B6" }}>
                     <Settings size={18} />
                   </div>
                   <div className="flex flex-col">
@@ -321,7 +321,7 @@ export default function Profile() {
                 data-testid="section-push-notifications"
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500 shrink-0">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ background: "#E9C46A1A", color: "#E9C46A" }}>
                     <Bell size={18} />
                   </div>
                   <div className="flex flex-col min-w-0">
@@ -358,7 +358,7 @@ export default function Profile() {
               </div>
               <div className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors cursor-pointer">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-gray-500/10 flex items-center justify-center text-gray-500">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "#2C2C2C1A", color: "#2C2C2C" }}>
                     <CircleHelp size={18} />
                   </div>
                   <span className="font-medium text-foreground">Help & Support</span>
