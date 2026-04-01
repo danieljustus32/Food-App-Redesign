@@ -1,6 +1,6 @@
 import type { RecipeProvider, NormalizedRecipe } from "./types";
 import { SpoonacularProvider } from "./spoonacular";
-import { EdamamProvider } from "./edamam";
+// import { EdamamProvider } from "./edamam"; // Disabled in production
 import { MockProvider } from "./mock";
 
 export type { NormalizedRecipe, RecipeProvider };
@@ -19,13 +19,14 @@ function buildProviders(): { real: RecipeProvider[]; mock: RecipeProvider } {
     console.log("[recipe-providers] Spoonacular provider: not available (missing SPOONACULAR_API_KEY)");
   }
 
-  const edamam = new EdamamProvider();
-  if (edamam.isAvailable()) {
-    real.push(edamam);
-    console.log("[recipe-providers] Edamam provider: available");
-  } else {
-    console.log("[recipe-providers] Edamam provider: not available (missing EDAMAM_APP_ID / EDAMAM_APP_KEY)");
-  }
+  // Edamam provider disabled in production
+  // const edamam = new EdamamProvider();
+  // if (edamam.isAvailable()) {
+  //   real.push(edamam);
+  //   console.log("[recipe-providers] Edamam provider: available");
+  // } else {
+  //   console.log("[recipe-providers] Edamam provider: not available (missing EDAMAM_APP_ID / EDAMAM_APP_KEY)");
+  // }
 
   if (real.length === 0 && isDev) {
     console.log("[recipe-providers] No real providers available, using mock provider (APP_ENV=dev)");
