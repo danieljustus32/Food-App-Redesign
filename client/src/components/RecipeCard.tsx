@@ -126,7 +126,7 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
         </motion.div>
 
         {/* Info panel — slightly-darker-than-white background, compact */}
-        <div className="bg-neutral-50 px-4 pt-3 pb-8 z-10 pointer-events-none">
+        <div className="bg-neutral-50 px-4 pt-6 pb-8 z-10 pointer-events-none">
           <div className="flex items-center gap-2 mb-1.5">
             <div className="flex gap-2 flex-wrap flex-1">
               {recipe.tags.slice(0, 3).map(tag => (
