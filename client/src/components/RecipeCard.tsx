@@ -106,8 +106,8 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
       <Card className="w-full h-full overflow-hidden rounded-3xl shadow-xl relative border-0 touch-none flex flex-col">
         {/* Image section — fixed 3:2 ratio matches Spoonacular landscape images */}
         <div
-          className="w-full bg-neutral-100 bg-contain bg-center bg-no-repeat flex-shrink-0"
-          style={{ backgroundImage: `url(${recipe.image})`, aspectRatio: "3/2" }}
+          className="flex-1 bg-neutral-100 bg-contain bg-center bg-no-repeat"
+          style={{ backgroundImage: `url(${recipe.image})` }}
         />
 
         {/* SAVE / PASS indicators */}
@@ -125,9 +125,9 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
           PASS
         </motion.div>
 
-        {/* Info panel — slightly-darker-than-white background, fills remaining card height */}
-        <div className="bg-neutral-50 px-5 pt-4 pb-6 z-10 pointer-events-none flex-1 flex flex-col justify-between">
-          <div className="flex items-center gap-2 mb-2">
+        {/* Info panel — slightly-darker-than-white background, compact */}
+        <div className="bg-neutral-50 px-4 pt-3 pb-4 z-10 pointer-events-none">
+          <div className="flex items-center gap-2 mb-1.5">
             <div className="flex gap-2 flex-wrap flex-1">
               {recipe.tags.slice(0, 3).map(tag => (
                 <Badge key={tag} variant="secondary" className="bg-neutral-200 hover:bg-neutral-300 text-neutral-700 border-0 rounded-full px-3">
@@ -143,7 +143,7 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
               {showDetails ? <X size={20} /> : <Info size={20} />}
             </button>
           </div>
-          <h2 className="text-2xl font-serif font-bold mb-2 leading-tight text-neutral-900">{recipe.title}</h2>
+          <h2 className="text-xl font-serif font-bold mb-1.5 leading-tight text-neutral-900">{recipe.title}</h2>
           <div className="flex items-center gap-4 text-sm font-medium text-neutral-500">
             <span className="flex items-center gap-1"><Clock size={16} /> {recipe.readyInMinutes} min</span>
             <span className="flex items-center gap-1"><Users size={16} /> {recipe.servings} servings</span>
