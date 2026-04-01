@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { ChefHat, Eye, EyeOff, Check, X } from "lucide-react";
+import { Eye, EyeOff, Check, X } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 
@@ -124,10 +124,13 @@ export default function Auth() {
     <div className="min-h-[100dvh] bg-background flex flex-col items-center px-6 py-8 overflow-y-auto">
       <div className="w-full max-w-sm flex flex-col">
         <div className="flex flex-col items-center justify-center py-4">
-          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-3">
-            <ChefHat size={32} className="text-primary" />
-          </div>
-          <h1 className="text-3xl font-serif font-bold text-foreground">Feastly</h1>
+          <img
+            src="/logo.png"
+            alt="Feastly"
+            className="w-20 h-20 object-contain mb-3"
+            style={{ filter: "drop-shadow(0 2px 4px rgba(178,34,34,0.35))" }}
+          />
+          <h1 className="text-3xl font-serif font-bold text-primary">Feastly</h1>
           <p className="text-muted-foreground text-sm mt-1">Swipe. Save. Cook.</p>
         </div>
 
