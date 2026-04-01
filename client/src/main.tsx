@@ -24,10 +24,12 @@ if ("serviceWorker" in navigator) {
       })
       .catch(() => {});
 
-    // Reload the page once the new service worker has taken control
+    // Only reload when an *existing* controller is replaced (i.e. a real update).
+    // If there was no controller yet this is the first install — don't reload.
+    const hadController = !!navigator.serviceWorker.controller;
     let refreshing = false;
     navigator.serviceWorker.addEventListener("controllerchange", () => {
-      if (!refreshing) {
+      if (hadController && !refreshing) {
         refreshing = true;
         window.location.reload();
       }
