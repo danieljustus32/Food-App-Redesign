@@ -53,10 +53,11 @@ export default function CookingMode() {
     isSpeakingRef.current = isSpeaking;
   }, [isSpeaking]);
 
+  const repeatCurrentRef = useRef<() => void>(() => {});
+
   useEffect(() => {
     if (recipe) {
       const allSteps = [
-        { type: 'instruction' as const, text: `Let's start cooking ${recipe.title}. I'll guide you through measuring out each ingredient first, then read you the recipe's instructions. Say "done" or "next" when you're ready to measure out the next ingredient or move on to the next step. Let's begin.` },
         ...recipe.ingredients.filter(ing => !isSaltOrPepper(ing)).map(ing => ({ type: 'ingredient' as const, text: ing })),
         ...recipe.instructions.map(inst => ({ type: 'instruction' as const, text: inst }))
       ];
@@ -76,7 +77,9 @@ export default function CookingMode() {
         const lastResult = event.results[event.results.length - 1];
         if (lastResult.isFinal) {
           const transcript = lastResult[0].transcript.trim().toLowerCase();
-          if (transcript.includes("done") || transcript.includes("next") || transcript.includes("continue") || transcript.includes("ready")) {
+          if (transcript.includes("repeat") || transcript.includes("again")) {
+            repeatCurrentRef.current();
+          } else if (transcript.includes("done") || transcript.includes("next") || transcript.includes("continue") || transcript.includes("ready")) {
             handleNextStepRef.current();
           }
         }
@@ -194,10 +197,8 @@ export default function CookingMode() {
 
   const startCooking = () => {
     setHasStarted(true);
-    speak(steps[0].text, () => {
-      setIsListening(true);
-      handleNextStepRef.current();
-    });
+    setIsListening(true);
+    speak(steps[0].text);
   };
 
   const stopCooking = useCallback(() => {
@@ -236,6 +237,7 @@ export default function CookingMode() {
   const toggleListening = () => setIsListening(!isListening);
 
   const repeatCurrent = () => speak(steps[currentStepIndex].text);
+  repeatCurrentRef.current = repeatCurrent;
 
   if (isLoading) {
     return (
@@ -288,7 +290,7 @@ export default function CookingMode() {
             </div>
             <h1 className="text-4xl font-serif font-bold mb-4">Hands-free Cooking</h1>
             <p className="text-zinc-400 text-lg mb-12">
-              I'll read you the ingredients and instructions step-by-step. Just say <strong className="text-white">"done"</strong> or <strong className="text-white">"next"</strong> when you're ready to proceed.
+              I'll read you the ingredients and instructions step-by-step. Say <strong className="text-white">"next"</strong> or <strong className="text-white">"done"</strong> to advance, or <strong className="text-white">"repeat"</strong> to hear the current step again.
             </p>
             <button
               onClick={startCooking}
@@ -355,14 +357,13 @@ export default function CookingMode() {
                   <div className="text-sm font-bold text-primary mb-4 uppercase tracking-wider" data-testid="text-step-label">
                     {(() => {
                       const currentStep = steps[currentStepIndex];
-                      if (currentStepIndex === 0) return 'Introduction';
                       if (currentStep.type === 'ingredient') {
                         const position = steps.slice(0, currentStepIndex).filter(s => s.type === 'ingredient').length + 1;
                         const total = steps.filter(s => s.type === 'ingredient').length;
                         return `Ingredient ${position} of ${total}`;
                       } else {
-                        const position = steps.slice(0, currentStepIndex).filter(s => s.type === 'instruction').length;
-                        const total = steps.filter(s => s.type === 'instruction').length - 1;
+                        const position = steps.slice(0, currentStepIndex).filter(s => s.type === 'instruction').length + 1;
+                        const total = steps.filter(s => s.type === 'instruction').length;
                         return `Instruction ${position} of ${total}`;
                       }
                     })()}
