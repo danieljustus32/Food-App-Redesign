@@ -75,6 +75,7 @@ export default function CookingMode() {
       recognition.lang = 'en-US';
 
       recognition.onresult = (event: any) => {
+        if (isSpeakingRef.current) return;
         const lastResult = event.results[event.results.length - 1];
         if (lastResult.isFinal) {
           const transcript = lastResult[0].transcript.trim().toLowerCase();
@@ -93,7 +94,7 @@ export default function CookingMode() {
       };
 
       recognition.onend = () => {
-        if (cookingActiveRef.current && isListeningRef.current && !isSpeakingRef.current) {
+        if (cookingActiveRef.current && isListeningRef.current) {
           try { recognition.start(); } catch (e) { }
         }
       };
@@ -119,12 +120,12 @@ export default function CookingMode() {
 
   useEffect(() => {
     if (!recognitionRef.current) return;
-    if (isListening && !isSpeaking) {
+    if (isListening) {
       try { recognitionRef.current.start(); } catch (e) { }
     } else {
       try { recognitionRef.current.stop(); } catch (e) { }
     }
-  }, [isListening, isSpeaking]);
+  }, [isListening]);
 
   const speakWithBrowserFallback = useCallback((text: string, onEnd?: () => void) => {
     const synth = window.speechSynthesis;
