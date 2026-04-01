@@ -24,6 +24,30 @@ uri = "file://.canvas/assets/feastly-logo-plate-b.png"
 type = "image"
 title = "feastly plate cutlery heart logo"
 
+[[generated]]
+id = "rccoPq1fm9O-72icSADBu"
+uri = "file://.canvas/assets/feastly-v1.png"
+type = "image"
+title = "feastly fork knife plate heart v1"
+
+[[generated]]
+id = "v3DYKSOQM1HRwrotuHwAP"
+uri = "file://.canvas/assets/feastly-v2.png"
+type = "image"
+title = "feastly fork knife plate heart v2"
+
+[[generated]]
+id = "jp1n8WMttGnXGOzOdPYAu"
+uri = "file://.canvas/assets/feastly-v3.png"
+type = "image"
+title = "feastly fork knife plate heart v3"
+
+[[generated]]
+id = "7UZ1bj8P72MJj0iOe3oW7"
+uri = "file://.canvas/assets/feastly-v4.png"
+type = "image"
+title = "feastly fork knife plate heart v4 rounded"
+
 [[outputs]]
 id = "qydXdNm1cOR1JYEHTQC0U"
 uri = "file://attached_assets/generated_images/feastly-logo-v1.png"
