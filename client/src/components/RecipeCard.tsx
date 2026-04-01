@@ -103,14 +103,14 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
       animate={{ x: 0, rotate: 0 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
     >
-      <Card className="w-full h-full overflow-hidden rounded-3xl shadow-xl relative border-0 touch-none">
+      <Card className="w-full h-full overflow-hidden rounded-3xl shadow-xl relative border-0 touch-none flex flex-col">
+        {/* Image section — contain so landscape photos aren't cropped */}
         <div
-          className="absolute inset-0 bg-cover bg-center"
+          className="flex-1 bg-neutral-100 bg-contain bg-center bg-no-repeat"
           style={{ backgroundImage: `url(${recipe.image})` }}
         />
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-
+        {/* SAVE / PASS indicators */}
         <motion.div
           style={{ opacity: likeOpacity }}
           className="absolute top-8 right-8 border-4 border-green-500 text-green-500 rounded-xl px-4 py-2 text-4xl font-bold uppercase tracking-wider rotate-12 z-10"
@@ -125,25 +125,26 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
           PASS
         </motion.div>
 
-        <div className="absolute bottom-0 left-0 right-0 p-6 text-white pb-10 z-10 pointer-events-none">
-          <div className="flex items-center gap-2 mb-3">
+        {/* Info panel — slightly-darker-than-white background */}
+        <div className="bg-neutral-50 px-5 pt-4 pb-6 z-10 pointer-events-none" style={{ flexShrink: 0 }}>
+          <div className="flex items-center gap-2 mb-2">
             <div className="flex gap-2 flex-wrap flex-1">
               {recipe.tags.slice(0, 3).map(tag => (
-                <Badge key={tag} variant="secondary" className="bg-white/20 hover:bg-white/30 text-white backdrop-blur-md border-0 rounded-full px-3">
+                <Badge key={tag} variant="secondary" className="bg-neutral-200 hover:bg-neutral-300 text-neutral-700 border-0 rounded-full px-3">
                   {tag}
                 </Badge>
               ))}
             </div>
             <button
               onClick={handleInfoClick}
-              className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/40 transition-colors pointer-events-auto flex-shrink-0"
+              className="w-10 h-10 rounded-full bg-neutral-200 flex items-center justify-center text-neutral-700 hover:bg-neutral-300 transition-colors pointer-events-auto flex-shrink-0"
               data-testid="button-info"
             >
               {showDetails ? <X size={20} /> : <Info size={20} />}
             </button>
           </div>
-          <h2 className="text-3xl font-serif font-bold mb-2 leading-tight">{recipe.title}</h2>
-          <div className="flex items-center gap-4 text-sm font-medium text-white/90">
+          <h2 className="text-2xl font-serif font-bold mb-2 leading-tight text-neutral-900">{recipe.title}</h2>
+          <div className="flex items-center gap-4 text-sm font-medium text-neutral-500">
             <span className="flex items-center gap-1"><Clock size={16} /> {recipe.readyInMinutes} min</span>
             <span className="flex items-center gap-1"><Users size={16} /> {recipe.servings} servings</span>
           </div>
