@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, useMotionValue, useTransform, AnimatePresence } from "framer-motion";
-import { Info, X, Heart, Clock, Users, ChefHat } from "lucide-react";
+import { Info, X, Clock, Users } from "lucide-react";
 import { useDrag } from "@use-gesture/react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -198,8 +198,8 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
                 </div>
 
                 <div className="mb-8">
-                  <h3 className="text-lg font-bold flex items-center gap-2 mb-4 text-foreground">
-                    <Heart className="text-primary fill-primary/20" size={20} /> Ingredients
+                  <h3 className="text-lg font-bold mb-4 text-foreground">
+                    Ingredients
                   </h3>
                   <ul className="space-y-3">
                     {recipe.ingredients.map((ing, i) => (
@@ -212,8 +212,8 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-bold flex items-center gap-2 mb-4 text-foreground">
-                    <ChefHat className="text-secondary" size={20} /> Instructions
+                  <h3 className="text-lg font-bold mb-4 text-foreground">
+                    Instructions
                   </h3>
                   <ol className="space-y-4">
                     {recipe.instructions.map((step, i) => (
