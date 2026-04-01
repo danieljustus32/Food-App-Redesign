@@ -141,9 +141,30 @@ export default function CookingMode() {
       recognition.onerror = (event: any) => {
         console.log("[CookingMode] recognition.onerror →", event.error);
         if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-          isListeningRef.current = false;
-          setIsListening(false);
-          setMicBlocked(true);
+          // Try getUserMedia as a recovery path: it may trigger a browser permission
+          // dialog (if status is "prompt") or give a definitive denial.
+          if (navigator.mediaDevices?.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+              .then(stream => {
+                stream.getTracks().forEach(t => t.stop());
+                console.log("[CookingMode] getUserMedia recovery succeeded, restarting recognition");
+                if (cookingActiveRef.current) {
+                  try { recognition.start(); } catch (e) {
+                    console.warn("[CookingMode] recognition.start() after recovery threw:", e);
+                  }
+                }
+              })
+              .catch(err => {
+                console.warn("[CookingMode] getUserMedia recovery denied:", err);
+                isListeningRef.current = false;
+                setIsListening(false);
+                setMicBlocked(true);
+              });
+          } else {
+            isListeningRef.current = false;
+            setIsListening(false);
+            setMicBlocked(true);
+          }
         }
       };
 
@@ -299,26 +320,46 @@ export default function CookingMode() {
     return expanded;
   }, [steps]);
 
-  const startCooking = () => {
-    console.log("[CookingMode] startCooking →", {
-      micStatus,
-      hasRecognition: !!recognitionRef.current,
-      inIframe,
+  const startCooking = async () => {
+    console.log("[CookingMode] startCooking → priming mic via getUserMedia first", {
+      micStatus, hasRecognition: !!recognitionRef.current, inIframe,
     });
-    cookingActiveRef.current = true;
-    isListeningRef.current = true;
-    setHasStarted(true);
-    setIsListening(true);
-    if (recognitionRef.current) {
+
+    // Always call getUserMedia before recognition.start().
+    // This triggers the real browser permission dialog (if status is "prompt"),
+    // confirms access (if already granted), or gives a clear denial.
+    let micGranted = true;
+    if (navigator.mediaDevices?.getUserMedia) {
       try {
-        recognitionRef.current.start();
-        console.log("[CookingMode] recognition.start() called");
-      } catch (e) {
-        console.warn("[CookingMode] recognition.start() threw:", e);
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach(t => t.stop());
+        console.log("[CookingMode] getUserMedia granted — mic is available");
+      } catch (err) {
+        console.warn("[CookingMode] getUserMedia denied:", err);
+        micGranted = false;
       }
     } else {
-      console.warn("[CookingMode] recognitionRef.current is null — SpeechRecognition not initialised");
+      console.warn("[CookingMode] getUserMedia not available, trying recognition directly");
     }
+
+    cookingActiveRef.current = true;
+    setHasStarted(true);
+
+    if (micGranted) {
+      isListeningRef.current = true;
+      setIsListening(true);
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.start();
+          console.log("[CookingMode] recognition.start() called after getUserMedia");
+        } catch (e) {
+          console.warn("[CookingMode] recognition.start() threw:", e);
+        }
+      }
+    } else {
+      setMicBlocked(true);
+    }
+
     speak(getStepSpeechText(0));
   };
 
@@ -474,14 +515,23 @@ export default function CookingMode() {
               <span className="flex items-center gap-2 text-red-400">
                 Mic blocked
                 <button
-                  onClick={() => {
-                    console.log("[CookingMode] retry mic tapped, micStatus:", micStatus);
-                    setMicBlocked(false);
-                    isListeningRef.current = true;
-                    setIsListening(true);
-                    if (recognitionRef.current) {
-                      try { recognitionRef.current.start(); } catch (e) {
-                        console.warn("[CookingMode] retry recognition.start() threw:", e);
+                  onClick={async () => {
+                    console.log("[CookingMode] retry mic: calling getUserMedia first");
+                    if (navigator.mediaDevices?.getUserMedia) {
+                      try {
+                        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        stream.getTracks().forEach(t => t.stop());
+                        console.log("[CookingMode] retry getUserMedia granted");
+                        setMicBlocked(false);
+                        isListeningRef.current = true;
+                        setIsListening(true);
+                        if (recognitionRef.current) {
+                          try { recognitionRef.current.start(); } catch (e) {
+                            console.warn("[CookingMode] retry recognition.start() threw:", e);
+                          }
+                        }
+                      } catch (err) {
+                        console.warn("[CookingMode] retry getUserMedia still denied:", err);
                       }
                     }
                   }}
