@@ -2,6 +2,7 @@
   "name": "Feastly",
   "short_name": "Feastly",
   "description": "Swipe to discover and save delicious recipes. Hands-free cooking mode, shopping lists, and more.",
+  "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
