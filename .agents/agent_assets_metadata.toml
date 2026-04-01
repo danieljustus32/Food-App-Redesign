@@ -48,6 +48,24 @@ uri = "file://.canvas/assets/feastly-v4.png"
 type = "image"
 title = "feastly fork knife plate heart v4 rounded"
 
+[[generated]]
+id = "CxaJ-orWMUs9IWq-QhM5v"
+uri = "file://.canvas/assets/feastly-heart-a.png"
+type = "image"
+title = "feastly heart logo line art A"
+
+[[generated]]
+id = "C6_A4u19KzREUnVy_G4W0"
+uri = "file://.canvas/assets/feastly-heart-b.png"
+type = "image"
+title = "feastly heart logo filled B"
+
+[[generated]]
+id = "Da2SUB_2RikIeLqnCur5D"
+uri = "file://.canvas/assets/feastly-heart-c.png"
+type = "image"
+title = "feastly heart logo outline C"
+
 [[outputs]]
 id = "qydXdNm1cOR1JYEHTQC0U"
 uri = "file://attached_assets/generated_images/feastly-logo-v1.png"
