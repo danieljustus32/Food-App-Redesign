@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect } from "react";
 import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -7,9 +7,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import { NotificationsProvider, useNotifications } from "@/hooks/use-notifications-context";
 import { NotificationPermissionPrompt } from "@/components/NotificationPermissionPrompt";
-import { MicrophonePermissionModal } from "@/components/MicrophonePermissionModal";
-import { useMicPermission } from "@/hooks/use-mic-permission";
-import { isInIframe } from "@/lib/iframeCheck";
 
 import NotFound from "@/pages/not-found";
 import Auth from "@/pages/Auth";
@@ -25,40 +22,12 @@ import TermsOfService from "@/pages/TermsOfService";
 import { Header } from "@/components/layout/Header";
 import { BottomNav } from "@/components/layout/BottomNav";
 
-const MIC_DISMISS_KEY = "feastly-mic-prompt-dismissed-until";
-const MIC_DISMISS_DAYS = 14;
-
 function AppRouterInner() {
   const { user, isLoading } = useAuth();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [location] = useLocation();
   const { showPrompt, dismissPrompt, triggerPromptIfNeeded } = useNotifications();
   const promptTriggeredRef = useRef(false);
-  const { status: micStatus, checked: micChecked } = useMicPermission();
-  const [micModalDismissed, setMicModalDismissed] = useState(() => {
-    try {
-      const until = localStorage.getItem(MIC_DISMISS_KEY);
-      return until ? Date.now() < parseInt(until, 10) : false;
-    } catch {
-      return false;
-    }
-  });
-
-  const showMicModal =
-    !!user &&
-    micChecked &&
-    !micModalDismissed &&
-    (micStatus === "prompt" || micStatus === "denied");
-
-  const handleDismissMicModal = () => {
-    if (micStatus === "prompt") {
-      try {
-        const until = Date.now() + MIC_DISMISS_DAYS * 24 * 60 * 60 * 1000;
-        localStorage.setItem(MIC_DISMISS_KEY, String(until));
-      } catch {}
-    }
-    setMicModalDismissed(true);
-  };
 
   useEffect(() => {
     scrollRef.current?.scrollTo(0, 0);
@@ -104,7 +73,6 @@ function AppRouterInner() {
       </div>
       <BottomNav />
       {showPrompt && <NotificationPermissionPrompt onDismiss={dismissPrompt} />}
-      {showMicModal && <MicrophonePermissionModal onDismiss={handleDismissMicModal} inIframe={isInIframe()} />}
     </div>
   );
 }

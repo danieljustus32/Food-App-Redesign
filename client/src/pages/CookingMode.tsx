@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { isSaltOrPepper } from "@/lib/ingredientFilters";
 import { isInIframe } from "@/lib/iframeCheck";
+import { useMicPermission } from "@/hooks/use-mic-permission";
+import { MicrophonePermissionModal } from "@/components/MicrophonePermissionModal";
 
 interface SavedRecipe {
   id: string;
@@ -19,6 +21,8 @@ interface SavedRecipe {
   instructions: string[];
   tags: string[];
 }
+
+const MIC_DISMISS_KEY = "feastly-mic-prompt-dismissed-until";
 
 export default function CookingMode() {
   const [match, params] = useRoute("/cook/:id");
@@ -40,6 +44,31 @@ export default function CookingMode() {
   const [micBlocked, setMicBlocked] = useState(false);
 
   const inIframe = isInIframe();
+  const { status: micStatus, checked: micChecked } = useMicPermission();
+
+  const [micModalDismissed, setMicModalDismissed] = useState(() => {
+    try {
+      const until = localStorage.getItem(MIC_DISMISS_KEY);
+      return until ? Date.now() < parseInt(until, 10) : false;
+    } catch {
+      return false;
+    }
+  });
+
+  const showMicModal =
+    micChecked &&
+    !micModalDismissed &&
+    (micStatus === "prompt" || micStatus === "denied");
+
+  const handleDismissMicModal = () => {
+    if (micStatus === "prompt") {
+      try {
+        const until = Date.now() + 14 * 24 * 60 * 60 * 1000;
+        localStorage.setItem(MIC_DISMISS_KEY, String(until));
+      } catch {}
+    }
+    setMicModalDismissed(true);
+  };
 
   const recognitionRef = useRef<any>(null);
   const handleNextStepRef = useRef<() => void>(() => {});
@@ -508,6 +537,9 @@ export default function CookingMode() {
             </div>
           )}
         </div>
+      )}
+      {showMicModal && (
+        <MicrophonePermissionModal onDismiss={handleDismissMicModal} inIframe={inIframe} />
       )}
     </div>
   );
