@@ -227,11 +227,11 @@ export default function Auth() {
                 {passwordRules.map((rule, i) => (
                   <div key={i} className="flex items-center gap-2 text-sm">
                     {ruleResults[i] ? (
-                      <Check size={14} className="text-primary shrink-0" />
+                      <Check size={14} className="text-canopy shrink-0" />
                     ) : (
                       <X size={14} className="text-muted-foreground/50 shrink-0" />
                     )}
-                    <span className={ruleResults[i] ? "text-primary" : "text-muted-foreground"}>
+                    <span className={ruleResults[i] ? "text-canopy" : "text-muted-foreground"}>
                       {rule.label}
                     </span>
                   </div>
@@ -268,7 +268,7 @@ export default function Auth() {
                   </p>
                 )}
                 {!isLogin && confirmPassword.length > 0 && passwordsMatch && (
-                  <p className="text-xs text-primary mt-1.5 ml-1 flex items-center gap-1">
+                  <p className="text-xs text-canopy mt-1.5 ml-1 flex items-center gap-1">
                     <Check size={12} /> Passwords match
                   </p>
                 )}

@@ -10,11 +10,11 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useNotifications } from "@/hooks/use-notifications-context";
 
 const DIETARY_OPTIONS = [
-  { id: "vegetarian", label: "Vegetarian", description: "No meat or fish", icon: Leaf, iconClass: "bg-primary/10 text-primary" },
-  { id: "vegan", label: "Vegan", description: "No animal products", icon: Leaf, iconClass: "bg-secondary/10 text-secondary" },
-  { id: "gluten free", label: "Gluten-Free", description: "No gluten-containing grains", icon: Wheat, iconClass: "bg-accent/20 text-foreground" },
-  { id: "dairy free", label: "Dairy-Free", description: "No milk or dairy products", icon: MilkOff, iconClass: "bg-primary/10 text-primary" },
-  { id: "ketogenic", label: "Keto", description: "Low carb, high fat", icon: EggOff, iconClass: "bg-muted text-muted-foreground" },
+  { id: "vegetarian", label: "Vegetarian", description: "No meat or fish", icon: Leaf, iconClass: "bg-canopy/10 text-canopy" },
+  { id: "vegan", label: "Vegan", description: "No animal products", icon: Leaf, iconClass: "bg-canopy/10 text-canopy" },
+  { id: "gluten free", label: "Gluten-Free", description: "No gluten-containing grains", icon: Wheat, iconClass: "bg-harvest/20 text-harvest" },
+  { id: "dairy free", label: "Dairy-Free", description: "No milk or dairy products", icon: MilkOff, iconClass: "bg-canopy/10 text-canopy" },
+  { id: "ketogenic", label: "Keto", description: "Low carb, high fat", icon: EggOff, iconClass: "bg-deep-dive/10 text-deep-dive" },
   { id: "pescetarian", label: "Pescetarian", description: "Fish but no meat", icon: Fish, iconClass: "bg-secondary/10 text-secondary" },
 ];
 
@@ -135,7 +135,7 @@ export default function Profile() {
               data-testid="link-terms-of-service"
             >
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+                <div className="w-8 h-8 rounded-full bg-deep-dive/10 flex items-center justify-center text-deep-dive">
                   <ScrollText size={18} />
                 </div>
                 <div className="flex flex-col">
@@ -219,8 +219,8 @@ export default function Profile() {
               </Card>
             </section>
 
-            <div className="flex gap-3 p-4 rounded-2xl bg-accent/10 border border-accent/30" data-testid="allergen-disclaimer">
-              <AlertTriangle size={20} className="text-accent-foreground shrink-0 mt-0.5" />
+            <div className="flex gap-3 p-4 rounded-2xl bg-harvest/10 border border-harvest/30" data-testid="allergen-disclaimer">
+              <AlertTriangle size={20} className="text-harvest shrink-0 mt-0.5" />
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Allergy filtering is based on ingredient keyword matching and may not catch every allergen. Always verify recipe ingredients yourself to ensure they are safe for your dietary needs.
               </p>
@@ -248,9 +248,9 @@ export default function Profile() {
 
         <div className="space-y-6">
           {user && !user.emailVerified && (
-            <Card className="rounded-2xl border-0 shadow-sm overflow-hidden bg-accent/10 border border-accent/30 p-4" data-testid="card-email-verification">
+            <Card className="rounded-2xl border-0 shadow-sm overflow-hidden bg-harvest/10 border border-harvest/30 p-4" data-testid="card-email-verification">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-foreground shrink-0">
+                <div className="w-8 h-8 rounded-full bg-harvest/20 flex items-center justify-center text-foreground shrink-0">
                   <Mail size={18} />
                 </div>
                 <div className="flex-1">
@@ -261,7 +261,7 @@ export default function Profile() {
                   <button
                     onClick={handleResendVerification}
                     disabled={resending}
-                    className="text-sm font-semibold text-foreground bg-accent/20 hover:bg-accent/30 px-4 py-2 rounded-full transition-colors disabled:opacity-50"
+                    className="text-sm font-semibold text-foreground bg-harvest/20 hover:bg-harvest/30 px-4 py-2 rounded-full transition-colors disabled:opacity-50"
                     data-testid="button-profile-resend-verification"
                   >
                     {resending ? "Sending..." : "Resend Verification Email"}
@@ -272,7 +272,7 @@ export default function Profile() {
           )}
 
           {user && user.emailVerified && (
-            <div className="flex items-center gap-2 px-1 text-sm text-primary" data-testid="text-email-verified">
+            <div className="flex items-center gap-2 px-1 text-sm text-canopy" data-testid="text-email-verified">
               <CheckCircle2 size={16} />
               <span>Email verified</span>
             </div>
@@ -304,7 +304,7 @@ export default function Profile() {
                 data-testid="button-privacy-security"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+                  <div className="w-8 h-8 rounded-full bg-deep-dive/10 flex items-center justify-center text-deep-dive">
                     <Shield size={18} />
                   </div>
                   <span className="font-medium text-foreground">Privacy & Security</span>

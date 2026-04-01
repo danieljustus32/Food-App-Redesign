@@ -113,7 +113,7 @@ export function RecipeCard({ recipe, onSwipeLeft, onSwipeRight, active }: Recipe
 
         <motion.div
           style={{ opacity: likeOpacity }}
-          className="absolute top-8 right-8 border-4 border-primary text-primary rounded-xl px-4 py-2 text-4xl font-bold uppercase tracking-wider rotate-12 z-10"
+          className="absolute top-8 right-8 border-4 border-canopy text-canopy rounded-xl px-4 py-2 text-4xl font-bold uppercase tracking-wider rotate-12 z-10"
         >
           SAVE
         </motion.div>

@@ -266,7 +266,7 @@ export default function CookingMode() {
                   exit={{ opacity: 0, scale: 0.9 }}
                   className="flex flex-col items-center text-center"
                 >
-                  <div className="w-24 h-24 rounded-full bg-primary/20 text-primary flex items-center justify-center mb-6">
+                  <div className="w-24 h-24 rounded-full bg-canopy/20 text-canopy flex items-center justify-center mb-6">
                     <CheckCircle size={48} />
                   </div>
                   <h2 className="text-3xl font-serif font-bold mb-4">Bon Appétit!</h2>

@@ -211,10 +211,10 @@ export default function Discover() {
 
               <button
                 onClick={handleSwipeRight}
-                className="w-16 h-16 rounded-full bg-card shadow-[0_8px_30px_rgb(0,0,0,0.08)] flex items-center justify-center text-primary active:scale-90 transition-transform hover:bg-primary/5"
+                className="w-16 h-16 rounded-full bg-card shadow-[0_8px_30px_rgb(0,0,0,0.08)] flex items-center justify-center text-canopy active:scale-90 transition-transform hover:bg-canopy/5"
                 data-testid="button-like"
               >
-                <Heart size={32} strokeWidth={2.5} className="fill-primary" />
+                <Heart size={32} strokeWidth={2.5} className="fill-canopy" />
               </button>
             </>
           )}
