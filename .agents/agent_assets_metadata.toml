@@ -66,6 +66,30 @@ uri = "file://.canvas/assets/feastly-heart-c.png"
 type = "image"
 title = "feastly heart logo outline C"
 
+[[generated]]
+id = "Qk_FGWXKylKVtYgDiUhU5"
+uri = "file://.canvas/assets/feastly-chef-a.png"
+type = "image"
+title = "feastly chef hat line art A"
+
+[[generated]]
+id = "Zci6z-GtAP3j-Jh2aJTs7"
+uri = "file://.canvas/assets/feastly-chef-b.png"
+type = "image"
+title = "feastly chef hat with cutlery B"
+
+[[generated]]
+id = "TdzsYVL9M_55kp-C76yRE"
+uri = "file://.canvas/assets/feastly-chef-c.png"
+type = "image"
+title = "feastly chef hat heart cutout C"
+
+[[generated]]
+id = "EK5e1m8RU6xL9jDrEOyqL"
+uri = "file://.canvas/assets/feastly-chef-d.png"
+type = "image"
+title = "feastly chef hat geometric D"
+
 [[outputs]]
 id = "qydXdNm1cOR1JYEHTQC0U"
 uri = "file://attached_assets/generated_images/feastly-logo-v1.png"
