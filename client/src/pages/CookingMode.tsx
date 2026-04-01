@@ -66,6 +66,8 @@ export default function CookingMode() {
     }
   }, [recipe]);
 
+  const recognitionRunningRef = useRef(false);
+
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition) {
@@ -88,14 +90,24 @@ export default function CookingMode() {
       };
 
       recognition.onerror = (event: any) => {
-        if (event.error === 'not-allowed') {
+        recognitionRunningRef.current = false;
+        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+          isListeningRef.current = false;
           setIsListening(false);
         }
       };
 
       recognition.onend = () => {
+        recognitionRunningRef.current = false;
         if (cookingActiveRef.current && isListeningRef.current) {
-          try { recognition.start(); } catch (e) { }
+          setTimeout(() => {
+            if (cookingActiveRef.current && isListeningRef.current && !recognitionRunningRef.current) {
+              try {
+                recognition.start();
+                recognitionRunningRef.current = true;
+              } catch (e) {}
+            }
+          }, 300);
         }
       };
 
@@ -106,6 +118,7 @@ export default function CookingMode() {
       cookingActiveRef.current = false;
       isListeningRef.current = false;
       isSpeakingRef.current = false;
+      recognitionRunningRef.current = false;
       if (recognitionRef.current) {
         try { recognitionRef.current.stop(); } catch (e) {}
         recognitionRef.current = null;
@@ -120,10 +133,13 @@ export default function CookingMode() {
 
   useEffect(() => {
     if (!recognitionRef.current) return;
-    if (isListening) {
-      try { recognitionRef.current.start(); } catch (e) { }
-    } else {
-      try { recognitionRef.current.stop(); } catch (e) { }
+    if (isListening && !recognitionRunningRef.current) {
+      try {
+        recognitionRef.current.start();
+        recognitionRunningRef.current = true;
+      } catch (e) {}
+    } else if (!isListening && recognitionRunningRef.current) {
+      try { recognitionRef.current.stop(); } catch (e) {}
     }
   }, [isListening]);
 
@@ -131,11 +147,12 @@ export default function CookingMode() {
     const synth = window.speechSynthesis;
     if (!synth) { onEnd?.(); return; }
     synth.cancel();
+    isSpeakingRef.current = true;
     setIsSpeaking(true);
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 0.95;
-    utterance.onend = () => { setIsSpeaking(false); onEnd?.(); };
-    utterance.onerror = () => { setIsSpeaking(false); };
+    utterance.onend = () => { isSpeakingRef.current = false; setIsSpeaking(false); onEnd?.(); };
+    utterance.onerror = () => { isSpeakingRef.current = false; setIsSpeaking(false); };
     synth.speak(utterance);
   }, []);
 
@@ -157,7 +174,13 @@ export default function CookingMode() {
     const abortController = new AbortController();
     currentFetchAbortRef.current = abortController;
 
+    isSpeakingRef.current = true;
     setIsSpeaking(true);
+
+    const clearSpeaking = () => {
+      isSpeakingRef.current = false;
+      setIsSpeaking(false);
+    };
 
     fetch("/api/voice/tts", {
       method: "POST",
@@ -170,7 +193,7 @@ export default function CookingMode() {
         const blob = await res.blob();
 
         if (abortController.signal.aborted || !cookingActiveRef.current) {
-          setIsSpeaking(false);
+          clearSpeaking();
           return;
         }
 
@@ -181,7 +204,7 @@ export default function CookingMode() {
         audio.onended = () => {
           URL.revokeObjectURL(url);
           currentAudioRef.current = null;
-          setIsSpeaking(false);
+          clearSpeaking();
           setTimeout(() => {
             if (cookingActiveRef.current) onEnd?.();
           }, 1500);
@@ -191,21 +214,21 @@ export default function CookingMode() {
           URL.revokeObjectURL(url);
           currentAudioRef.current = null;
           if (cookingActiveRef.current) speakWithBrowserFallback(text, onEnd);
-          else setIsSpeaking(false);
+          else clearSpeaking();
         };
 
         audio.play().catch(() => {
           if (cookingActiveRef.current) speakWithBrowserFallback(text, onEnd);
-          else setIsSpeaking(false);
+          else clearSpeaking();
         });
       })
       .catch(err => {
         if (err?.name === 'AbortError') {
-          setIsSpeaking(false);
+          clearSpeaking();
           return;
         }
         if (cookingActiveRef.current) speakWithBrowserFallback(text, onEnd);
-        else setIsSpeaking(false);
+        else clearSpeaking();
       });
   }, [cancelCurrentSpeech, speakWithBrowserFallback]);
 
@@ -250,7 +273,6 @@ export default function CookingMode() {
   const startCooking = () => {
     cookingActiveRef.current = true;
     isListeningRef.current = true;
-    isSpeakingRef.current = false;
     setHasStarted(true);
     setIsListening(true);
     speak(getStepSpeechText(0));
@@ -260,6 +282,7 @@ export default function CookingMode() {
     cookingActiveRef.current = false;
     isListeningRef.current = false;
     isSpeakingRef.current = false;
+    recognitionRunningRef.current = false;
     cancelCurrentSpeech();
     if (recognitionRef.current) {
       try { recognitionRef.current.stop(); } catch (e) {}
