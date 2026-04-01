@@ -1,4 +1,4 @@
-const CACHE_VERSION = "v2";
+const CACHE_VERSION = "v3";
 const STATIC_CACHE = `feastly-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `feastly-runtime-${CACHE_VERSION}`;
 const OFFLINE_URL = "/offline.html";
@@ -12,27 +12,32 @@ const PRECACHE_ASSETS = [
   "/favicon.png",
 ];
 
-// ── Install ──────────────────────────────────────────────────────────────────
+// ── Install ───────────────────────────────────────────────────────────────────
+// Cache assets individually so one failure does NOT abort the entire install.
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches
-      .open(STATIC_CACHE)
-      .then((cache) => cache.addAll(PRECACHE_ASSETS))
-      .then(() => self.skipWaiting())
+    caches.open(STATIC_CACHE).then(async (cache) => {
+      await Promise.allSettled(
+        PRECACHE_ASSETS.map((url) =>
+          cache.add(url).catch(() => {
+            // Silently skip assets that fail to cache (e.g. during first install
+            // race conditions). The runtime cache fills them on next normal visit.
+          })
+        )
+      );
+    }).then(() => self.skipWaiting())
   );
 });
 
-// ── Activate ─────────────────────────────────────────────────────────────────
+// ── Activate ──────────────────────────────────────────────────────────────────
 self.addEventListener("activate", (event) => {
-  const allowedCaches = [STATIC_CACHE, RUNTIME_CACHE];
+  const allowed = [STATIC_CACHE, RUNTIME_CACHE];
   event.waitUntil(
     caches
       .keys()
       .then((keys) =>
         Promise.all(
-          keys
-            .filter((k) => !allowedCaches.includes(k))
-            .map((k) => caches.delete(k))
+          keys.filter((k) => !allowed.includes(k)).map((k) => caches.delete(k))
         )
       )
       .then(() => self.clients.claim())
@@ -47,75 +52,113 @@ self.addEventListener("fetch", (event) => {
   // Only handle GET requests
   if (request.method !== "GET") return;
 
-  // Let API calls go straight to the network; fall through on failure
+  // API: network-only; return a clean JSON error when offline
   if (url.pathname.startsWith("/api/")) {
     event.respondWith(
-      fetch(request).catch(() =>
-        new Response(
-          JSON.stringify({ error: "You are offline. Please reconnect." }),
-          { status: 503, headers: { "Content-Type": "application/json" } }
-        )
+      fetch(request).catch(
+        () =>
+          new Response(
+            JSON.stringify({ error: "You are offline. Please reconnect." }),
+            { status: 503, headers: { "Content-Type": "application/json" } }
+          )
       )
     );
     return;
   }
 
-  // For same-origin requests use stale-while-revalidate
+  // Same-origin assets: stale-while-revalidate with offline fallback
   if (url.origin === location.origin) {
-    event.respondWith(staleWhileRevalidate(request));
+    event.respondWith(handleSameOrigin(request));
     return;
   }
 
-  // Cross-origin requests (CDN fonts, images, etc.) – network first, cache fallback
-  event.respondWith(networkFirstWithCache(request));
+  // Cross-origin (Google Fonts, CDN images, etc.): network with cache backup.
+  // Always resolve so the SW never throws on font failures.
+  event.respondWith(handleCrossOrigin(request));
 });
 
-// Stale-while-revalidate: serve from cache immediately, refresh in background
-async function staleWhileRevalidate(request) {
-  const cache = await caches.open(RUNTIME_CACHE);
-  const cachedResponse = await cache.match(request);
+// ── Same-origin strategy ──────────────────────────────────────────────────────
+async function handleSameOrigin(request) {
+  try {
+    const runtimeCache = await caches.open(RUNTIME_CACHE);
 
-  const fetchPromise = fetch(request)
-    .then((networkResponse) => {
-      if (networkResponse && networkResponse.status === 200) {
-        cache.put(request, networkResponse.clone());
-      }
-      return networkResponse;
-    })
-    .catch(() => null);
+    // Kick off a network refresh in the background
+    const networkPromise = fetch(request)
+      .then((res) => {
+        if (res && res.status === 200) {
+          runtimeCache.put(request, res.clone());
+        }
+        return res;
+      })
+      .catch(() => null);
 
-  if (cachedResponse) {
-    // Kick off background revalidation but return cached immediately
-    fetchPromise; // intentionally not awaited
-    return cachedResponse;
+    // Serve from cache immediately if available
+    const cached =
+      (await runtimeCache.match(request)) ||
+      (await caches.match(request, { cacheName: STATIC_CACHE }));
+
+    if (cached) {
+      networkPromise; // background revalidation continues
+      return cached;
+    }
+
+    // Nothing cached — wait for network
+    const networkRes = await networkPromise;
+    if (networkRes) return networkRes;
+
+    // Network failed and nothing cached — serve offline fallback
+    return offlineFallback(request);
+  } catch {
+    return offlineFallback(request);
   }
-
-  // Nothing cached – wait for network
-  const networkResponse = await fetchPromise;
-  if (networkResponse) return networkResponse;
-
-  // Network failed and nothing cached – serve offline page for navigation requests
-  if (request.mode === "navigate") {
-    const offlinePage = await caches.match(OFFLINE_URL);
-    if (offlinePage) return offlinePage;
-  }
-
-  return new Response("Offline", { status: 503 });
 }
 
-// Network first, fall back to cache
-async function networkFirstWithCache(request) {
-  const cache = await caches.open(RUNTIME_CACHE);
+// ── Cross-origin strategy ─────────────────────────────────────────────────────
+async function handleCrossOrigin(request) {
   try {
-    const networkResponse = await fetch(request);
-    if (networkResponse && networkResponse.status === 200) {
-      cache.put(request, networkResponse.clone());
+    const cache = await caches.open(RUNTIME_CACHE);
+    const networkRes = await fetch(request);
+    if (networkRes && networkRes.status === 200) {
+      cache.put(request, networkRes.clone());
     }
-    return networkResponse;
+    return networkRes;
   } catch {
-    const cachedResponse = await cache.match(request);
-    return cachedResponse || new Response("Offline", { status: 503 });
+    // Return cached version if available, otherwise an empty transparent response
+    // so the browser does not log a network error for non-critical assets.
+    const cached = await caches.match(request);
+    if (cached) return cached;
+
+    // For fonts/stylesheets return an empty but valid response
+    const ct = request.headers.get("Accept") || "";
+    if (ct.includes("text/css") || request.destination === "font") {
+      return new Response("", {
+        status: 200,
+        headers: { "Content-Type": "text/css" },
+      });
+    }
+    return new Response("", { status: 200 });
   }
+}
+
+// ── Offline fallback helper ───────────────────────────────────────────────────
+async function offlineFallback(request) {
+  // For navigation requests serve the offline page
+  if (request.mode === "navigate") {
+    const offlinePage =
+      (await caches.match(OFFLINE_URL)) ||
+      (await caches.match(OFFLINE_URL, { cacheName: STATIC_CACHE }));
+    if (offlinePage) return offlinePage;
+    // Last resort: inline response
+    return new Response(
+      `<!DOCTYPE html><html><head><meta charset="utf-8">
+       <title>Offline – Feastly</title></head><body style="font-family:sans-serif;text-align:center;padding:3rem">
+       <h1>You're offline</h1><p>Please check your connection and try again.</p>
+       <button onclick="location.reload()">Retry</button></body></html>`,
+      { status: 200, headers: { "Content-Type": "text/html" } }
+    );
+  }
+  // For sub-resources return a neutral empty response
+  return new Response("", { status: 200 });
 }
 
 // ── Push Notifications ────────────────────────────────────────────────────────
@@ -151,35 +194,21 @@ self.addEventListener("notificationclick", (event) => {
             return;
           }
         }
-        if (self.clients.openWindow) {
-          return self.clients.openWindow(targetUrl);
-        }
+        if (self.clients.openWindow) return self.clients.openWindow(targetUrl);
       })
   );
 });
 
 // ── Background Sync ───────────────────────────────────────────────────────────
 self.addEventListener("sync", (event) => {
-  if (event.tag === "sync-cookbook") {
-    event.waitUntil(syncCookbook());
-  }
-  if (event.tag === "sync-shopping-list") {
-    event.waitUntil(syncShoppingList());
-  }
+  if (event.tag === "sync-cookbook") event.waitUntil(syncCookbook());
+  if (event.tag === "sync-shopping-list") event.waitUntil(syncShoppingList());
 });
 
-async function syncCookbook() {
-  // Placeholder: implement retry logic for pending cookbook mutations
-  // stored in IndexedDB when the user was offline
-}
-
-async function syncShoppingList() {
-  // Placeholder: implement retry logic for pending shopping-list mutations
-}
+async function syncCookbook() {}
+async function syncShoppingList() {}
 
 // ── Message Handling ──────────────────────────────────────────────────────────
 self.addEventListener("message", (event) => {
-  if (event.data?.type === "SKIP_WAITING") {
-    self.skipWaiting();
-  }
+  if (event.data?.type === "SKIP_WAITING") self.skipWaiting();
 });
