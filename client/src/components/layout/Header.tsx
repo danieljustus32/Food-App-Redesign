@@ -5,7 +5,7 @@ export function Header() {
         <img
           src="/logo.png"
           alt="Feastly"
-          className="w-8 h-8 object-contain"
+          className="w-16 h-16 object-contain"
           style={{ filter: "drop-shadow(0 2px 4px rgba(178,34,34,0.35))" }}
         />
         <h1 className="text-xl font-bold tracking-tight text-primary font-serif">
