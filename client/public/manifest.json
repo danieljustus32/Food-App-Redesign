@@ -10,6 +10,29 @@
   "background_color": "#f0ebe7",
   "theme_color": "#b22222",
   "categories": ["food", "lifestyle"],
+  "screenshots": [
+    {
+      "src": "/screenshots/discover.png",
+      "sizes": "742x1590",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Discover recipes with a swipe"
+    },
+    {
+      "src": "/screenshots/cookbook.png",
+      "sizes": "738x1590",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Your saved cookbook"
+    },
+    {
+      "src": "/screenshots/groceries.png",
+      "sizes": "746x1332",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Auto-generated grocery list"
+    }
+  ],
   "icons": [
     {
       "src": "/icon-192.png",
