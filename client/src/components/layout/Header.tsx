@@ -1,7 +1,7 @@
 export function Header() {
   return (
     <div className="flex items-center justify-center h-14 px-4 bg-background/80 backdrop-blur-xl border-b border-border/30 z-50 absolute top-0 w-full shadow-sm">
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-0">
         <img
           src="/logo.png"
           alt="Feastly"
