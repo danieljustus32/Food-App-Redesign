@@ -64,6 +64,9 @@ export async function sendVerificationEmail(
     html: `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 20px; background: #f0ebe7;">
         <div style="text-align: center; margin-bottom: 32px;">
+          <div style="width: 64px; height: 64px; background: #b22222; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+            <img src="${baseUrl}/logo-white.png" alt="Feastly" width="44" height="44" style="display: block;" />
+          </div>
           <h1 style="font-size: 28px; font-weight: bold; color: #1a1a1a; margin: 0 0 4px;">Feastly</h1>
           <p style="color: #8a6e5e; font-size: 14px; margin: 0;">Swipe. Save. Cook.</p>
         </div>

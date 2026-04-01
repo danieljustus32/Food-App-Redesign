@@ -90,6 +90,18 @@ uri = "file://.canvas/assets/feastly-chef-d.png"
 type = "image"
 title = "feastly chef hat geometric D"
 
+[[generated]]
+id = "SVbPhcGiyrE1SB9HUoB7v"
+uri = "file://client/public/logo.png"
+type = "image"
+title = "feastly chef hat transparent"
+
+[[generated]]
+id = "Rrun8l6oO3fB1Dma0UG8b"
+uri = "file://client/public/logo-white.png"
+type = "image"
+title = "feastly chef hat white"
+
 [[outputs]]
 id = "qydXdNm1cOR1JYEHTQC0U"
 uri = "file://attached_assets/generated_images/feastly-logo-v1.png"
