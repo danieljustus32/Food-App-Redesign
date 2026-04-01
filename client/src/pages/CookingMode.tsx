@@ -40,6 +40,7 @@ export default function CookingMode() {
   const recognitionRef = useRef<any>(null);
   const handleNextStepRef = useRef<() => void>(() => {});
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+  const currentFetchAbortRef = useRef<AbortController | null>(null);
 
   const isListeningRef = useRef(isListening);
   const isSpeakingRef = useRef(isSpeaking);
@@ -98,6 +99,7 @@ export default function CookingMode() {
 
     return () => {
       if (recognitionRef.current) recognitionRef.current.stop();
+      if (currentFetchAbortRef.current) currentFetchAbortRef.current.abort();
       if (currentAudioRef.current) {
         currentAudioRef.current.pause();
         currentAudioRef.current = null;
@@ -126,12 +128,23 @@ export default function CookingMode() {
     synth.speak(utterance);
   }, []);
 
-  const speak = useCallback((text: string, onEnd?: () => void) => {
+  const cancelCurrentSpeech = useCallback(() => {
+    if (currentFetchAbortRef.current) {
+      currentFetchAbortRef.current.abort();
+      currentFetchAbortRef.current = null;
+    }
     if (currentAudioRef.current) {
       currentAudioRef.current.pause();
       currentAudioRef.current = null;
     }
     if (window.speechSynthesis) window.speechSynthesis.cancel();
+  }, []);
+
+  const speak = useCallback((text: string, onEnd?: () => void) => {
+    cancelCurrentSpeech();
+
+    const abortController = new AbortController();
+    currentFetchAbortRef.current = abortController;
 
     setIsSpeaking(true);
 
@@ -139,10 +152,14 @@ export default function CookingMode() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text }),
+      signal: abortController.signal,
     })
       .then(async res => {
         if (!res.ok) throw new Error("TTS API failed");
         const blob = await res.blob();
+
+        if (abortController.signal.aborted) return;
+
         const url = URL.createObjectURL(blob);
         const audio = new Audio(url);
         currentAudioRef.current = audio;
@@ -166,10 +183,14 @@ export default function CookingMode() {
           speakWithBrowserFallback(text, onEnd);
         });
       })
-      .catch(() => {
+      .catch(err => {
+        if (err?.name === 'AbortError') {
+          setIsSpeaking(false);
+          return;
+        }
         speakWithBrowserFallback(text, onEnd);
       });
-  }, [speakWithBrowserFallback]);
+  }, [cancelCurrentSpeech, speakWithBrowserFallback]);
 
   const startCooking = () => {
     setHasStarted(true);
@@ -179,18 +200,14 @@ export default function CookingMode() {
     });
   };
 
-  const stopCooking = () => {
+  const stopCooking = useCallback(() => {
+    cancelCurrentSpeech();
     setHasStarted(false);
     setIsListening(false);
     setIsSpeaking(false);
     setIsFinished(false);
     setCurrentStepIndex(0);
-    if (currentAudioRef.current) {
-      currentAudioRef.current.pause();
-      currentAudioRef.current = null;
-    }
-    if (window.speechSynthesis) window.speechSynthesis.cancel();
-  };
+  }, [cancelCurrentSpeech]);
 
   const handleNextStep = () => {
     setCurrentStepIndex(prev => {

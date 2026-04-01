@@ -50,9 +50,7 @@ async function generateTTS(text: string): Promise<Buffer> {
 
 function enqueueTTS(text: string): Promise<Buffer> {
   const task = ttsQueuePromise.then(async () => {
-    const buf = await generateTTS(text);
-    await new Promise(r => setTimeout(r, TTS_QUEUE_GAP_MS));
-    return buf;
+    return generateTTS(text);
   });
   ttsQueuePromise = task.then(() => {}, () => {});
   return task;
