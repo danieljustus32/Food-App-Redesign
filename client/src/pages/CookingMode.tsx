@@ -66,8 +66,6 @@ export default function CookingMode() {
     }
   }, [recipe]);
 
-  const recognitionRunningRef = useRef(false);
-
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition) {
@@ -90,7 +88,6 @@ export default function CookingMode() {
       };
 
       recognition.onerror = (event: any) => {
-        recognitionRunningRef.current = false;
         if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
           isListeningRef.current = false;
           setIsListening(false);
@@ -98,16 +95,8 @@ export default function CookingMode() {
       };
 
       recognition.onend = () => {
-        recognitionRunningRef.current = false;
         if (cookingActiveRef.current && isListeningRef.current) {
-          setTimeout(() => {
-            if (cookingActiveRef.current && isListeningRef.current && !recognitionRunningRef.current) {
-              try {
-                recognition.start();
-                recognitionRunningRef.current = true;
-              } catch (e) {}
-            }
-          }, 300);
+          try { recognition.start(); } catch (e) {}
         }
       };
 
@@ -118,7 +107,6 @@ export default function CookingMode() {
       cookingActiveRef.current = false;
       isListeningRef.current = false;
       isSpeakingRef.current = false;
-      recognitionRunningRef.current = false;
       if (recognitionRef.current) {
         try { recognitionRef.current.stop(); } catch (e) {}
         recognitionRef.current = null;
@@ -130,18 +118,6 @@ export default function CookingMode() {
       }
     };
   }, []);
-
-  useEffect(() => {
-    if (!recognitionRef.current) return;
-    if (isListening && !recognitionRunningRef.current) {
-      try {
-        recognitionRef.current.start();
-        recognitionRunningRef.current = true;
-      } catch (e) {}
-    } else if (!isListening && recognitionRunningRef.current) {
-      try { recognitionRef.current.stop(); } catch (e) {}
-    }
-  }, [isListening]);
 
   const speakWithBrowserFallback = useCallback((text: string, onEnd?: () => void) => {
     const synth = window.speechSynthesis;
@@ -275,6 +251,9 @@ export default function CookingMode() {
     isListeningRef.current = true;
     setHasStarted(true);
     setIsListening(true);
+    if (recognitionRef.current) {
+      try { recognitionRef.current.start(); } catch (e) {}
+    }
     speak(getStepSpeechText(0));
   };
 
@@ -282,7 +261,6 @@ export default function CookingMode() {
     cookingActiveRef.current = false;
     isListeningRef.current = false;
     isSpeakingRef.current = false;
-    recognitionRunningRef.current = false;
     cancelCurrentSpeech();
     if (recognitionRef.current) {
       try { recognitionRef.current.stop(); } catch (e) {}
@@ -322,6 +300,13 @@ export default function CookingMode() {
     const next = !isListening;
     isListeningRef.current = next;
     setIsListening(next);
+    if (recognitionRef.current) {
+      if (next) {
+        try { recognitionRef.current.start(); } catch (e) {}
+      } else {
+        try { recognitionRef.current.stop(); } catch (e) {}
+      }
+    }
   };
 
   const repeatCurrent = () => speak(getStepSpeechText(currentStepIndex));
