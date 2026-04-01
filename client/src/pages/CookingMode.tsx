@@ -70,6 +70,24 @@ export default function CookingMode() {
     setMicModalDismissed(true);
   };
 
+  // When mic permission is granted (e.g. user manually enabled it in browser settings),
+  // clear the blocked state and restart recognition if cooking is in progress.
+  useEffect(() => {
+    if (micStatus !== "granted") return;
+    console.log("[CookingMode] micStatus → granted; clearing micBlocked");
+    setMicBlocked(false);
+    if (cookingActiveRef.current && !isListeningRef.current) {
+      console.log("[CookingMode] auto-restarting listening after permission granted");
+      isListeningRef.current = true;
+      setIsListening(true);
+      if (recognitionRef.current) {
+        try { recognitionRef.current.start(); } catch (e) {
+          console.warn("[CookingMode] recognition.start() after grant threw:", e);
+        }
+      }
+    }
+  }, [micStatus]);
+
   const recognitionRef = useRef<any>(null);
   const handleNextStepRef = useRef<() => void>(() => {});
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -317,6 +335,7 @@ export default function CookingMode() {
     setIsSpeaking(false);
     setIsFinished(false);
     setCurrentStepIndex(0);
+    setMicBlocked(false);
   }, [cancelCurrentSpeech]);
 
   const handleNextStep = () => {
@@ -452,7 +471,26 @@ export default function CookingMode() {
             {isSpeaking ? (
               <span className="text-zinc-500"><Volume2 size={14} className="inline text-primary animate-pulse mr-1" />Speaking...</span>
             ) : micBlocked ? (
-              <span className="text-red-400">Mic blocked — check browser permissions</span>
+              <span className="flex items-center gap-2 text-red-400">
+                Mic blocked
+                <button
+                  onClick={() => {
+                    console.log("[CookingMode] retry mic tapped, micStatus:", micStatus);
+                    setMicBlocked(false);
+                    isListeningRef.current = true;
+                    setIsListening(true);
+                    if (recognitionRef.current) {
+                      try { recognitionRef.current.start(); } catch (e) {
+                        console.warn("[CookingMode] retry recognition.start() threw:", e);
+                      }
+                    }
+                  }}
+                  className="text-xs bg-red-500/20 hover:bg-red-500/30 text-red-300 px-2 py-0.5 rounded-full normal-case font-semibold transition-colors"
+                  data-testid="button-retry-mic"
+                >
+                  Retry
+                </button>
+              </span>
             ) : isListening ? (
               <span className="text-zinc-500"><span className="inline-block w-2 h-2 rounded-full bg-primary animate-ping mr-1" />Listening for "Done", "Next", or "Repeat"</span>
             ) : (
