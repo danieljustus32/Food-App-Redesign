@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRoute, useLocation } from "wouter";
 import { Mic, MicOff, Volume2, X, Play, CheckCircle, ChevronRight, Pause, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -38,9 +38,19 @@ export default function CookingMode() {
   const [isFinished, setIsFinished] = useState(false);
 
   const recognitionRef = useRef<any>(null);
-  const synthRef = useRef(window.speechSynthesis);
   const handleNextStepRef = useRef<() => void>(() => {});
-  const currentUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const isListeningRef = useRef(isListening);
+  const isSpeakingRef = useRef(isSpeaking);
+
+  useEffect(() => {
+    isListeningRef.current = isListening;
+  }, [isListening]);
+
+  useEffect(() => {
+    isSpeakingRef.current = isSpeaking;
+  }, [isSpeaking]);
 
   useEffect(() => {
     if (recipe) {
@@ -88,17 +98,12 @@ export default function CookingMode() {
 
     return () => {
       if (recognitionRef.current) recognitionRef.current.stop();
-      synthRef.current.cancel();
+      if (currentAudioRef.current) {
+        currentAudioRef.current.pause();
+        currentAudioRef.current = null;
+      }
     };
   }, []);
-
-  const isListeningRef = useRef(isListening);
-  const isSpeakingRef = useRef(isSpeaking);
-
-  useEffect(() => {
-    isListeningRef.current = isListening;
-    isSpeakingRef.current = isSpeaking;
-  }, [isListening, isSpeaking]);
 
   useEffect(() => {
     if (!recognitionRef.current) return;
@@ -109,31 +114,69 @@ export default function CookingMode() {
     }
   }, [isListening, isSpeaking]);
 
-  const speak = (text: string, onEnd?: () => void) => {
-    if (!synthRef.current) return;
-    synthRef.current.cancel();
+  const speakWithBrowserFallback = useCallback((text: string, onEnd?: () => void) => {
+    const synth = window.speechSynthesis;
+    if (!synth) { onEnd?.(); return; }
+    synth.cancel();
     setIsSpeaking(true);
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 0.95;
-    currentUtteranceRef.current = utterance;
-    utterance.onend = () => {
-      if (currentUtteranceRef.current !== utterance) return;
-      setIsSpeaking(false);
-      onEnd?.();
-    };
-    utterance.onerror = () => {
-      if (currentUtteranceRef.current !== utterance) return;
-      setIsSpeaking(false);
-    };
-    synthRef.current.speak(utterance);
-  };
+    utterance.onend = () => { setIsSpeaking(false); onEnd?.(); };
+    utterance.onerror = () => { setIsSpeaking(false); };
+    synth.speak(utterance);
+  }, []);
+
+  const speak = useCallback((text: string, onEnd?: () => void) => {
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current = null;
+    }
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+
+    setIsSpeaking(true);
+
+    fetch("/api/voice/tts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    })
+      .then(async res => {
+        if (!res.ok) throw new Error("TTS API failed");
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        currentAudioRef.current = audio;
+
+        audio.onended = () => {
+          URL.revokeObjectURL(url);
+          currentAudioRef.current = null;
+          setIsSpeaking(false);
+          setTimeout(() => {
+            onEnd?.();
+          }, 1500);
+        };
+
+        audio.onerror = () => {
+          URL.revokeObjectURL(url);
+          currentAudioRef.current = null;
+          speakWithBrowserFallback(text, onEnd);
+        };
+
+        audio.play().catch(() => {
+          speakWithBrowserFallback(text, onEnd);
+        });
+      })
+      .catch(() => {
+        speakWithBrowserFallback(text, onEnd);
+      });
+  }, [speakWithBrowserFallback]);
 
   const startCooking = () => {
     setHasStarted(true);
-    speak(steps[0].text, () => setTimeout(() => {
+    speak(steps[0].text, () => {
       setIsListening(true);
       handleNextStepRef.current();
-    }, 3000));
+    });
   };
 
   const stopCooking = () => {
@@ -142,7 +185,11 @@ export default function CookingMode() {
     setIsSpeaking(false);
     setIsFinished(false);
     setCurrentStepIndex(0);
-    if (synthRef.current) synthRef.current.cancel();
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current = null;
+    }
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
   };
 
   const handleNextStep = () => {
@@ -207,6 +254,7 @@ export default function CookingMode() {
         </h2>
         <button
           onClick={toggleListening}
+          data-testid="button-toggle-mic"
           className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${isListening ? 'bg-primary text-white shadow-[0_0_15px_rgba(255,50,50,0.5)]' : 'bg-white/10 text-white/50'}`}
         >
           {isListening ? <Mic size={24} /> : <MicOff size={24} />}
@@ -287,7 +335,7 @@ export default function CookingMode() {
                   transition={{ duration: 0.4 }}
                   className="w-full"
                 >
-                  <div className="text-sm font-bold text-primary mb-4 uppercase tracking-wider">
+                  <div className="text-sm font-bold text-primary mb-4 uppercase tracking-wider" data-testid="text-step-label">
                     {(() => {
                       const currentStep = steps[currentStepIndex];
                       if (currentStepIndex === 0) return 'Introduction';
@@ -302,7 +350,7 @@ export default function CookingMode() {
                       }
                     })()}
                   </div>
-                  <h3 className="text-3xl sm:text-4xl lg:text-5xl font-serif leading-tight">
+                  <h3 className="text-3xl sm:text-4xl lg:text-5xl font-serif leading-tight" data-testid="text-step-content">
                     {steps[currentStepIndex].text}
                   </h3>
                 </motion.div>
@@ -315,12 +363,14 @@ export default function CookingMode() {
               <button
                 onClick={handlePrevStep}
                 disabled={currentStepIndex === 0}
+                data-testid="button-prev-step"
                 className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center text-white disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <ChevronRight size={24} className="rotate-180" />
               </button>
               <button
                 onClick={repeatCurrent}
+                data-testid="button-repeat"
                 className="flex-1 h-16 rounded-full bg-white/10 flex items-center justify-center gap-2 font-semibold text-lg active:scale-95 transition-transform"
               >
                 <Volume2 size={20} />
@@ -328,6 +378,7 @@ export default function CookingMode() {
               </button>
               <button
                 onClick={handleNextStep}
+                data-testid="button-next-step"
                 className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white active:scale-95 transition-transform"
               >
                 <ChevronRight size={24} />

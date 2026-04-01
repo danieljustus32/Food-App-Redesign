@@ -15,7 +15,7 @@ A Tinder-style recipe discovery app where users swipe through food photos to sav
 1. **Discover** - Swipeable recipe cards fetched from multiple recipe APIs with fallback. Swipe right to save, left to pass.
 2. **Cookbook** - Persistent collection of saved recipes with cook mode and shopping list integration.
 3. **Shopping List** - Organized by grocery store aisle with check-off functionality.
-4. **Hands-free Cooking** - Voice-guided step-by-step cooking using browser Speech APIs.
+4. **Hands-free Cooking** - Voice-guided step-by-step cooking using OpenAI TTS (nova voice, tts-1 model) with browser Speech API fallback. Server-side request queuing, in-memory caching (50 entries), and mic mute/resume to prevent feedback.
 5. **User Auth** - Registration/login with session-based authentication. Social login with Google and Apple OAuth. Email verification via Mailgun for password-based accounts.
 
 ## Recipe Provider System
@@ -56,6 +56,7 @@ The app uses an API-agnostic provider pattern (`server/recipe-providers/`):
 - `POST /api/shopping-list` - Add ingredients
 - `PATCH /api/shopping-list/:id/toggle` - Toggle item checked
 - `DELETE /api/shopping-list/checked` - Clear checked items
+- `POST /api/voice/tts` - Generate MP3 audio via OpenAI TTS (nova, tts-1, cached + rate-limited)
 
 ## Environment Variables
 - `DATABASE_URL` - PostgreSQL connection string (auto-set)
@@ -73,6 +74,7 @@ The app uses an API-agnostic provider pattern (`server/recipe-providers/`):
 - `APPLE_PRIVATE_KEY` - Apple Sign-In private key (optional, for Apple login)
 - `MAILGUN_API_KEY` - Mailgun API key (for email verification)
 - `MAILGUN_DOMAIN` - Mailgun domain (for email verification)
+- `OPENAI_API_KEY` - OpenAI API key (for TTS in hands-free cooking mode)
 
 ## File Structure
 - `shared/schema.ts` - Drizzle schema + Zod types

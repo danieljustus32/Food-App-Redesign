@@ -5,6 +5,58 @@ import { setupAuth, requireAuth } from "./auth";
 import { getRandomRecipes, searchRecipes } from "./recipe-providers";
 import { formatTag } from "./tagUtils";
 import type { User } from "@shared/schema";
+import OpenAI from "openai";
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+const ttsCache = new Map<string, Buffer>();
+const TTS_CACHE_MAX = 50;
+
+let ttsQueuePromise: Promise<void> = Promise.resolve();
+const TTS_QUEUE_GAP_MS = 1000;
+
+async function generateTTS(text: string): Promise<Buffer> {
+  if (ttsCache.has(text)) {
+    return ttsCache.get(text)!;
+  }
+
+  const attempt = async (): Promise<Buffer> => {
+    try {
+      const response = await openai.audio.speech.create({
+        model: "tts-1",
+        voice: "nova",
+        input: text,
+        speed: 0.9,
+      });
+      const buffer = Buffer.from(await response.arrayBuffer());
+      if (ttsCache.size >= TTS_CACHE_MAX) {
+        const firstKey = ttsCache.keys().next().value;
+        if (firstKey !== undefined) ttsCache.delete(firstKey);
+      }
+      ttsCache.set(text, buffer);
+      return buffer;
+    } catch (err: any) {
+      if (err?.status === 429) {
+        await new Promise(r => setTimeout(r, 2000));
+        return attempt();
+      }
+      throw err;
+    }
+  };
+
+  const result = await attempt();
+  return result;
+}
+
+function enqueueTTS(text: string): Promise<Buffer> {
+  const task = ttsQueuePromise.then(async () => {
+    const buf = await generateTTS(text);
+    await new Promise(r => setTimeout(r, TTS_QUEUE_GAP_MS));
+    return buf;
+  });
+  ttsQueuePromise = task.then(() => {}, () => {});
+  return task;
+}
 
 function getSection(ingredient: string): string {
   const lower = ingredient.toLowerCase();
@@ -235,6 +287,22 @@ export async function registerRoutes(
     const user = req.user as User;
     await storage.clearAllItems(user.id);
     res.json({ message: "Cleared all items" });
+  });
+
+  app.post("/api/voice/tts", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { text } = req.body;
+      if (!text || typeof text !== "string") {
+        return res.status(400).json({ message: "text is required" });
+      }
+      const audio = await enqueueTTS(text.slice(0, 4096));
+      res.set("Content-Type", "audio/mpeg");
+      res.set("Content-Length", String(audio.length));
+      res.set("Cache-Control", "public, max-age=3600");
+      res.send(audio);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
   });
 
   // TEMPORARY: Admin endpoint to clear all users for testing. Remove after use.
