@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, memo } from "react";
 import { Card } from "@/components/ui/card";
 import { Clock, Trash2, Heart, ShoppingCart, Mic, Info, SlidersHorizontal, ArrowUpDown, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -63,6 +63,93 @@ function getMealOrder(tags: string[]) {
   return order.length;
 }
 
+const CARD_TRANSITION = { duration: 0.2, ease: "easeOut" };
+const LAYOUT_TRANSITION = { duration: 0.25, ease: "easeOut" };
+
+interface RecipeCardProps {
+  recipe: SavedRecipe;
+  onRemove: (recipe: SavedRecipe, e: React.MouseEvent) => void;
+  onAddToList: (recipe: SavedRecipe, e: React.MouseEvent) => void;
+  onNavigate: (path: string) => void;
+}
+
+const RecipeCard = memo(function RecipeCard({ recipe, onRemove, onAddToList, onNavigate }: RecipeCardProps) {
+  return (
+    <motion.div
+      key={recipe.id}
+      layout="position"
+      initial={{ opacity: 0, scale: 0.92 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.92, transition: CARD_TRANSITION }}
+      transition={CARD_TRANSITION}
+      style={{ willChange: "transform, opacity" }}
+    >
+      <Card
+        className="overflow-hidden rounded-2xl border-0 shadow-sm bg-card hover:shadow-md transition-shadow relative group"
+        data-testid={`card-recipe-${recipe.id}`}
+      >
+        <div className="h-32 w-full overflow-hidden bg-muted">
+          <img
+            src={recipe.image}
+            alt={recipe.title}
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-cover"
+          />
+        </div>
+        <div className="p-4">
+          <h3 className="font-serif font-bold text-lg mb-1 leading-tight line-clamp-1">{recipe.title}</h3>
+          <div className="flex items-center justify-between mt-2">
+            <div className="flex items-center text-xs text-muted-foreground gap-3">
+              <span className="flex items-center gap-1"><Clock size={12} /> {recipe.readyInMinutes}m</span>
+              {recipe.tags[0] && <span className="text-primary font-medium">{recipe.tags[0]}</span>}
+            </div>
+            {recipe.source !== "edamam" && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onNavigate(`/cook/${recipe.id}`);
+                }}
+                className="flex items-center gap-1 text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-full active:scale-95 transition-transform"
+                data-testid={`button-cook-${recipe.id}`}
+              >
+                <Mic size={12} /> Cook
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="absolute top-2 right-2 flex gap-1.5">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onNavigate(`/recipe/${recipe.id}`);
+            }}
+            className="w-8 h-8 rounded-full bg-black/60 flex items-center justify-center text-white active:scale-95 shadow-sm hover:bg-black/75 transition-colors"
+            data-testid={`button-info-${recipe.id}`}
+          >
+            <Info size={14} />
+          </button>
+          <button
+            onClick={(e) => onAddToList(recipe, e)}
+            className="w-8 h-8 rounded-full bg-black/60 flex items-center justify-center text-white active:scale-95 shadow-sm hover:bg-black/75 transition-colors"
+            data-testid={`button-add-to-list-${recipe.id}`}
+          >
+            <ShoppingCart size={14} />
+          </button>
+          <button
+            onClick={(e) => onRemove(recipe, e)}
+            className="w-8 h-8 rounded-full bg-black/60 flex items-center justify-center text-white active:scale-95 shadow-sm hover:bg-black/75 transition-colors"
+            data-testid={`button-remove-${recipe.id}`}
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
+      </Card>
+    </motion.div>
+  );
+});
+
 export default function Cookbook() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
@@ -122,7 +209,7 @@ export default function Cookbook() {
       const res = await apiRequest("POST", "/api/shopping-list", { ingredients });
       return res.json();
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/shopping-list"] });
       if (data.added > 0) {
         toast({ title: "Added to Shopping List", description: `${data.added} ingredients added.` });
@@ -132,28 +219,32 @@ export default function Cookbook() {
     },
   });
 
-  const handleRemoveClick = (recipe: SavedRecipe, e: React.MouseEvent) => {
+  const handleRemoveClick = useCallback((recipe: SavedRecipe, e: React.MouseEvent) => {
     e.stopPropagation();
     setRecipeToDelete(recipe);
-  };
+  }, []);
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = useCallback(() => {
     if (recipeToDelete) {
       removeMutation.mutate(recipeToDelete.id);
       setRecipeToDelete(null);
     }
-  };
+  }, [recipeToDelete, removeMutation]);
 
-  const handleAddToList = (recipe: SavedRecipe, e: React.MouseEvent) => {
+  const handleAddToList = useCallback((recipe: SavedRecipe, e: React.MouseEvent) => {
     e.stopPropagation();
     addToListMutation.mutate(recipe.ingredients);
-  };
+  }, [addToListMutation]);
 
-  const clearAll = () => {
+  const handleNavigate = useCallback((path: string) => {
+    setLocation(path);
+  }, [setLocation]);
+
+  const clearAll = useCallback(() => {
     setSortBy("default");
     setMealFilter(null);
     setDietFilter(null);
-  };
+  }, []);
 
   return (
     <div className="bg-background pt-20 pb-24 px-4">
@@ -315,70 +406,15 @@ export default function Cookbook() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-            <AnimatePresence>
+            <AnimatePresence mode="popLayout">
               {filteredAndSorted.map((recipe) => (
-                <motion.div
+                <RecipeCard
                   key={recipe.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-                >
-                  <Card className="overflow-hidden rounded-2xl border-0 shadow-sm bg-card hover:shadow-md transition-shadow relative group" data-testid={`card-recipe-${recipe.id}`}>
-                    <div
-                      className="h-32 w-full bg-cover bg-center"
-                      style={{ backgroundImage: `url(${recipe.image})` }}
-                    />
-                    <div className="p-4">
-                      <h3 className="font-serif font-bold text-lg mb-1 leading-tight line-clamp-1">{recipe.title}</h3>
-                      <div className="flex items-center justify-between mt-2">
-                        <div className="flex items-center text-xs text-muted-foreground gap-3">
-                          <span className="flex items-center gap-1"><Clock size={12} /> {recipe.readyInMinutes}m</span>
-                          {recipe.tags[0] && <span className="text-primary font-medium">{recipe.tags[0]}</span>}
-                        </div>
-                        {recipe.source !== "edamam" && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setLocation(`/cook/${recipe.id}`);
-                            }}
-                            className="flex items-center gap-1 text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-full active:scale-95 transition-transform"
-                            data-testid={`button-cook-${recipe.id}`}
-                          >
-                            <Mic size={12} /> Cook
-                          </button>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="absolute top-2 right-2 flex gap-1.5">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setLocation(`/recipe/${recipe.id}`);
-                        }}
-                        className="w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white active:scale-95 shadow-sm hover:bg-black/60 transition-colors"
-                        data-testid={`button-info-${recipe.id}`}
-                      >
-                        <Info size={14} />
-                      </button>
-                      <button
-                        onClick={(e) => handleAddToList(recipe, e)}
-                        className="w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white active:scale-95 shadow-sm hover:bg-black/60 transition-colors"
-                        data-testid={`button-add-to-list-${recipe.id}`}
-                      >
-                        <ShoppingCart size={14} />
-                      </button>
-                      <button
-                        onClick={(e) => handleRemoveClick(recipe, e)}
-                        className="w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white active:scale-95 shadow-sm hover:bg-black/60 transition-colors"
-                        data-testid={`button-remove-${recipe.id}`}
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </Card>
-                </motion.div>
+                  recipe={recipe}
+                  onRemove={handleRemoveClick}
+                  onAddToList={handleAddToList}
+                  onNavigate={handleNavigate}
+                />
               ))}
             </AnimatePresence>
           </div>
